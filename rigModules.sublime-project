@@ -1,0 +1,11 @@
+{
+    "folders":
+    [
+        {
+            "path": "rigModules",
+            "name": "Rig Modules",
+            "folder_exclude_patterns": [""],
+            "follow_symlinks": true
+        },
+    ]
+}

@@ -1,0 +1,1606 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"in",
+				"inc\t#include <…>"
+			],
+			[
+				"low",
+				"lowCJnt\tstatement"
+			],
+			[
+				"eff",
+				"effectedJnts\tstatement"
+			],
+			[
+				"effect",
+				"effectedJnts"
+			],
+			[
+				"limb",
+				"limbControl"
+			],
+			[
+				"out",
+				"outputX"
+			],
+			[
+				"sq",
+				"squashCtrlName\tparam"
+			],
+			[
+				"clav",
+				"clavParLoc\tstatement"
+			],
+			[
+				"set",
+				"setAttr"
+			],
+			[
+				"stret",
+				"stretchTog"
+			],
+			[
+				"str",
+				"stretchPointCond\tstatement"
+			],
+			[
+				"glo",
+				"globalScale\tstatement"
+			],
+			[
+				"pin",
+				"pinBlndNode\tstatement"
+			],
+			[
+				"lim",
+				"limbControl\tparam"
+			],
+			[
+				"lower",
+				"lowerTransMult\tstatement"
+			],
+			[
+				"upper",
+				"upperTransMult\tstatement"
+			],
+			[
+				"upperPin",
+				"upperPinTransMult"
+			],
+			[
+				"createS",
+				"createStretchyLimb\tfunction"
+			],
+			[
+				"j",
+				"jnts\tparam"
+			],
+			[
+				"contro",
+				"limbControl"
+			],
+			[
+				"outP",
+				"outputX"
+			],
+			[
+				"input",
+				"input2X"
+			],
+			[
+				"jnt",
+				"jntLenList\tstatement"
+			],
+			[
+				"jntLen",
+				"jntLenList"
+			],
+			[
+				"opt",
+				"optparse"
+			],
+			[
+				"amar",
+				"amarokInterface"
+			],
+			[
+				"amarok",
+				"amarokdict\tstatement"
+			],
+			[
+				"QF",
+				"QFormLayout"
+			],
+			[
+				"load",
+				"loadVal\tparam"
+			],
+			[
+				"key",
+				"KeyError\tclass"
+			],
+			[
+				"locName",
+				"locNamesList\tstatement"
+			],
+			[
+				"parent",
+				"parentConstraint"
+			],
+			[
+				"j_wwiar_sca",
+				"j_wwiar_locScaleSpnBoxVal\tglobalstmt"
+			],
+			[
+				"def",
+				"defaultLocData\tmodule"
+			],
+			[
+				"fngr",
+				"fngrThumbLocs\tstatement"
+			],
+			[
+				"x",
+				"xrange\tclass"
+			],
+			[
+				"foot",
+				"footLocRot\tstatement"
+			],
+			[
+				"footLoc",
+				"footLocPos\tstatement"
+			],
+			[
+				"it",
+				"iteritems\tfunction"
+			],
+			[
+				"curF",
+				"curFngrList"
+			],
+			[
+				"shoul",
+				"shoulderLocPos\tstatement"
+			],
+			[
+				"pvP",
+				"pvParName\tstatement"
+			],
+			[
+				"re",
+				"resizeLocs\tfunction"
+			],
+			[
+				"pvPar",
+				"pvParName\tstatement"
+			],
+			[
+				"get",
+				"getExistingLocData\tfunction"
+			],
+			[
+				"should",
+				"shoulderLocRot\tstatement"
+			],
+			[
+				"j_wwiar_l",
+				"j_wwiar_locScaleSpnBoxVal\tstatement"
+			],
+			[
+				"create",
+				"createLocs\tfunction"
+			],
+			[
+				"phal",
+				"phalCtrlRot"
+			],
+			[
+				"pvGr",
+				"pvGrpConstr"
+			],
+			[
+				"pvGrp",
+				"pvGrpConstr\tstatement"
+			],
+			[
+				"newPv",
+				"newPvPosLoc"
+			],
+			[
+				"space",
+				"spaceLocator"
+			],
+			[
+				"all",
+				"allPhalCtrl\tstatement"
+			],
+			[
+				"trans",
+				"translate"
+			],
+			[
+				"j_wwiar_C",
+				"j_wwiar_ctrlScaleSpnBoxVal\tstatement"
+			],
+			[
+				"enumNames",
+				"enumNames\tparam"
+			],
+			[
+				"sp",
+				"createSpSwConstraint\tfunction"
+			],
+			[
+				"enum",
+				"enumNames\tparam"
+			],
+			[
+				"nice",
+				"niceParName\tstatement"
+			],
+			[
+				"lock",
+				"lockHideAttrs"
+			],
+			[
+				"attrList",
+				"attrList"
+			],
+			[
+				"base",
+				"baseJntPos\tstatement"
+			],
+			[
+				"j_wwiarSc",
+				"j_wwiar_ctrlScaleSpnBoxVal\tstatement"
+			],
+			[
+				"make",
+				"makeIdentity"
+			],
+			[
+				"aim",
+				"aimConstraint"
+			],
+			[
+				"head",
+				"headUpAimPos\tstatement"
+			],
+			[
+				"suff",
+				"suffixB\tstatement"
+			],
+			[
+				"jntChain",
+				"jntChainExtraName"
+			],
+			[
+				"j_",
+				"j_utils\tmodule"
+			],
+			[
+				"j_wwiarc",
+				"j_wwiar_ctrlScaleSpnBoxVal\tstatement"
+			],
+			[
+				"j_wwiar_c",
+				"j_wwiar_ctrlScaleSpnBoxVal\tglobalstmt"
+			],
+			[
+				"conn",
+				"connAttr\tstatement"
+			],
+			[
+				"overr",
+				"overrideEnabled"
+			],
+			[
+				"override",
+				"overrideDisplayType"
+			],
+			[
+				"j_wwiar_",
+				"j_wwiar_limbBoxNum\tglobalstmt"
+			],
+			[
+				"j_ww",
+				"j_wwiar_spine\tstatement"
+			],
+			[
+				"j_wwiar",
+				"j_wwiar_rigName\tglobalstmt"
+			],
+			[
+				"par",
+				"pairedCnncts\tstatement"
+			],
+			[
+				"del",
+				"delete"
+			],
+			[
+				"object",
+				"objectType"
+			],
+			[
+				"createLoc",
+				"createLocsOnCurve\tfunction"
+			],
+			[
+				"createLocs",
+				"createLocsOnCurve"
+			],
+			[
+				"j_w",
+				"j_wwiar_"
+			],
+			[
+				"headBaseT",
+				"headBaseTmpName"
+			],
+			[
+				"ch",
+				"childEff\tstatement"
+			],
+			[
+				"mir",
+				"mirrorSide\tparam"
+			],
+			[
+				"createLeg",
+				"createLegSkelMech\tfunction"
+			],
+			[
+				"current",
+				"currentMirLimbBoxes"
+			],
+			[
+				"createArm",
+				"createArmLocs\tfunction"
+			],
+			[
+				"va",
+				"valueChanged"
+			],
+			[
+				"spine",
+				"spineSpnBox\tstatement"
+			],
+			[
+				"updateLim",
+				"updateLimbMirName\tfunction"
+			],
+			[
+				"update",
+				"updateLimbSide"
+			],
+			[
+				"loc",
+				"locScaleSpnBoxVal\tglobalstmt"
+			],
+			[
+				"text",
+				"textChanged"
+			],
+			[
+				"name",
+				"nameEdit\tstatement"
+			],
+			[
+				"updateMir",
+				"updateLimbMirTog\tfunction"
+			],
+			[
+				"updateLimbM",
+				"updateLimbMirName\tfunction"
+			],
+			[
+				"updateC",
+				"updateColSpnBox\tfunction"
+			],
+			[
+				"main1",
+				"main1ImgBtn\tstatement"
+			],
+			[
+				"main",
+				"main1SpnBoxVal\tstatement"
+			],
+			[
+				"limbBox",
+				"limbBoxNum"
+			],
+			[
+				"li",
+				"limbBoxNum\tstatement"
+			],
+			[
+				"limbName",
+				"limbNameVal"
+			],
+			[
+				"return",
+				"returnKeys\tstatement"
+			],
+			[
+				"w",
+				"wlp0s26u1u3"
+			],
+			[
+				"sect",
+				"sectVal"
+			],
+			[
+				"sort",
+				"sortedKeys\tstatement"
+			],
+			[
+				"createFing",
+				"createFingerSkelMech\tfunction"
+			],
+			[
+				"fng",
+				"fngrThumbLocs\tstatement"
+			],
+			[
+				"fn",
+				"fngrBaseLoc\tstatement"
+			],
+			[
+				"constr",
+				"constrTarget\t''"
+			],
+			[
+				"createSp",
+				"createSpSwConstraint\tfunction"
+			],
+			[
+				"rot",
+				"rotOffset\t[0,0,0]"
+			],
+			[
+				"arm",
+				"armCtrlRot\tstatement"
+			],
+			[
+				"inh",
+				"inheritsTransform"
+			],
+			[
+				"connect",
+				"connectAttr"
+			],
+			[
+				"degree",
+				"degreeValue"
+			],
+			[
+				"createSpine",
+				"createSpineSkelMech\tfunction"
+			],
+			[
+				"orient",
+				"orientConstraint"
+			],
+			[
+				"fAm",
+				"fArmTwist1\tstatement"
+			],
+			[
+				"fA",
+				"fArmTwistE\tstatement"
+			],
+			[
+				"fa",
+				"fArmTwist2"
+			],
+			[
+				"fAr",
+				"fArmTwist2"
+			],
+			[
+				"point",
+				"pointConstraint"
+			],
+			[
+				"obj",
+				"objExists"
+			],
+			[
+				"pv",
+				"pvLckAttr\tstatement"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "bodyFunctions.py",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "fileLocation = '/mnt/DataDrive/Documents/USB/Uni_Tomfoolery/Year_2/Misc/LeeRigs/scenes/test.json'\ndata = {\n    'a test' : 'this is',\n    'my asshole' : 'it hurts'\n}\n\nwith open(fileLocation, 'w') as f:\n    json.dump(data, f)\n    \nwith open(fileLocation, 'r') as f:\n    fileContents = json.load(f)\n    \nprint fileContents\n\n\nstoredLocs = {\n    'locatorName' : {\n        'translate' : [2, 14, -0.5],\n        'rotate' : [0, 0, 0],\n        'scale' : [1, 1, 1],\n        'local scale' : [1, 1, 1],\n        'poleVectorDist' : None,\n    },\n    'otherLocator' : {\n        'translate' : [4.5, 14, -0.7],\n        'rotate' : [0, 0, 0],\n        'scale' : [1, 1, 1],\n        'local scale' : [1, 1, 1],\n        'poleVectorDist' : None,\n    },\n}",
+			"settings":
+			{
+				"buffer_size": 727,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "if cmds.objExists(name+'wholeHand'+suff) and not mirror:\n        for fngrKey, fngrVal in fngrLocs.iteritems():\n            for sectKey, sectVal in fngrVal.iteritems():\n                pos = cmds.xform(name+sectKey[1]+suff, q=True, t=True, ws=True)\n                fngrLocs[fngrKey][sectKey] = (pos[0], pos[1], pos[2])\n        cmds.delete(name+'wholeHand'+suff)\n    elif not cmds.objExists(name+'wholeHand'+suff):\n        mirror = False\n\n    ## create\n    if mirror:\n        name = str(rigName)+'_'+str(mirrorSide)+'_'+limbName\n        if cmds.objExists(name+'wholeHand'+suff):\n            cmds.delete(name+'wholeHand'+suff)\n        for k, v in fngrLocs.iteritems():\n            fngrLocs[k] = j_utils.createLocs(v, name, suff, rigName=rigName, side=side_,\n                                             limbName=limbName, mirror=True, mirSide=mirrorSide,\n                                             scale=j_wwiar_locScaleSpnBoxVal)\n        side_ = mirrorSide+'_'\n    else:\n        for k, v in fngrLocs.iteritems():\n            fngrLocs[k] = j_utils.createLocs(v, name, suff, scale=j_wwiar_locScaleSpnBoxVal)\n    ## parent curves\n    fngrsList = [\n        'Index',\n        'Middle',\n        'Ring',\n        'Pinky',\n        'Thumb',\n    ]\n    handPos = cmds.xform(name+'fngrMiddle_base'+suff, q=True, t=True, ws=True)\n    handName = createParCrv('wholeHand', '', name, suff, xyz=handPos)\n    if cmds.objExists(name+'wholeArm'+suff):\n        cmds.parent(name+'wholeHand'+suff, name+'wholeArm'+suff)\n    for x in fngrsList:\n        fngrBaseName = name+'fngr'+x+'_base'+suff\n        pos = cmds.xform(fngrBaseName, q=True, t=True, ws=True)\n        curFngrList=[]\n        for k, v in fngrLocs.iteritems():\n            for sectKey, sectVal in v.iteritems():\n                if x in sectKey[1]:\n                    curFngrList.append(sectKey)\n        fngrName = createParCrv('wholeFngr'+x, curFngrList, name, suff, xyz=pos)\n        cmds.parent(name+'wholeFngr'+x+suff, name+'wholeHand'+suff)\n    for k, v in fngrLocs.iteritems():\n        curFngr = k[2]\n        createPvVis('fngr'+curFngr+'_base', 'fngr'+curFngr+'_lowMid',\n                    'fngr'+curFngr+'_tip','fngr'+curFngr+'PvVis',\n                    name, suff, handName, [3, 0, 0], 0.2)\n\n\n\n\n\n    ## create locs\n    if not cmds.objExists('{0}wholeHand{1}'.format(name, suff)):\n        mirror = False\n\n    for k, v in fngrLocs.iteritems():\n        fngrLocs[k] = j_utils.createLocs(v, name, suff, rigName=rigName, side=side_,\n                                         limbName=limbName, mirror=mirror, mirSide=mirrorSide,\n                                         scale=j_wwiar_locScaleSpnBoxVal)\n    ## create parent curves\n    fngrsList = [\n        'Index',\n        'Middle',\n        'Ring',\n        'Pinky',\n        'Thumb',\n    ]\n    ##- hand parent curve\n    origName = name\n    if cmds.objExists('{0}wholeHand{1}'.format(name, suff)):\n        handLocPos = cmds.xform('{0}wholeHand{1}'.format(name, suff),\n                                q=True, t=True, ws=True)\n        handLocRot = cmds.xform('{0}wholeHand{1}'.format(name, suff),\n                                q=True, ro=True, ws=True)\n        if mirror:\n            name = '{0}_{1}_{2}'.format(rigName, mirrorSide, limbName)\n            handLocPos[0] *= -1\n            handLocRot[1] *= -1\n            handLocRot[2] *= -1\n        handChilds = cmds.listRelatives('{0}wholeHand{1}'.format(name, suff),\n                                        c=True, typ='transform')\n        cmds.parent(handChilds, w=True)\n        cmds.delete('{0}wholeHand{1}'.format(name, suff))\n    else:\n        handLocPos = cmds.xform('{0}wrist{1}'.format(name, suff),\n                                q=True, t=True, ws=True)\n        handLocRot = cmds.xform('{0}wrist{1}'.format(name, suff),\n                                q=True, ro=True, ws=True)\n    handName = createParCrv('wholeHand', '', name, suff, xyz=handLocPos,\n                            rotXyz=handLocRot, freeze=False)\n    if cmds.objExists('{0}wholeArm{1}'.format(name, suff)):\n        cmds.parent('{0}wholeHand{1}'.format(name, suff), '{0}wholeArm{1}'.format(name, suff))\n    ##- fingers parent curves\n    for x in fngrsList:\n        if cmds.objExists('{0}wholeFngr{1}{2}'.format(name, x, suff)):\n            fngrLocPos = cmds.xform('{0}wholeFngr{1}{2}'.format(origName, x, suff),\n                                    q=True, t=True, ws=True)\n            fngrLocRot = cmds.xform('{0}wholeFngr{1}{2}'.format(origName, x, suff),\n                                    q=True, ro=True, ws=True)\n            if mirror:\n                fngrLocPos[0] *= -1\n                fngrLocRot[1] *= -1\n                fngrLocRot[2] *= -1\n            fngrChilds = cmds.listRelatives('{0}wholeFngr{1}{2}'.format(name, x, suff),\n                                            c=True, typ='transform')\n            if fngrChilds:\n                cmds.parent(fngrChilds, w=True)\n            cmds.delete('{0}wholeFngr{1}{2}'.format(name, x, suff))\n        else:\n            fngrLocPos = cmds.xform('{0}fngr{1}_base{2}'.format(name, x, suff),\n                                    q=True, t=True, ws=True)\n            fngrLocRot = cmds.xform('{0}fngr{1}_base{2}'.format(name, x, suff),\n                                    q=True, ro=True, ws=True)\n        curFngrList = []\n        for k, v in fngrLocs.iteritems():\n            for sectKey, sectVal in v.iteritems():\n                if x in sectKey[1]:\n                    curFngrList.append(sectKey)\n        fngrName = createParCrv('wholeFngr{0}'.format(x), curFngrList, name, suff,\n                                xyz=fngrLocPos, rotXyz=fngrLocRot, freeze=False)\n        cmds.parent('{0}wholeFngr{1}{2}'.format(name, x, suff),\n                    '{0}wholeHand{1}'.format(name, suff))\n    for k, v in fngrLocs.iteritems():\n        curFngr = k[2]\n        createPvVis('fngr{0}_base'.format(curFngr), 'fngr{0}_lowMid'.format(curFngr),\n                    'fngr{0}_tip'.format(curFngr), 'fngr{0}PvVis'.format(curFngr),\n                    name, suff, handName, [3, 0, 0], 0.2)",
+			"settings":
+			{
+				"buffer_size": 6033,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "if side.lower() == 'l' or 'left' in side.lower():\n\nif side.lower() == 'r' or 'right' in side.lower():\n\n\nif not side.lower() == 'l'",
+			"settings":
+			{
+				"buffer_size": 130,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 400.0,
+		"last_filter": "packa",
+		"selected_items":
+		[
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"ssc",
+				"Set Syntax: C++"
+			],
+			[
+				"pack",
+				"Package Control: Remove Package"
+			],
+			[
+				"ssc+",
+				"Set Syntax: C++"
+			],
+			[
+				"ssp",
+				"Set Syntax: Python"
+			],
+			[
+				"ss",
+				"Set Syntax: Lua"
+			],
+			[
+				"sscss",
+				"Set Syntax: CSS"
+			],
+			[
+				"ssl",
+				"Set Syntax: Lua"
+			],
+			[
+				"sslu",
+				"Set Syntax: Lua"
+			],
+			[
+				"sslua",
+				"Set Syntax: Lua"
+			],
+			[
+				"ssb",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"ssmel",
+				"Set Syntax: MEL"
+			],
+			[
+				"indent",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"tab",
+				"Indentation: Convert to Tabs"
+			],
+			[
+				"ssht",
+				"Set Syntax: HTML"
+			],
+			[
+				"ssjs",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"sshtm",
+				"Set Syntax: HTML"
+			],
+			[
+				"ssphp",
+				"Set Syntax: PHP"
+			],
+			[
+				"sssh",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"ssba",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"ssshe",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 529.0
+	},
+	"console":
+	{
+		"height": 139.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/rigModules.sublime-project",
+		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/uiTest2.py",
+		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_2/Misc/LeeRigs/scenes/test2.json",
+		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_2/Misc/LeeRigs/scenes/test.json",
+		"/home/Jenks/Autodesk/ApplicationPlugins/ngskintools/Contents/scripts/ngSkinTools/ui/actions.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/curveCreator/crvCreator.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/rigTools.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/defaultLocData.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/utilities.py",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Accessories/Navigation Light/part.cfg",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Accessories/Spotlight/part.cfg",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Submarine/Sub Floodlight/part.cfg",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Submarine/PartCategories.cfg",
+		"/tmp/.fr-wZYU9h/readme.txt",
+		"/tmp/.fr-WTnyGn/readme.txt",
+		"/usr/share/applications/Autodesk-Maya.desktop",
+		"/usr/share/applications/Autodesk-Maya2016.desktop",
+		"/home/Jenks/Downloads/maya/EULA/English.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/KSP.log",
+		"/tmp/.fr-Kft8sK/GameData/000_FilterExtensions/ReadMe.txt",
+		"/tmp/.fr-2qkBaR/ReadMe.txt",
+		"/tmp/.fr-Yt32po/readme.txt",
+		"/tmp/.fr-1kqI1d/readme.txt",
+		"/mnt/DataDrive/SteamLibrary_LINUX/steamapps/common/Kerbal Space Program/settings.cfg",
+		"/etc/openvpn/US California.ovpn",
+		"/home/Jenks/.config/sublime-text-3/Packages/Colorsublime - Themes/DeerAntlerDark_2.tmTheme",
+		"/tmp/Flat-Plat-20170605/install.sh",
+		"/run/media/Jenks/JENKS_STICK/Uni_Tomfoolery/Misc/Zygote/Rig/Zygote_RenderRig.ma",
+		"/run/media/Jenks/JENKS_STICK/Uni_Tomfoolery/Misc/Zygote/Rig/Zygote_AnimRig.ma",
+		"/home/Jenks/.conkyrc",
+		"/sys/class/net/enp3s0/operstate",
+		"/sys/class/net/wlp0s29u1u3/operstate",
+		"/home/Jenks/a.json",
+		"/usr/bin/conky.spotify.nowplaying.work.sh",
+		"/home/Jenks/.config/unity3d/Fishing Planet LLC/FishingPlanet/prefs",
+		"/home/Jenks/.conky/anowplaying.py",
+		"/home/Jenks/.conkyrc2",
+		"/home/Jenks/.conky/anowplaying_spotify.py",
+		"/usr/bin/conky/spotify-nowplaying-work.sh",
+		"/usr/bin/conky/spotify-nowplaying-work",
+		"/home/Jenks/.conky/spotify-nowplaying-work",
+		"/home/Jenks/.conky/spotify-nowplaying-length",
+		"/home/Jenks/.conky/spotify-nowplaying",
+		"/home/Jenks/.conky/spotify-nowplaying-work.sh",
+		"/home/Jenks/.conky/startup.sh",
+		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_2/Misc/LeeRigs/scenes/testSkin.json",
+		"/home/Jenks/anus.json",
+		"/home/Jenks/.conkyrc.conf",
+		"/home/Jenks/conkyrc.conf",
+		"/opt/Chatty/readme.txt",
+		"/home/Jenks/Desktop/scripts/j_wwiar/j_wwiar.py",
+		"/home/Jenks/maya/scripts/j_wwiar/j_wwiar.py",
+		"/home/Jenks/Desktop/scripts/j_wwiar/readme.txt",
+		"/home/Jenks/maya/scripts/Jenks/crvShapes/zSettingsCog.py",
+		"/home/Jenks/maya/scripts/j_wwiar/j_wwiar_UI.py",
+		"/home/Jenks/Desktop/scripts/j_wwiar.py",
+		"/home/Jenks/Desktop/scripts/j_wwiar_UI.py",
+		"/home/Jenks/Desktop/scripts/j_wwiar/j_wwiar_UI.py",
+		"/home/Jenks/Desktop/scripts/jenksRenamer.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/uiTest1_UI.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/curveCreator/crvCreatorUI_qt5.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/modularRig.py",
+		"/home/Jenks/maya/scripts/Jenks/UHmenu/scripts/jammOrientJoint.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/jointDuplicator/jointDuplicator.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/ikSplineCreator/ikSplineCreator.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/uiTest1.py",
+		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_2/Misc/LeeRigs/scenes/armour_unsmoothed.01.json",
+		"/home/Jenks/Autodesk/ApplicationPlugins/ngskintools/Contents/scripts/ngSkinTools/ui/mainwindow.py",
+		"/opt/teamviewer/tv_bin/script/teamviewerd.service",
+		"/etc/systemd/system/teamviewer/teamviewerd.service",
+		"/home/Jenks/etc/systemd/system/teamviewer/teamviewerd.service",
+		"/home/Jenks/etc/systemd/system.conf",
+		"/home/Jenks/maya/scripts/Jenks/UHmenu/scripts/UHRFTools_3.py",
+		"/home/Jenks/maya/scripts/Jenks/UHmenu/scripts/UHRFTools_UI.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/curveCreator/crvCreatorUI.py",
+		"/home/Jenks/maya/scripts/Jenks/jenksMenu.mel",
+		"/home/Jenks/maya/scripts/Jenks/UHmenu/scripts/UHRFTools_2.py",
+		"/var/local/BetterDiscord/themes/CasualDark.css",
+		"/tmp/.fr-BiVmBs/small-members-tab-themes/small-members-tab.theme.css",
+		"/tmp/.fr-Gvvs31/small-members-tab-themes/small-members-tab.theme.css",
+		"/usr/share/BetterDiscord/BetterDiscordApp-stable16/lib/BetterDiscord.js",
+		"/usr/share/BetterDiscord/BetterDiscordApp-stable16/betterdiscord.js",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/saves/buildb_builds.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Coope's deck/skilltreetweakdata.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/lua/menumanager.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/saves/enhanced_hitmarkers_options.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/menu/options.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/lua/hudhitconfirm.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/mod.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/lua/hudmanagerpd2.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/lua/copdamage.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Enhanced Hitmarkers/readme.txt",
+		"/tmp/.fr-xFhusa/Oh Shit! More Profiles/multiprofileitemgui.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/longerNames/mod.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/longerNames/longerNames.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/longerNames/longerNames_profiles.lua",
+		"/tmp/.fr-jenrQx/Oh Shit! More Profiles/mod.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/MUI/mod.txt",
+		"/tmp/.fr-RG6XkK/Oh Shit! More Profiles/mod.txt",
+		"/home/Jenks/Downloads/mod.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/MUI/lua/mui_manager.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/MUI/lua/animated_list.lua",
+		"/home/Jenks/Desktop/testLock.pl",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Flashing Swan Song/unitnetworkhandler.lua",
+		"/usr/share/xscreensaver/config/abstractile.xml",
+		"/home/Jenks/.xscreensaver",
+		"/usr/share/xscreensaver/hacks.conf.d/xscreensaver.conf",
+		"/usr/share/xscreensaver/config/wormhole.xml",
+		"/home/Jenks/.config/i3/config",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/MUI/lua/mui_menu.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/MUI/lua/mui_subtitle_item.lua",
+		"/home/Jenks/Steam/skins/Compact/resource/styles/fonts.styles",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/Flashing Swan Song/mod.txt",
+		"/mnt/DataDrive/SteamLibrary_LINUX/steamapps/common/PAYDAY 2 - BACKUP7/mods/PocoHud3/poco/Hud3_Options.lua",
+		"/home/Jenks/Steam/skins/Compact/settings.ini",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/pp/trainer/config.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/PocoHud3/poco/Hud3.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/PocoHud3/poco/Hud3_Options.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/pp/trainer/keyconfig.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/PocoHud3/poco/Hud3_class.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/PocoHud3/poco/common.lua",
+		"/mnt/DataDrive/SteamLibrary_LINUX/steamapps/common/PAYDAY 2 - BACKUP8/mods/PocoHud3/poco/Hud3.lua",
+		"/mnt/DataDrive/SteamLibrary_LINUX/steamapps/common/PAYDAY 2 - BACKUP8/mods/PocoHud3/poco/Hud3_Options.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/pp/trainer/configs/default_config.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/pp/keyconfig.lua",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/pp/readme.txt",
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/PAYDAY 2/mods/pp/config.lua",
+		"/mnt/DataDrive/SteamLibrary_LINUX/steamapps/common/PAYDAY 2 - BACKUP8/mods/MUI/mod.txt"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"'_L'",
+			"if side ==",
+			"limbControl",
+			"'\\+|\\+'",
+			"/",
+			"A",
+			"clavParLoc",
+			"stretchPointCond",
+			"PVConst_GRP",
+			"upper",
+			"upperPinDist",
+			"upper",
+			"rigName, ",
+			"{0}_{1}",
+			"KEYBDINPUT",
+			"Keyboard",
+			"loc2",
+			"loc1",
+			"limbGlobalScale",
+			"limbSizeDiv",
+			"obj",
+			"for ",
+			"for",
+			"artist",
+			"/usr/bin",
+			"'+num+'",
+			"'+i+'",
+			"'+num+'",
+			"setParentText",
+			"updateLimbMirTog",
+			"updateMirrorBtn",
+			"updateLimbName",
+			"updateLimbMirName",
+			"updateLimbMirTog",
+			"+str(val)",
+			"'+num+'",
+			"[value]",
+			"[enabled]",
+			"Enabled",
+			"enabled",
+			"label",
+			"][",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"Opt1",
+			"opt1",
+			"arm",
+			"True",
+			"},",
+			"\n                ",
+			"']},\n",
+			"},",
+			"updateLimbType",
+			"('",
+			"],",
+			": [",
+			"[",
+			"''",
+			"0",
+			"'localScale' : [(scale, scale, scale)]",
+			") : (",
+			"'localScale' : [(1, 1, 1)]",
+			"'scale' : [1, 1, 1],",
+			"j_wwiar_locScaleSpnBoxVal",
+			") : (",
+			":",
+			"oName",
+			"baseLoc",
+			"limbCap",
+			"mirrorSide",
+			"limb.capitalize()",
+			"startJnt",
+			"parentCurve",
+			"createParCrv",
+			"'wrist'",
+			"parentCrvPos",
+			"parentCrvLoc",
+			"'shoulder'",
+			"'Arm'",
+			"shoulder",
+			"shoulderLocRot",
+			"shoulderLocPos",
+			"armChilds",
+			"armLocs",
+			"fngr",
+			"Fngr",
+			"fngr",
+			"Fngr",
+			"fngr",
+			"Fngr",
+			"fngr",
+			"fngrName",
+			"wholeFngr",
+			"pvGrp",
+			"j_utils.",
+			"name, c",
+			"name,",
+			"}fngr{",
+			"fngr",
+			"tmpFngrCtrlConstr",
+			"fngrCtrlPosLoc",
+			"curFngr",
+			"4",
+			"1",
+			"j_utils.",
+			"hip"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"createParCrvShape",
+			"j_utils.connectAttrs(",
+			"j_utils.createAttr(",
+			"j_utils.createBuffer(",
+			"j_utils.createSpSwConstraint(",
+			"j_utils.createCtrlShape(",
+			"j_utils.createSplineIK(",
+			"j_utils.createFKIK(",
+			"j_utils.createIK(",
+			"j_utils.createJnts",
+			"j_utils.createLocsOnCurve",
+			"j_utils.resizeLocs",
+			"j_utils.createSingleLoc",
+			"j_utils.createLocs",
+			"if mirror:\n        if limbName is not '':\n            limbName = str(limbName)+'_'\n        name=str(prefix)+'_'+str(mirrorSide)+'_'+limbName",
+			"if limbName is not '':\n            limbName = str(limbName)+'_'\n        name=str(prefix)+'_'+str(side)+'_'+limbName",
+			"if limbName is not '':\n        limbName = str(limbName)+'_'\n    name=str(prefix)+'_'+str(mirrorSide)+'_'+limbName",
+			"if limbName is not '':\n        limbName = str(limbName)+'_'\n    name=str(prefix)+'_'+str(side)+'_'+limbName",
+			"j_wwiar_rigNameTxt",
+			"j_wwiar_limbMirTog_",
+			"j_wwiar_limbMirName_",
+			"j_wwiar_limbOpt",
+			"j_wwiar_limbOpt'+optNum+'_'+num+'Val",
+			"j_wwiar_limbType_",
+			"j_wwiar_limbParent_",
+			"j_wwiar_limbSide_",
+			"j_wwiar_limbName_",
+			"j_wwiar_ctrlScaleSpnBoxVal",
+			"j_wwiar_locScaleSpnBoxVal",
+			"j_wwiar_spineJntsNum",
+			"j_wwiar_rigName",
+			"j_wwiar_rigMode",
+			"j_wwiar_currentLimbBoxes",
+			"j_wwiar_limbBoxNum",
+			"j_wwiar_rigMode",
+			"j_wwiar_currentLimbBoxes",
+			"j_wwiar_limbBoxNum",
+			"exec('",
+			"exec(",
+			"bdstorage.json",
+			"hitconfirm_crit",
+			"TdlQ",
+			"loverkill",
+			"mirrorSide",
+			"mirSide",
+			"getCrv",
+			"getParents",
+			"swapDigits",
+			"if not side == 'L' or 'L_' not in side or '_L' not in side:",
+			"if side == 'L' or 'L_' in side or '_L' in side:",
+			"is None",
+			"spineIK_chest_BIND",
+			"spineIK_hips_BIND",
+			"cmds.",
+			"RIG.043",
+			"font exo2",
+			"size=10",
+			"size=8",
+			"size=9",
+			"size=7",
+			"size=10",
+			"size=11",
+			"size=12",
+			"size=9",
+			"[117, 156, 79]",
+			"[132, 179, 86]",
+			"[149, 212, 87]",
+			"../assets",
+			"\"../assets",
+			"jntStretchName",
+			"hdlName",
+			"effName",
+			"crvName",
+			"crvInfoName'",
+			"crvInfoName",
+			"crvGlobalScaleName'",
+			"crvGlobalScaleName",
+			"crvStretchName'",
+			"crvStretchName",
+			"..",
+			"../",
+			"source \\\"Jenks/UHmenu/scripts/comet/",
+			"",
+			"zoomCloseSpan",
+			"zoomer",
+			"zoomerImg",
+			"mainZoomer",
+			"img-enlargable",
+			"zoomer-close",
+			"zoomer-caption",
+			"zoomer-content",
+			"zoom-id",
+			"zoomer",
+			"zoom-id",
+			"zoom-close",
+			"zoomer",
+			"zoom-caption",
+			"zoom-content",
+			"zoomImg",
+			"img-enlargable",
+			"bgDesign.png",
+			"from UHmenu import",
+			"../css/",
+			"../js/",
+			"../assets/",
+			"../js/",
+			"../css/",
+			"",
+			"../js/",
+			"../assets/img",
+			"../css/",
+			"assets/img/",
+			"href=\"",
+			"href=\"html/port",
+			"href=\"html/",
+			"href=\"html/.*\\.html\"",
+			"assets/img/",
+			"QtWidgets.QIcon"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "bodyFunctions.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content"
+							],
+							"show_definitions": false,
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 1,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 727,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								300,
+								300
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content"
+							],
+							"show_definitions": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6033,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2722,
+								2722
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 816.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 130,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								51,
+								51
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.unsaved_changes":
+	{
+		"height": 110.0
+	},
+	"pinned_build_system": "",
+	"project": "rigModules.sublime-project",
+	"replace":
+	{
+		"height": 72.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

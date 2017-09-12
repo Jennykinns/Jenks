@@ -1,11 +1,10 @@
 import maya.cmds as cmds
 import os
+import json
 from Jenks.scripts.rigModules import utilityFunctions as utils
-from Jenks.scripts.rigModules import ctrlFunctions
 from Jenks.scripts.rigModules import apiFuncitons as api
 
 reload(utils)
-reload(ctrlFunctions)
 reload(api)
 
 
@@ -39,6 +38,44 @@ def loadGeo(rigName, path, group=None):
             if cmds.nodeType(lN) == 'transform':
                 cmds.parent(lN, group)
 
+def fileDialogFilter(fileFormats):
+    fileFilter = ''
+    fileFormats.append(('All', '*.*'))
+    for i, x in enumerate(fileFormats):
+        seperator = ';;' if i > 0 else ''
+        fileFilter += '{0}{1[0]} Files ({1[1]})'.format(seperator, x)
+    return fileFilter
+
+
+def saveJson(data, defaultDir=None, caption='Save Json', fileFormats=[('JSON', '*.json')]):
+    fileFilter = fileDialogFilter(fileFormats)
+    fileName = cmds.fileDialog2(dialogStyle=1,
+                                caption=caption,
+                                fileMode=0,
+                                fileFilter=fileFilter,
+                                dir=defaultDir)
+    if fileName:
+        with open(fileName[0], 'w') as f:
+            json.dump(data, f, indent=4)
+        return True
+    else:
+        return False
+
+def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json')], fileOverride=False):
+    if not fileOverride:
+        fileFilter = fileDialogFilter(fileFormats)
+        fileName = cmds.fileDialog2(dialogStyle=1,
+                                    caption=caption,
+                                    fileMode=1,
+                                    fileFilter=fileFilter,
+                                    dir=defaultDir)
+    else:
+        fileName = fileOverride
+    if fileName:
+        with open(fileName[0], 'r') as f:
+            data = json.load(f)
+    return data
+
 
 class rig:
     def __init__(self):
@@ -50,8 +87,8 @@ class rig:
         self.worldLoc.lockAttr()
         self.geoGrp = utils.newNode('group', name='geometry',
                                       parent=self.grp.name, skipNum=True)
-        self.globalCtrl = ctrlFunctions.ctrl(name='global', parent=self.grp.name, skipNum=True)
-        self.globalCtrl.controlShape(color=30)
+        self.globalCtrl = ctrlFn.ctrl(name='global', parent=self.grp.name, skipNum=True)
+        self.globalCtrl.modifyShape(color=30)
         self.ctrlsGrp = utils.newNode('group', name='controls',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)
         self.skelGrp = utils.newNode('group', name='skeleton',

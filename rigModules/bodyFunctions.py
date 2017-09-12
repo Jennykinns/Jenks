@@ -2,14 +2,14 @@ import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ikFunctions
-from Jenks.scripts.rigModules import ctrlFunctions
+from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 from Jenks.scripts.rigModules import suffixDictionary
 from Jenks.scripts.rigModules import defaultBodyOptions
 from Jenks.scripts.rigModules import orientJoints
 
 reload(utils)
 reload(ikFunctions)
-reload(ctrlFunctions)
+reload(ctrlFn)
 reload(suffixDictionary)
 
 class armModule:

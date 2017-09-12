@@ -78,6 +78,10 @@ def lockAttr(node, attr='', hide=True, unlock=False):
         else:
             cmds.setAttr('{}.{}'.format(node, each), l=not unlock, k=not hide)
 
+def getShapeNodes(obj):
+    children = cmds.listRelatives(obj, s=1)
+    return children
+
 class newNode:
     def __init__(self, node, name='', suffixOverride='', parent='', side='C',
                  operation=None, skipNum=False):
@@ -89,7 +93,7 @@ class newNode:
         elif node == 'group':
             self.name = cmds.group(n=nodeName, em=1)
         elif node == 'control':
-            self.name = cmds.circle(n=nodeName, ch=0)
+            self.name = cmds.circle(n=nodeName, ch=0)[0]
         else:
             self.name = cmds.createNode(node, n=nodeName, ss=1)
         if parent:

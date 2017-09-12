@@ -23,3 +23,8 @@ def getPath(mObj):
         objName = objPath
 
     return objPath, objName
+
+def getNurbsCurve(crvShape):
+    mObj = getMObj(crvShape)
+    MFnNurbs = om.MFnNurbsCurve(mObj)
+    return MFnNurbs

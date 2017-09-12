@@ -1,11 +1,10 @@
 import maya.cmds as cmds
-import maya.OpenMaya as om
+import maya.api.OpenMaya as om
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFuncitons as api
-from Jenks.scripts.rigModules import fileFunctions as file
+from Jenks.scripts.rigModules import fileFunctions as fileFn
 
-reload(utils)
-reload(file)
+reload(api)
 
 def getShapeData(ctrlName):
     curveShapes = utils.getShapeNodes(ctrlName)
@@ -19,22 +18,26 @@ def getShapeData(ctrlName):
         cvArray = om.MPointArray()
         knotArray = om.MDoubleArray()
 
-        nurbsCrv.getCVs(cvArray, om.MSpace.kObject)
-        nurbsCrv.getKnots(knotArray)
+        #nurbsCrv.getCVs(cvArray, om.MSpace.kObject)
+        cvArray = nurbsCrv.cvPositions(om.MSpace.kObject)
+        #nurbsCrv.getKnots(knotArray)
+        knotArray = nurbsCrv.knots()
 
-        for cvNum in range(cvArray.length()):
+        #for cvNum in range(cvArray.length()):
+        for cvNum in range(len(cvArray)):
             cv = {'x' : cvArray[cvNum].x,
                   'y' : cvArray[cvNum].y,
                   'z' : cvArray[cvNum].z}
             crvData[i]['CVs'].append(cv)
         crvData[i]['knots'].extend(knotArray)
-        crvData[i]['degree'] = nurbsCrv.degree()
-        crvData[i]['form'] = nurbsCrv.form()
+        crvData[i]['degree'] = nurbsCrv.degree
+        crvData[i]['form'] = nurbsCrv.form
 
     return crvData
 
 
-def applyShapeData(ctrlName, crvData):
+def applyShapeData(ctrlName, crvData, transOffset=(0, 0, 0),
+                   rotOffset=(0, 0, 0), scaleOffset=(1, 1, 1)):
     curveShapes = utils.getShapeNodes(ctrlName)
     ctrlMObj = api.getMObj(ctrlName)
     if curveShapes:
@@ -43,8 +46,10 @@ def applyShapeData(ctrlName, crvData):
     for crvShape in crvData.keys():
         nurbsCrv = om.MFnNurbsCurve()
         cvArray = om.MPointArray()
-        for x in crvData[crvShape]['CVs']:
-            cvArray.append(x['x'], x['y'], x['z'])
+        for i, x in enumerate(crvData[crvShape]['CVs']):
+            cvArray.append((x['x'], x['y'], x['z']))
+            cvArray[i] = (api.transformMPoint(cvArray[i], rot=rotOffset, trans=transOffset,
+                                              scale=scaleOffset))
         knotArray = om.MDoubleArray()
         for x in crvData[crvShape]['knots']:
             knotArray.append(x)
@@ -59,7 +64,7 @@ def applyShapeData(ctrlName, crvData):
 
 def saveShapeData(ctrlName):
     crvData = getShapeData(ctrlName)
-    status = file.saveJson(crvData,
+    status = fileFn.saveJson(crvData,
                            defaultDir='/home/Jenks/maya/scripts/Jenks/scripts/controlShapes',
                            caption='Save Control Shape',
                            fileFormats=[('SHAPE', '*.shape')])
@@ -67,10 +72,11 @@ def saveShapeData(ctrlName):
 
 def loadShapeData(ctrlName, shape=False, path=None):
     fo = ['{}/{}.shape'.format(path, shape)] if shape and path else False
-    crvData = file.loadJson(defaultDir='/home/Jenks/maya/scripts/Jenks/scripts/controlShapes',
-                            caption='Save Control Shape',
-                            fileFormats=[('SHAPE', '*.shape')],
-                            fileOverride=fo)
+    defDir = '{}/Jenks/scripts/controlShapes'.format(fileFn.getScriptDir())
+    crvData = fileFn.loadJson(defaultDir=defDir,
+                              caption='Save Control Shape',
+                              fileFormats=[('SHAPE', '*.shape')],
+                              fileOverride=fo)
     if crvData:
         applyShapeData(ctrlName, crvData)
         return True
@@ -118,12 +124,21 @@ class ctrl:
             self.offsetGrps[-1].parent(par, relative=True)
             par = self.offsetGrps[-1]
 
-    def modifyShape(self, shape=None, color=None, rotation=(0, 0, 0), translation=(0, 0, 0)):
+    def modifyShape(self, shape=None, color=None, rotation=(0, 0, 0),
+                    translation=(0, 0, 0), scale=(1, 1, 1)):
         if shape:
-            path='/home/Jenks/maya/scripts/Jenks/scripts/controlShapes'
+            scriptsPath = fileFn.getScriptDir()
+            path = '{}/Jenks/scripts/controlShapes'.format(scriptsPath)
             loadShapeData(self.ctrl.name, shape, path)
+        crvData = getShapeData(self.ctrl.name)
+        applyShapeData(self.ctrl.name, crvData, transOffset=translation, rotOffset=rotation,
+                       scaleOffset=scale)
         if color:
             utils.setShapeColor(self.ctrl.name, color=color)
+        else:
+            print 'get existing colour and apply (for if the shape changes)'
+
+
 
     def constrain(self, target, typ='parent', mo=True, offset=[0, 0, 0],
                   aimVector=[1, 0, 0], aimUp=[0, 1, 0], aimWorldUpType=2, aimWorldUp=[0, 1, 0],

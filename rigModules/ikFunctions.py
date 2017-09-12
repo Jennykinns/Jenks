@@ -1,8 +1,6 @@
 import maya.cmds as cmds
 from Jenks.scripts.rigModules import utilityFunctions as utils
 
-reload(utils)
-
 class ik:
     """
     Create and manipulate Ik handles.

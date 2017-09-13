@@ -1,3 +1,4 @@
+import maya.cmds as cmds
 # ======================================================================
 #
 #   doOrientJoint(jointsToOrient, aimAxis, upAxis, worldUp, guessUp)

@@ -1,12 +1,17 @@
 import maya.cmds as cmds
 import maya.api.OpenMaya as om
+
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFuncitons as api
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
-reload(api)
+reload(utils)
 
-def getShapeData(ctrlName):
+def getAllControls():
+    ctrls = cmds.ls('*_CTRL')
+    return ctrls
+
+def getShapeData(ctrlName, color=False):
     curveShapes = utils.getShapeNodes(ctrlName)
     crvData = {}
     for i, each in enumerate(curveShapes):
@@ -32,6 +37,8 @@ def getShapeData(ctrlName):
         crvData[i]['knots'].extend(knotArray)
         crvData[i]['degree'] = nurbsCrv.degree
         crvData[i]['form'] = nurbsCrv.form
+        if color:
+            crvData[i]['color'] = cmds.getAttr('{}.overrideColor'.format(each))
 
     return crvData
 
@@ -56,6 +63,8 @@ def applyShapeData(ctrlName, crvData, transOffset=(0, 0, 0),
         degree = crvData[crvShape]['degree']
         form = crvData[crvShape]['form']
         nurbsCrv.create(cvArray, knotArray, degree, form, 0, 1, ctrlMObj)
+        if 'color' in crvData[crvShape].keys():
+            utils.setColor(nurbsCrv.name(), color=crvData[crvShape]['color'])
 
     shapes = utils.getShapeNodes(ctrlName)
     for i, each in enumerate(shapes):
@@ -71,7 +80,7 @@ def saveShapeData(ctrlName):
     return status
 
 def loadShapeData(ctrlName, shape=False, path=None):
-    fo = ['{}/{}.shape'.format(path, shape)] if shape and path else False
+    fo = '{}/{}.shape'.format(path, shape) if shape and path else False
     defDir = '{}/Jenks/scripts/controlShapes'.format(fileFn.getScriptDir())
     crvData = fileFn.loadJson(defaultDir=defDir,
                               caption='Save Control Shape',
@@ -82,6 +91,22 @@ def loadShapeData(ctrlName, shape=False, path=None):
         return True
     else:
         return False
+
+def saveCtrls(rigName):
+    path = fileFn.getAssetDir()
+    for ctrl in getAllControls():
+        crvData = getShapeData(ctrl, color=True)
+        fo = fileFn.getLatestVersion(rigName, path, 'rig/WIP/controlShapes', new=True, name=ctrl)
+        fileFn.saveJson(crvData, fileOverride=fo)
+
+def loadCtrls(rigName):
+    path = fileFn.getAssetDir()
+    for ctrl in getAllControls():
+        fo = fileFn.getLatestVersion(rigName, path, 'rig/WIP/controlShapes', name=ctrl)
+        if fo:
+            crvData = fileFn.loadJson(fileOverride=fo)
+            if crvData:
+                applyShapeData(ctrl, crvData)
 
 class ctrl:
     def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None,

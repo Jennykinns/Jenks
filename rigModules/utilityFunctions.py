@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+
 from Jenks.scripts.rigModules import suffixDictionary
 
 reload(suffixDictionary)
@@ -50,8 +51,11 @@ def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
 def setShapeColor(obj, color=None):
     shapes = cmds.listRelatives(obj, s=1)
     for each in shapes:
-        cmds.setAttr('{}.overrideEnabled'.format(each), 1)
-        cmds.setAttr('{}.overrideColor'.format(each), color if color else 0)
+        setColor(each, color)
+
+def setColor(obj, color=None):
+    cmds.setAttr('{}.overrideEnabled'.format(obj), 1)
+    cmds.setAttr('{}.overrideColor'.format(obj), color if color else 0)
 
 def matchTransforms(objs, targetObj):
     for each in objs:

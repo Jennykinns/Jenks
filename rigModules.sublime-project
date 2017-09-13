@@ -10,7 +10,15 @@
 			"path": "rigModules"
 		},
 		{
+			"name": "Control Shapes",
 			"path": "controlShapes"
 		}
-	]
+	],
+
+	"settings" : {
+		"python_interpreter_path": "/usr/bin/python2.7",
+		"python_package_paths" : [
+			"/home/Jenks/.config/sublime-text-3/mayaCompletion/",
+		]
+	}
 }

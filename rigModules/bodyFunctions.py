@@ -7,6 +7,7 @@ from Jenks.scripts.rigModules import suffixDictionary
 from Jenks.scripts.rigModules import defaultBodyOptions
 from Jenks.scripts.rigModules import orientJoints
 
+reload(orientJointsparam module)
 reload(utils)
 reload(ikFunctions)
 reload(ctrlFn)
@@ -26,7 +27,7 @@ class armModule:
         ]
         ## orient joints
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=jnts.items(), aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
+            orientJoints.doOrientJoint(jointsToOrient=jnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
                                        worldUp=(0, 1, 0), guessUp=1)
         ## ik/fk
         if options['IK'] and options['FK']:

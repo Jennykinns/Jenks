@@ -3,7 +3,6 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
 
-
 def getMObj(objName):
     #mSelList = om.MSelectionList()
     #mObj = om.MObject()

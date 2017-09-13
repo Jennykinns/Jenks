@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
 def getSkinValues(obj, tol=0.001):
@@ -38,7 +39,7 @@ def loadSkin(rigName, geo, override=False):
     fileName = fileFn.getLatestVersion(rigName, path, 'rig/WIP/skin', name=geo)
     if not fileName:
         return False
-    skinData = fileFn.loadJson(fileOverride=[fileName])
+    skinData = fileFn.loadJson(fileOverride=fileName)
     # do stuff with skin data
     vtxList, skinCls = getSkinInfo(geo)
     if skinCls:

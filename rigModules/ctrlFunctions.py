@@ -123,8 +123,9 @@ class ctrl:
         if offsetGrpNum > 0:
             self.createCtrlOffsetGrps(offsetGrpNum, name, guide, skipNum)
             self.ctrl.parent(self.offsetGrps[-1].name, relative=True)
-            self.constGrp = utils.newNode('group', name=name,suffixOverride='controlConst',
-                                          side=side, skipNum=skipNum, parent=self.ctrl.name)
+            self.constGrp = utils.newNode('group', name=name, suffixOverride='controlConst',
+                                          side=side, skipNum=skipNum)
+            self.constGrp.parent(parent=self.ctrl.name, relative=True)
             self.ctrlRoot = self.rootGrp.name
             self.ctrlEnd = self.constGrp.name
         else:
@@ -134,6 +135,7 @@ class ctrl:
             cmds.delete(guide)
         if parent:
             cmds.parent(self.ctrlRoot, parent)
+        cmds.select(cl=1)
 
     def createCtrlOffsetGrps(self, num, name, guide=None, skipNum=False):
         self.rootGrp = utils.newNode('group', name=name, suffixOverride='controlRootGrp',
@@ -161,34 +163,56 @@ class ctrl:
         if color:
             utils.setShapeColor(self.ctrl.name, color=color)
         else:
-            print 'get existing colour and apply (for if the shape changes)'
-
-
+            print '## get existing colour and apply (for if the shape changes)'
 
     def constrain(self, target, typ='parent', mo=True, offset=[0, 0, 0],
                   aimVector=[1, 0, 0], aimUp=[0, 1, 0], aimWorldUpType=2, aimWorldUp=[0, 1, 0],
-                  aimWorldUpObject='C_global_CTRL'):
+                  aimWorldUpObject='C_global_CTRL', skipRot='none', skipTrans='none'):
         if typ == 'parent':
-            cmds.parentConstraint(self.constGrp.name, target, mo=mo)
+            cmds.parentConstraint(self.constGrp.name, target, mo=mo, sr=skipRot, st=skipTrans)
         elif typ == 'point':
             if mo:
-                cmds.pointConstraint(self.constGrp.name, target, mo=mo)
+                cmds.pointConstraint(self.constGrp.name, target, mo=mo, sk=skipTrans)
             else:
-                cmds.pointConstraint(self.constGrp.name, target, o=offset)
+                cmds.pointConstraint(self.constGrp.name, target, o=offset, sk=skipTrans)
         elif typ == 'orient':
             if mo:
-                cmds.orientConstraint(self.constGrp.name, target, mo=mo)
+                cmds.orientConstraint(self.constGrp.name, target, mo=mo, sk=skipRot)
             else:
-                cmds.orientConstraint(self.constGrp.name, target, o=offset)
+                cmds.orientConstraint(self.constGrp.name, target, o=offset, sk=skipRot)
         elif typ == 'aim':
             if mo:
                 cmds.aimConstraint(self.constGrp.name, target, mo=mo, aim=aimVector, u=aimUp,
-                                   wut=aimWorldUpType, wuo=aimWorldUpObject, wu=aimWorldUp)
+                                   wut=aimWorldUpType, wuo=aimWorldUpObject, wu=aimWorldUp,
+                                   sk=skipRot)
             else:
                 cmds.aimConstraint(self.constGrp.name, target, o=offset, aim=aimVector,
                                    u=aimUp, wut=aimWorldUpType, wuo=aimWorldUpObject,
-                                   wu=aimWorldUp)
+                                   wu=aimWorldUp, sk=skipRot)
         elif typ == 'poleVector' or typ == 'pv':
             cmds.poleVectorConstraint(self.constGrp.name, target)
         else:
             cmds.warning('Parent Type Unsupported. Use: parent, point, orient, aim or poleVector.')
+
+    def lockAttr(self, attr='', hide=True, unlock=False):
+        utils.lockAttr(self.ctrl.name, attr, hide, unlock)
+
+    def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None, enumOptions=None):
+        if typ == 'enum':
+            enumName = ':'.join(enumOptions)
+            cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                         en=enumName, dv=defaultVal, k=1)
+        else:
+            cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                         dv=defaultVal, min=minVal, max=maxVal, k=1)
+        exec('self.ctrl.{0} = "{1}.{0}"'.format(name, self.ctrl.name))
+
+    def makeSettingCtrl(self, ikfk=True, parent=''):
+        self.modifyShape(shape='cog', color=utils.getColors(self.side)['settingCol'],
+                         scale=(0.2, 0.2, 0.2))
+        if parent:
+            cmds.parentConstraint(parent, self.rootGrp.name, mo=1)
+        self.lockAttr()
+        if ikfk:
+            self.addAttr('ikfkSwitch', nn='IK / FK Switch', minVal=0, maxVal=1)
+

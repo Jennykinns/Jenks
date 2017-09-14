@@ -18,7 +18,10 @@ class rig:
         self.globalCtrl.modifyShape(color=30, shape='global')
         self.ctrlsGrp = utils.newNode('group', name='controls',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)
+        self.settingCtrlsGrp = utils.newNode('group', name='settingCtrls',
+                                             parent=self.ctrlsGrp.name, skipNum=True)
         self.skelGrp = utils.newNode('group', name='skeleton',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)
         self.mechGrp = utils.newNode('group', name='mechanics',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)
+        cmds.setAttr('{}.v'.format(self.mechGrp.name), 0)

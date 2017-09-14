@@ -13,16 +13,19 @@ class ik:
         self.name = name
         self.side = side
 
-    def createIK(self, solver='ikRPsolver'):
+    def createIK(self, solver='ikRPsolver', parent=None):
         ## ik creation
         ik = cmds.ikHandle(sj=self.sj, ee=self.ej, sol=solver)
-        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle'), side=self.side)
-        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector'), side=self.side)
-        self.grp = cmds.group(self.hdl, name=utils.setupName(self.name, obj='group'), side=self.side)
+        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle', side=self.side))
+        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector', side=self.side))
+        self.grp = cmds.group(self.hdl, name=utils.setupName(self.name, obj='group', side=self.side))
+        if parent:
+            cmds.parent(self.grp, parent)
         grpCP = cmds.xform(self.hdl, q=1, t=1, ws=1)
         cmds.xform(self.grp, piv=grpCP, ws=1)
         ## set effected joints
         self.jnts = utils.getChildrenBetweenObjs(self.sj, self.ej)
+        cmds.select(cl=1)
 
 
     def createSplineIK(self, crv=None, autoCrvSpans=0, rootOnCrv=True):

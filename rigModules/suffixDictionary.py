@@ -15,5 +15,7 @@ suffix = {
     'multDoubleLinear' : '_MDL',
     'multiplyDivide' : '_MPD',
     'curveInfo' : '_CIN',
+    'setRange' : '_SETR',
+    'reverse' : '_REV'
 
 }

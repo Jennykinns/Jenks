@@ -26,7 +26,7 @@ def create():
     # ctrl2 = ctrlFn.ctrl(name='test', guide='joint2')
     # ctrl2.constrain('joint2')
 
-    arm = bodyFn.armModule(side='L')
+    arm = bodyFn.armModule(rig, side='L')
     arm.create(autoOrient=True)
 
     ##

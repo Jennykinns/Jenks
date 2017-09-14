@@ -45,8 +45,26 @@ def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
       objs = sChilds
       objs.reverse()
     objs.insert(0, startObj)
-
     return objs
+
+def getColors(typ):
+    colors = {}
+    if typ == 'L':
+        colors['col1'] = 15
+        colors['col2'] = 28
+        colors['col3'] = 29
+        colors['settingCol'] = 26
+    elif typ == 'R':
+        colors['col1'] = 12
+        colors['col2'] = 24
+        colors['col3'] = 21
+        colors['settingCol'] = 31
+    else:
+        colors['col1'] = 30
+        colors['col2'] = 0
+        colors['col3'] = 0
+        colors['settingCol'] = 7
+    return colors
 
 def setShapeColor(obj, color=None):
     shapes = cmds.listRelatives(obj, s=1)
@@ -104,6 +122,7 @@ class newNode:
             cmds.parent(self.name, parent)
         if operation and 'operation' in cmds.listAttr(self.name):
             cmds.setAttr('{}.operation'.format(self.name), operation)
+        cmds.select(cl=1)
 
     def parent(self, parent, relative=False):
         if parent == 'world':
@@ -112,7 +131,6 @@ class newNode:
 
     def lockAttr(self, attr='', hide=True, unlock=False):
         lockAttr(self.name, attr, hide, unlock)
-
 
     def connect(self, nodeAttr, dest, mode='from'):
         nodeAttrFull = '{}.{}'.format(self.name, nodeAttr)

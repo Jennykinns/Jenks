@@ -14,6 +14,9 @@ suffix = {
     'condition' : '_COND',
     'multDoubleLinear' : '_MDL',
     'multiplyDivide' : '_MPD',
+    'multiplyDivide_div' : '_DIV',
+    'multiplyDivide_mult' : '_MULT',
+    'multiplyDivide_pow' : '_POW',
     'curveInfo' : '_CIN',
     'setRange' : '_SETR',
     'reverse' : '_REV'

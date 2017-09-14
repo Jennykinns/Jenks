@@ -124,7 +124,7 @@ class ik:
             cmds.setAttr('{}.input1'.format(gsMult.name), chainLength)
             ## distance / globalScaleMult
             divNd = utils.newNode('multiplyDivide', name='{}Dist'.format(self.name),
-                                  suffix='_DIV', operation=2)
+                                  suffixOverride='multiplyDivide_div', operation=2)
             cmds.connectAttr(distanceAttr, '{}.input1X'.format(divNd.name))
             cmds.connectAttr('{}.output'.format(gsMult.name), '{}.input2X'.format(divNd.name))
             ## condition; distance -> first, globalScaleMult -> second, div -> colorIfTrue
@@ -136,11 +136,17 @@ class ik:
                              '{}.secondTerm'.format(condNd.name))
             cmds.connectAttr('{}.output'.format(divNd.name),
                              '{}.colorIfTrue'.format(condNd.name))
+            ## toggle (with power node)
+            disablePowNode = utils.newNode('multiplyDivide',
+                                           name='{}StretchToggle'.format(self.name),
+                                           suffixOverride='multiplyDivide_pow', operation=3)
+            disablePowNode.connect('input1X', '{}.outColorR'.format(condNd.name), mode='to')
+            self.stretchToggleAttr = '{}.input2X'.format(disablePowNode.name)
             ## mult for each joint
             for jnt in self.jnts[1:]:
                 transMult = utils.newNode('multDoubleLinear', name='{}{}'.format(self.name, jnt))
                 cmds.setAttr('{}.input1'.format(transMult.name),
                              cmds.getAttr('{}.tx'.format(jnt)))
-                cmds.connectAttr('{}.outColorR'.format(condNd.name),
+                cmds.connectAttr('{}.outputX'.format(disablePowNode.name),
                                  '{}.input2'.format(transMult.name))
                 cmds.connectAttr('{}.output'.format(transMult.name), '{}.tx'.format(jnt))

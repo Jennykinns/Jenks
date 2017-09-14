@@ -20,7 +20,7 @@ class armModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.arm, autoOrient=False):
+    def create(self, options=defaultBodyOptions.arm, autoOrient=False, customNodes=False):
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -141,28 +141,34 @@ class armModule:
             ##- controls
             self.shoulderFKCtrl = ctrlFn.ctrl(name='{}shoulderFK'.format(extraName),
                                               side=self.side, guide=fkJnts[0], skipNum=True,
-                                              # parent=self.clavFKCtrl.ctrlEnd)
                                               parent=fkCtrlGrp.name)
             self.shoulderFKCtrl.modifyShape(color=col['col1'], shape='circle', scale=(0.6, 0.6, 0.6))
-            self.shoulderFKCtrl.lockAttr(attr=['t', 's'])
-            self.shoulderFKCtrl.constrain(fkJnts[0], typ='orient')
+            self.shoulderFKCtrl.lockAttr(attr=['s'])
+            self.shoulderFKCtrl.constrain(fkJnts[0], typ='parent')
 
             self.elbowFKCtrl = ctrlFn.ctrl(name='{}elbowFK'.format(extraName), side=self.side,
                                            guide=fkJnts[1], skipNum=True,
                                            parent=self.shoulderFKCtrl.ctrlEnd)
             self.elbowFKCtrl.modifyShape(color=col['col2'], shape='circle', scale=(0.6, 0.6, 0.6))
-            self.elbowFKCtrl.lockAttr(attr=['t', 's'])
-            self.elbowFKCtrl.constrain(fkJnts[1], typ='orient')
+            self.elbowFKCtrl.lockAttr(attr=['s'])
+            self.elbowFKCtrl.constrain(fkJnts[1], typ='parent')
 
             self.wristFKCtrl = ctrlFn.ctrl(name='{}wristFK'.format(extraName), side=self.side,
                                           guide=fkJnts[2], skipNum=True,
                                           parent=self.elbowFKCtrl.ctrlEnd)
             self.wristFKCtrl.modifyShape(color=col['col1'], shape='circle', scale=(0.6, 0.6, 0.6))
-            self.wristFKCtrl.lockAttr(attr=['t', 's'])
-            self.wristFKCtrl.constrain(fkJnts[2], typ='orient')
+            self.wristFKCtrl.lockAttr(attr=['s'])
+            self.wristFKCtrl.constrain(fkJnts[2], typ='parent')
         ## stretchy
         if options['stretchy']:
-            print '## do stretchy'
+            if options['IK']:
+                armIK.addStretch(customStretchNode=customNodes,
+                                 globalScaleAttr='{}.sy'.format(self.rig.globalCtrl.ctrl.name))
+                self.handIKCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
+                                         minVal=0, maxVal=1, defaultVal=1)
+                cmds.connectAttr(self.handIKCtrl.ctrl.stretchySwitch, armIK.stretchToggleAttr)
+            if options['FK']:
+                print '## add proper stretch to fk'
         ## softIK
         if options['softIK']:
             print '## do soft IK'

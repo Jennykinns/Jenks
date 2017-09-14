@@ -167,30 +167,33 @@ class ctrl:
 
     def constrain(self, target, typ='parent', mo=True, offset=[0, 0, 0],
                   aimVector=[1, 0, 0], aimUp=[0, 1, 0], aimWorldUpType=2, aimWorldUp=[0, 1, 0],
-                  aimWorldUpObject='C_global_CTRL', skipRot='none', skipTrans='none'):
+                  aimWorldUpObject='C_global_CTRL', skipRot='none', skipTrans='none',
+                  skipScale='none'):
         if typ == 'parent':
-            cmds.parentConstraint(self.constGrp.name, target, mo=mo, sr=skipRot, st=skipTrans)
+            cmds.parentConstraint(self.ctrlEnd, target, mo=mo, sr=skipRot, st=skipTrans)
         elif typ == 'point':
             if mo:
-                cmds.pointConstraint(self.constGrp.name, target, mo=mo, sk=skipTrans)
+                cmds.pointConstraint(self.ctrlEnd, target, mo=mo, sk=skipTrans)
             else:
-                cmds.pointConstraint(self.constGrp.name, target, o=offset, sk=skipTrans)
+                cmds.pointConstraint(self.ctrlEnd, target, o=offset, sk=skipTrans)
         elif typ == 'orient':
             if mo:
-                cmds.orientConstraint(self.constGrp.name, target, mo=mo, sk=skipRot)
+                cmds.orientConstraint(self.ctrlEnd, target, mo=mo, sk=skipRot)
             else:
-                cmds.orientConstraint(self.constGrp.name, target, o=offset, sk=skipRot)
+                cmds.orientConstraint(self.ctrlEnd, target, o=offset, sk=skipRot)
         elif typ == 'aim':
             if mo:
-                cmds.aimConstraint(self.constGrp.name, target, mo=mo, aim=aimVector, u=aimUp,
+                cmds.aimConstraint(self.ctrlEnd, target, mo=mo, aim=aimVector, u=aimUp,
                                    wut=aimWorldUpType, wuo=aimWorldUpObject, wu=aimWorldUp,
                                    sk=skipRot)
             else:
-                cmds.aimConstraint(self.constGrp.name, target, o=offset, aim=aimVector,
+                cmds.aimConstraint(self.ctrlEnd, target, o=offset, aim=aimVector,
                                    u=aimUp, wut=aimWorldUpType, wuo=aimWorldUpObject,
                                    wu=aimWorldUp, sk=skipRot)
+        elif typ == 'scale':
+            cmds.scaleConstraint(self.ctrlEnd, target, mo=mo, sk=skipScale)
         elif typ == 'poleVector' or typ == 'pv':
-            cmds.poleVectorConstraint(self.constGrp.name, target)
+            cmds.poleVectorConstraint(self.ctrlEnd, target)
         else:
             cmds.warning('Parent Type Unsupported. Use: parent, point, orient, aim or poleVector.')
 
@@ -203,8 +206,18 @@ class ctrl:
             cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
                          en=enumName, dv=defaultVal, k=1)
         else:
-            cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                         dv=defaultVal, min=minVal, max=maxVal, k=1)
+            if minVal and maxVal:
+                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, min=minVal, max=maxVal, k=1)
+            elif minVal:
+                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, min=minVal, k=1)
+            elif maxVal:
+                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, max=maxVal, k=1)
+            else:
+                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, k=1)
         exec('self.ctrl.{0} = "{1}.{0}"'.format(name, self.ctrl.name))
 
     def makeSettingCtrl(self, ikfk=True, parent=''):

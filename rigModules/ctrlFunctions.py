@@ -201,24 +201,68 @@ class ctrl:
         utils.lockAttr(self.ctrl.name, attr, hide, unlock)
 
     def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None, enumOptions=None):
-        if typ == 'enum':
-            enumName = ':'.join(enumOptions)
-            cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                         en=enumName, dv=defaultVal, k=1)
-        else:
-            if minVal and maxVal:
+        ctrlAttr = cmds.listAttr(self.ctrl.name)
+        if not name in ctrlAttr:
+            if typ == 'enum':
+                enumName = ':'.join(enumOptions)
                 cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                             dv=defaultVal, min=minVal, max=maxVal, k=1)
-            elif minVal:
-                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                             dv=defaultVal, min=minVal, k=1)
-            elif maxVal:
-                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                             dv=defaultVal, max=maxVal, k=1)
+                             en=enumName, dv=defaultVal, k=1)
             else:
-                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                             dv=defaultVal, k=1)
-        exec('self.ctrl.{0} = "{1}.{0}"'.format(name, self.ctrl.name))
+                if minVal and maxVal:
+                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                                 dv=defaultVal, min=minVal, max=maxVal, k=1)
+                elif minVal:
+                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                                 dv=defaultVal, min=minVal, k=1)
+                elif maxVal:
+                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                                 dv=defaultVal, max=maxVal, k=1)
+                else:
+                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
+                                 dv=defaultVal, k=1)
+            exec('self.ctrl.{0} = "{1}.{0}"'.format(name, self.ctrl.name))
+        else:
+            cmds.warning('{} already exists on {}.'.format(name, self.ctrl.name))
+
+    def spaceSwitching(self, parents, niceNames=None, constraint='parent', dv=0):
+        target = self.rootGrp.name
+        if not niceNames:
+            niceNames=[]
+            for each in parents:
+                splitParent = each.partition('_')[-1].rpartition('_')[0]
+                if splitParent == 'globalConst':
+                    splitParent = 'World'
+                niceNames.append(splitParent.capitalize())
+
+        if niceNames <= 1:
+            attrNiceName = niceNames[0]
+        else:
+            attrNiceName = ''
+            for i, each in enumerate(niceNames):
+                if i < len(niceNames)-1:
+                    attrNiceName += '{} / '.format(each)
+                else:
+                    attrNiceName += '{}'.format(each)
+
+        # add seperator
+        self.addAttr('spSwSep', '___   Space Switching', typ='enum', enumOptions=['___'])
+        # add attribute
+        spSwAttr = self.addAttr('spaceSwitch', '{} Switch'.format(attrNiceName), typ='enum',
+                                defaultVal=dv, enumOptions=niceNames)
+        # constraint
+        exec('constr = cmds.{}Constraint(parents, target, mo=1)[0]'.format(constraint))
+        # connect attrs
+        for i, each in enumerate(parents):
+            # create condition node
+            condNd = utils.newNode('condition', name='{}SpSwitch'.format(each), side=self.side, operation=0)
+            # set cond vals
+            cmds.setAttr('{}.secondTerm'.format(condNd.name), i)
+            cmds.setAttr('{}.colorIfTrueR'.format(condNd.name), 1)
+            cmds.setAttr('{}.colorIfFalseR'.format(condNd.name), 0)
+            # connect
+            condNd.connect('firstTerm', self.ctrl.spaceSwitch, mode='to')
+            condNd.connect('outColorR', '{}.{}W{}'.format(constr, each, i) , mode='from')
+
 
     def makeSettingCtrl(self, ikfk=True, parent=''):
         self.modifyShape(shape='cog', color=utils.getColors(self.side)['settingCol'],

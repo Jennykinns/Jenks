@@ -25,3 +25,4 @@ class rig:
         self.mechGrp = utils.newNode('group', name='mechanics',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)
         cmds.setAttr('{}.v'.format(self.mechGrp.name), 0)
+        self.scaleAttr = '{}.sy'.format(self.globalCtrl.ctrl.name)

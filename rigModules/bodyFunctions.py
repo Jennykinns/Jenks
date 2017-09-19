@@ -11,7 +11,7 @@ reload(orientJoints)
 reload(utils)
 reload(ikFn)
 reload(ctrlFn)
-reload(suffixDictionary)
+#reload(suffixDictionary)
 
 class armModule:
     def __init__(self, rig, extraName='', side='C'):
@@ -20,7 +20,8 @@ class armModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.arm, autoOrient=False, customNodes=False):
+    def create(self, options=defaultBodyOptions.arm, autoOrient=False,
+               customNodes=False, parent=None):
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -49,7 +50,6 @@ class armModule:
         clavIK = ikFn.ik(clavJnts[0], clavJnts[1],
                          name='{}clavicleIK'.format(extraName), side=self.side)
         clavIK.createIK(parent=armMechGrp.name)
-        # cmds.parentConstraint(clavJnts[1], clavChild, mo=1)
         self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicle'.format(extraName), side=self.side,
                                       guide=clavJnts[0], skipNum=True, parent=armCtrlsGrp.name)
         self.clavIKCtrl.modifyShape(shape='pringle', color=col['col2'])
@@ -92,7 +92,7 @@ class armModule:
                 cmds.connectAttr('{}.outputX'.format(swRev.name), '{}.{}W0'.format(parConstr[0], ikJnt))
             ##- control vis grps
             ikCtrlGrp = utils.newNode('group', name='{}armIKCtrls'.format(extraName), side=self.side,
-                                      parent=self.clavIKCtrl.ctrlEnd, skipNum=True)
+                                      parent=armCtrlsGrp.name, skipNum=True)
             fkCtrlGrp = utils.newNode('group', name='{}armFKCtrls'.format(extraName), side=self.side,
                                       parent=self.clavIKCtrl.ctrlEnd, skipNum=True)
             cmds.setDrivenKeyframe(ikCtrlGrp.name, at='visibility',
@@ -122,6 +122,8 @@ class armModule:
             self.handIKCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
             self.handIKCtrl.lockAttr(attr=['s'])
             self.handIKCtrl.constrain(armIK.grp)
+            # self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name, TORSO, self.clavIKCtrl.name],
+            #                                niceNames=['World', 'Chest', 'Clavicle'], dv=0)
             ##-- PoleVector
             pvGuide = '{}armPV{}'.format(self.moduleName, suffix['locator'])
             cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
@@ -131,7 +133,8 @@ class armModule:
             self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
             self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
-            print '## add space switch for arm poleVector'
+            self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name, self.handIKCtrl.ctrlEnd],
+                                           niceNames=['World', 'Hand'], dv=0)
 
             ## autoClav
             if options['autoClav']:
@@ -175,18 +178,115 @@ class armModule:
         ## ribbon
         if options['ribbon']:
             print '## do ribbon'
+
+        ## arm parent stuff
+        if parent:
+            armParentLoc = utils.newNode('locator', name='{}armParent'.format(extraName),
+                                         side=self.side, skipNum=True, parent=parent)
+            armParentLoc.matchTransforms(clavJnts[0])
+            cmds.parentConstraint(armParentLoc.name, clavJnts[0], mo=1)
+            cmds.parentConstraint(armParentLoc.name, self.clavIKCtrl.rootGrp.name, mo=1)
         return True
 
+
+class spineModule:
+    def __init__(self, rig, extraName='', side='C'):
+        self.moduleName = utils.setupBodyPartName(extraName, side)
+        self.extraName = extraName
+        self.side = side
+        self.rig = rig
+
+    def createFromJnts(self, autoOrient=False):
+        jntSuffix = suffix['joint']
+        spineJnts = utils.getChildrenBetweenObjs('{}spineBase{}'.format(self.moduleName,
+                                                                        jntSuffix),
+                                                 '{}spineEnd{}'.format(self.moduleName,
+                                                                       jntSuffix))
+        self.spineMech(autoOrient, spineJnts)
+
+
+
+    def createFromCrv(self, crv, numOfJnts=7):
+        ##create jnts
+        spineJnts = utils.createJntsFromCrv(crv, numOfJnts, name='{}spine'.format(self.extraName),
+                                            side=self.side)
+        baseJntName = utils.setupName('spineBase', extraName=self.extraName,
+                                      side=self.side, obj='joint', skipNumber=True)
+        endJntName = utils.setupName('spineEnd', extraName=self.extraName,
+                                      side=self.side, obj='joint', skipNumber=True)
+        for i, each in enumerate(spineJnts):
+            if i == 0:
+                spineJnts[i] = cmds.rename(spineJnts[i], baseJntName)
+            elif i == len(spineJnts)-1:
+                spineJnts[i] = cmds.rename(spineJnts[i], endJntName)
+            else:
+                spineJnts[i] = cmds.rename(spineJnts[i], utils.setupName('spine', extraName=self.extraName,
+                                           side=self.side, obj='joint'))
+        ## spine mech
+        self.spineMech(autoOrient=False, spineJnts=spineJnts, crv=crv)
+
+
+
+    def spineMech(self, autoOrient, spineJnts, crv=None):
+        jntSuffix = suffix['joint']
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        col = utils.getColors('C')
+        spineMechGrp = utils.newNode('group', name='{}spineMech'.format(self.extraName),
+                                     side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
+        ## orient joints
+        if autoOrient:
+            orientJoints.doOrientJoint(jointsToOrient=spineJnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
+                                       worldUp=(0, 1, 0), guessUp=1)
+        cmds.parent(spineJnts[0], self.rig.skelGrp.name)
+        chestJnt = spineJnts[len(spineJnts)/2]
+        self.spineArmJnt = spineJnts[int(len(spineJnts)-(len(spineJnts)/3.5))]
+        ## bind jnts
+        hipBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
+                                    name='{}spineIK_hipsBind'.format(extraName))
+        hipBindJnt.matchTransforms(spineJnts[0])
+        chestBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
+                                     name='{}spineIK_chestBind'.format(extraName))
+        chestBindJnt.matchTransforms(chestJnt)
+        ## splineIK
+        spineIK = ikFn.ik(spineJnts[0], spineJnts[-1], name='spineIK', side=self.side)
+        if crv:
+            spineIK.createSplineIK(parent=spineMechGrp.name, crv=crv)
+        else:
+            spineIK.createSplineIK(parent=spineMechGrp.name)
+        spineIK.addStretch(globalScaleAttr=self.rig.scaleAttr, mode='length')
+        ## skin bindJnts to crv
+        cmds.skinCluster(hipBindJnt.name, chestBindJnt.name, spineIK.crv)
+        ## ctrls
+        self.bodyCtrl = ctrlFn.ctrl(name='{}body'.format(extraName), side=self.side,
+                                    guide=hipBindJnt.name, deleteGuide=False,
+                                    skipNum=True, parent=self.rig.ctrlsGrp.name)
+        cmds.setAttr('{}.r'.format(self.bodyCtrl.rootGrp.name), 0, 0, 0)
+        self.bodyCtrl.modifyShape(shape='fatPlus', color=col['col2'])
+        self.hipCtrl = ctrlFn.ctrl(name='{}hips'.format(extraName), side=self.side, gimbal=True,
+                                   guide=hipBindJnt.name, deleteGuide=False, skipNum=True,
+                                   parent=self.bodyCtrl.ctrlEnd)
+        self.hipCtrl.modifyShape(shape='sphere', color=col['col1'])
+        self.hipCtrl.constrain(hipBindJnt.name)
+        self.chestCtrl = ctrlFn.ctrl(name='{}chest'.format(extraName), side=self.side, gimbal=True,
+                                     guide=chestBindJnt.name, deleteGuide=False, skipNum=True,
+                                     parent=self.bodyCtrl.ctrlEnd)
+        self.chestCtrl.modifyShape(shape='sphere', color=col['col2'])
+        self.chestCtrl.constrain(chestBindJnt.name)
+        ## IK Adv twist
+        spineIKStartLoc = utils.newNode('locator', name='{}spineStart'.format(extraName),
+                                      side=self.side, parent=hipBindJnt.name)
+        spineIKStartLoc.matchTransforms(spineJnts[0])
+        spineIKEndLoc = utils.newNode('locator', name='{}spineEnd'.format(extraName),
+                                      side=self.side, parent=chestBindJnt.name)
+        spineIKEndLoc.matchTransforms(spineJnts[-1])
+        spineIK.advancedTwist(spineIKStartLoc.name, spineIKEndLoc.name, wuType=4)
+        print '## add world switching to spine ctrls?'
 
 
 class legModule:
     def __init__(self):
         print '## leg'
 
-
-class spineModule:
-    def __init__(self):
-        print '## spine'
 
 
 class headModule:

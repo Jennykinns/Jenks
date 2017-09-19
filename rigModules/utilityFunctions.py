@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import suffixDictionary
+from Jenks.scripts.rigModules import orientJoints
 
 reload(suffixDictionary)
 
@@ -59,6 +60,11 @@ def getColors(typ):
         colors['col2'] = 24
         colors['col3'] = 21
         colors['settingCol'] = 31
+    elif typ == 'C':
+        colors['col1'] = 10
+        colors['col2'] = 22
+        colors['col3'] = 23
+        colors['settingCol'] = 7
     else:
         colors['col1'] = 30
         colors['col2'] = 0
@@ -75,8 +81,18 @@ def setColor(obj, color=None):
     cmds.setAttr('{}.overrideEnabled'.format(obj), 1)
     cmds.setAttr('{}.overrideColor'.format(obj), color if color else 0)
 
-def matchTransforms(objs, targetObj):
+def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
+    if type(objs) is not type(list()):
+        objs = [objs]
     for each in objs:
+        if skipRot and skipTrans:
+            continue
+        if skipRot:
+            cmds.delete(cmds.parentConstraint(targetObj, each, sr=['x', 'y', 'z']))
+            continue
+        if skipTrans:
+            cmds.delete(cmds.parentConstraint(targetObj, each, st=['x', 'y', 'z']))
+            continue
         cmds.delete(cmds.parentConstraint(targetObj, each))
 
 def lockAttr(node, attr='', hide=True, unlock=False):
@@ -104,9 +120,29 @@ def getShapeNodes(obj):
     children = cmds.listRelatives(obj, s=1)
     return children
 
+def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
+    tmpCrv = cmds.rebuildCurve(crv, rt=0, end=1, kr=0, kt=0, s=numOfJnts-1, d=3)[0]
+    parent = None
+    jntList = []
+    for i in range(numOfJnts):
+        jnt = newNode('joint', name=name, side=side, parent=parent)
+        jntList.append(jnt.name)
+        if chain:
+            parent = jnt.name
+        pos = cmds.getAttr('{}.ep[{}]'.format(tmpCrv, i))[0]
+        cmds.xform(jnt.name, t=pos, ws=1)
+    orientJoints.doOrientJoint(jointsToOrient=jntList, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
+                                       worldUp=(0, 1, 0), guessUp=1)
+    cmds.select(cl=1)
+    if not tmpCrv == crv:
+        cmds.delete(tmpCrv)
+    return jntList
+
+
 class newNode:
     def __init__(self, node, name='', suffixOverride='', parent='', side='C',
                  operation=None, skipNum=False):
+        self.node = node
         nodeName = setupName(name if name else node,
                              obj=node if not suffixOverride else suffixOverride,
                              side=side, skipNumber=skipNum)
@@ -142,6 +178,11 @@ class newNode:
                 for plug in existingConnections:
                     cmds.disconnectAttr(plug, nodeAttrFull)
             cmds.connectAttr(dest, nodeAttrFull)
+
+    def matchTransforms(self, obj, skipTrans=False, skipRot=False):
+        matchTransforms(self.name, obj, skipTrans, skipRot)
+        if self.node == 'joint':
+            cmds.makeIdentity(self.name, a=1, r=1)
 
 
 

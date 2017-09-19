@@ -28,7 +28,7 @@ class ik:
         cmds.select(cl=1)
 
 
-    def createSplineIK(self, crv=None, autoCrvSpans=0, rootOnCrv=True):
+    def createSplineIK(self, crv=None, autoCrvSpans=0, rootOnCrv=True, parent=None):
         ## ik creation
         if crv:
             ik = cmds.ikHandle(sj=self.sj, ee=self.ej, sol='ikSplineSolver', c=crv, ccv=False)
@@ -40,10 +40,12 @@ class ik:
                 scv = False
             ik = cmds.ikHandle(sj=self.sj, ee=self.ej, sol='ikSplineSolver', ccv=True,
                                scv=scv, ns=autoCrvSpans)
-            self.crv = ik[2]
-        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle'), side=self.side)
-        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector'), side=self.side)
-        self.grp = cmds.group(self.hdl, self.crv, name=utils.setupName(self.name, obj='group'), side=self.side)
+            self.crv = cmds.rename(ik[2], utils.setupName(self.name, obj='nurbsCrv', side=self.side))
+        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle', side=self.side))
+        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector', side=self.side))
+        self.grp = utils.newNode('group', name=self.name, side=self.side, parent=parent).name
+        cmds.parent(self.hdl, self.crv, self.grp)
+        cmds.setAttr('{}.it'.format(self.crv), 0)
         grpCP = cmds.xform(self.hdl, q=1, t=1, ws=1)
         cmds.xform(self.grp, piv=grpCP, ws=1)
         ## set effected joints

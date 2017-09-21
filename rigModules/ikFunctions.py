@@ -95,26 +95,28 @@ class ik:
                 op = 5
             if mode == 'distance':
                 ## locators
-                startLoc = utils.newNode('locator', name='{}Start'.format(self.name))
-                cmds.delete(cmds.parentConstraint(self.jnts[0], startLoc.name))
+                startLoc = utils.newNode('locator', name='{}Start'.format(self.name),
+                                         side=self.side)
+                cmds.delete(cmds.parentConstraint(self.sj, startLoc.name))
                 sjPar = cmds.listRelatives(self.jnts[0], p=1)
                 if sjPar:
                     cmds.parent(startLoc.name, sjPar)
-                endLoc = utils.newNode('locator', name='{}End'.format(self.name))
-                cmds.delete(cmds.parentConstraint(self.jnts[-1], endLoc.name))
+                endLoc = utils.newNode('locator', name='{}End'.format(self.name), side=self.side)
+                cmds.delete(cmds.parentConstraint(self.ej, endLoc.name))
                 cmds.parent(endLoc.name, self.grp)
                 ## distance between locs
-                distNd = utils.newNode('distanceBetween', name=self.name)
+                distNd = utils.newNode('distanceBetween', name=self.name, side=self.side)
                 cmds.connectAttr('{}.wp'.format(startLoc.name), '{}.point1'.format(distNd.name))
                 cmds.connectAttr('{}.wp'.format(endLoc.name), '{}.point2'.format(distNd.name))
                 distanceAttr = '{}.distance'.format(distNd.name)
             elif mode == 'length':
                 ## crv info
-                crvInfo = utils.newNode('curveInfo', name=self.crv)
+                crvInfo = utils.newNode('curveInfo', name=self.crv, side=self.side)
                 cmds.connectAttr('{}.ws'.format(self.crv), '{}.inputCurve'.format(crvInfo.name))
                 distanceAttr = '{}.arcLength'.format(crvInfo.name)
             ##  global scale mult
-            gsMult = utils.newNode('multDoubleLinear', name='{}GlobalScale'.format(self.name))
+            gsMult = utils.newNode('multDoubleLinear', name='{}GlobalScale'.format(self.name),
+                                   side=self.side)
             if globalScaleAttr:
                 cmds.connectAttr(globalScaleAttr, '{}.input2'.format(gsMult.name))
             else:
@@ -123,15 +125,16 @@ class ik:
             for jnt in self.jnts[1:]:
                 length = cmds.getAttr('{}.translateX'.format(jnt))
                 chainLength += length
-            cmds.setAttr('{}.input1'.format(gsMult.name), chainLength)
+            cmds.setAttr('{}.input1'.format(gsMult.name), abs(chainLength))
             ## distance / globalScaleMult
             divNd = utils.newNode('multiplyDivide', name='{}Dist'.format(self.name),
-                                  suffixOverride='multiplyDivide_div', operation=2)
+                                  suffixOverride='multiplyDivide_div', operation=2,
+                                  side=self.side)
             cmds.connectAttr(distanceAttr, '{}.input1X'.format(divNd.name))
             cmds.connectAttr('{}.output'.format(gsMult.name), '{}.input2X'.format(divNd.name))
             ## condition; distance -> first, globalScaleMult -> second, div -> colorIfTrue
             condNd = utils.newNode('condition', name='{}Stretch'.format(self.name),
-                                   operation=op)
+                                   operation=op, side=self.side)
             cmds.connectAttr(distanceAttr,
                              '{}.firstTerm'.format(condNd.name))
             cmds.connectAttr('{}.output'.format(gsMult.name),
@@ -139,14 +142,15 @@ class ik:
             cmds.connectAttr('{}.output'.format(divNd.name),
                              '{}.colorIfTrue'.format(condNd.name))
             ## toggle (with power node)
-            disablePowNode = utils.newNode('multiplyDivide',
+            disablePowNode = utils.newNode('multiplyDivide', side=self.side,
                                            name='{}StretchToggle'.format(self.name),
                                            suffixOverride='multiplyDivide_pow', operation=3)
             disablePowNode.connect('input1X', '{}.outColorR'.format(condNd.name), mode='to')
             self.stretchToggleAttr = '{}.input2X'.format(disablePowNode.name)
             ## mult for each joint
             for jnt in self.jnts[1:]:
-                transMult = utils.newNode('multDoubleLinear', name='{}{}'.format(self.name, jnt))
+                transMult = utils.newNode('multDoubleLinear', name='{}{}'.format(self.name, jnt),
+                                          side=self.side)
                 cmds.setAttr('{}.input1'.format(transMult.name),
                              cmds.getAttr('{}.tx'.format(jnt)))
                 cmds.connectAttr('{}.outputX'.format(disablePowNode.name),

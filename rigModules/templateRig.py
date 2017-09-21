@@ -27,9 +27,11 @@ def create():
     # ctrl2.constrain('joint2')
     spine = bodyFn.spineModule(rig, side='C')
     spine.createFromJnts(autoOrient=True)
-    for s in 'LR':
+    for s in 'L':
         arm = bodyFn.armModule(rig, side=s)
-        arm.create(autoOrient=True, parent=spine.spineArmJnt)
+        arm.create(autoOrient=True, parent=spine.armJnt)
+        leg = bodyFn.legModule(rig, side=s)
+        leg.create(autoOrient=True, parent=spine.baseJnt)
 
     ##
 

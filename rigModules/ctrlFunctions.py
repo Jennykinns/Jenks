@@ -125,6 +125,7 @@ class ctrl:
             self.ctrl.parent(self.offsetGrps[-1].name, relative=True)
             self.constGrp = utils.newNode('group', name=name, suffixOverride='controlConst',
                                           side=side, skipNum=skipNum)
+            utils.setOutlinerColor(self.constGrp.name, color=(0.6, 0.6, 0.58))
             self.constGrp.parent(parent=self.ctrl.name, relative=True)
             self.ctrlRoot = self.rootGrp.name
             self.ctrlEnd = self.constGrp.name
@@ -138,8 +139,10 @@ class ctrl:
         cmds.select(cl=1)
 
     def createCtrlOffsetGrps(self, num, name, guide=None, skipNum=False):
+
         self.rootGrp = utils.newNode('group', name=name, suffixOverride='controlRootGrp',
                                       side=self.side, skipNum=skipNum)
+        utils.setOutlinerColor(self.rootGrp.name, color=(0.48, 0.48, 0.44))
         if guide:
             utils.matchTransforms([self.rootGrp.name], guide)
         self.offsetGrps = []
@@ -148,6 +151,7 @@ class ctrl:
             self.offsetGrps.append(utils.newNode('group', name=name,
                                                  suffixOverride='controlOffset', side=self.side,
                                                  skipNum=skipNum))
+            utils.setOutlinerColor(self.offsetGrps[-1].name, color=(0.6, 0.6, 0.55))
             self.offsetGrps[-1].parent(par, relative=True)
             par = self.offsetGrps[-1]
 
@@ -208,13 +212,13 @@ class ctrl:
                 cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
                              en=enumName, dv=defaultVal, k=1)
             else:
-                if minVal and maxVal:
+                if minVal is not None and maxVal is not None:
                     cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
                                  dv=defaultVal, min=minVal, max=maxVal, k=1)
-                elif minVal:
+                elif minVal is not None:
                     cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
                                  dv=defaultVal, min=minVal, k=1)
-                elif maxVal:
+                elif maxVal is not None:
                     cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
                                  dv=defaultVal, max=maxVal, k=1)
                 else:
@@ -225,7 +229,7 @@ class ctrl:
             cmds.warning('{} already exists on {}.'.format(name, self.ctrl.name))
 
     def spaceSwitching(self, parents, niceNames=None, constraint='parent', dv=0):
-        target = self.rootGrp.name
+        target = self.offsetGrps[0].name
         if not niceNames:
             niceNames=[]
             for each in parents:

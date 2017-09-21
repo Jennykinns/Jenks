@@ -81,6 +81,10 @@ def setColor(obj, color=None):
     cmds.setAttr('{}.overrideEnabled'.format(obj), 1)
     cmds.setAttr('{}.overrideColor'.format(obj), color if color else 0)
 
+def setOutlinerColor(obj, color=None):
+    cmds.setAttr('{}.useOutlinerColor'.format(obj), 1 if color else 0)
+    cmds.setAttr('{}.outlinerColor'.format(obj), color[0], color[1], color[2])
+
 def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
     if type(objs) is not type(list()):
         objs = [objs]
@@ -137,6 +141,34 @@ def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
     if not tmpCrv == crv:
         cmds.delete(tmpCrv)
     return jntList
+
+def duplicateJntChain(chainName, jnts, parent=None):
+    newJnts = []
+    dupeChain = cmds.duplicate(jnts[0], rc=1)
+    for each in reversed(dupeChain):
+        if (each.rstrip('1')) not in jnts or not cmds.objectType(each) == 'joint':
+            cmds.delete(each)
+            continue
+        newName = '{}_{}{}'.format(each.rsplit('_', 1)[0], chainName,
+                                   suffixDictionary.suffix['joint'])
+        newJnts.insert(0, cmds.rename(each, newName))
+    if parent:
+        cmds.parent(newJnts[0], parent)
+    return newJnts
+
+def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=None, parent=None):
+    newJnts = []
+    for i, each in enumerate(objs):
+        newJntName = '{}{}_{}'.format(extraName, chainName,
+                                      jntNames[i] if jntNames else '')
+        jnt = newNode('joint', name=newJntName, side=side, parent=parent,
+                      skipNum=True if jntNames else False)
+        jnt.matchTransforms(each)
+        parent = jnt.name
+        newJnts.append(jnt.name)
+    orientJoints.doOrientJoint(jointsToOrient=newJnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
+                               worldUp=(0, 1, 0), guessUp=1)
+    return newJnts
 
 
 class newNode:

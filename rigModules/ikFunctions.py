@@ -16,9 +16,12 @@ class ik:
     def createIK(self, solver='ikRPsolver', parent=None):
         ## ik creation
         ik = cmds.ikHandle(sj=self.sj, ee=self.ej, sol=solver)
-        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle', side=self.side))
-        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector', side=self.side))
-        self.grp = cmds.group(self.hdl, name=utils.setupName(self.name, obj='group', side=self.side))
+        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle',
+                                                      side=self.side))
+        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector',
+                                                      side=self.side))
+        self.grp = cmds.group(self.hdl, name=utils.setupName(self.name, obj='group',
+                                                             side=self.side))
         if parent:
             cmds.parent(self.grp, parent)
         grpCP = cmds.xform(self.hdl, q=1, t=1, ws=1)
@@ -40,9 +43,12 @@ class ik:
                 scv = False
             ik = cmds.ikHandle(sj=self.sj, ee=self.ej, sol='ikSplineSolver', ccv=True,
                                scv=scv, ns=autoCrvSpans)
-            self.crv = cmds.rename(ik[2], utils.setupName(self.name, obj='nurbsCrv', side=self.side))
-        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle', side=self.side))
-        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector', side=self.side))
+            self.crv = cmds.rename(ik[2], utils.setupName(self.name, obj='nurbsCrv',
+                                                          side=self.side))
+        self.hdl = cmds.rename(ik[0], utils.setupName(self.name, obj='ikHandle',
+                                                      side=self.side))
+        self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector',
+                                                      side=self.side))
         self.grp = utils.newNode('group', name=self.name, side=self.side, parent=parent).name
         cmds.parent(self.hdl, self.crv, self.grp)
         cmds.setAttr('{}.it'.format(self.crv), 0)
@@ -92,7 +98,7 @@ class ik:
             elif operation == 'lesser':
                 op = 4
             else:
-                op = 5
+                op = 1
             if mode == 'distance':
                 ## locators
                 startLoc = utils.newNode('locator', name='{}Start'.format(self.name),

@@ -156,12 +156,14 @@ class ctrl:
             par = self.offsetGrps[-1]
 
     def modifyShape(self, shape=None, color=None, rotation=(0, 0, 0),
-                    translation=(0, 0, 0), scale=(1, 1, 1)):
+                    translation=(0, 0, 0), scale=(1, 1, 1), mirror=False):
         if shape:
             scriptsPath = fileFn.getScriptDir()
             path = '{}/Jenks/scripts/controlShapes'.format(scriptsPath)
             loadShapeData(self.ctrl.name, shape, path)
         crvData = getShapeData(self.ctrl.name)
+        if self.side == 'R' and mirror:
+            rotation = (rotation[0]+180, rotation[1], rotation[2])
         applyShapeData(self.ctrl.name, crvData, transOffset=translation, rotOffset=rotation,
                        scaleOffset=scale)
         if color:
@@ -204,7 +206,8 @@ class ctrl:
     def lockAttr(self, attr='', hide=True, unlock=False):
         utils.lockAttr(self.ctrl.name, attr, hide, unlock)
 
-    def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None, enumOptions=None):
+    def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None,
+                enumOptions=None):
         ctrlAttr = cmds.listAttr(self.ctrl.name)
         if not name in ctrlAttr:
             if typ == 'enum':
@@ -258,7 +261,8 @@ class ctrl:
         # connect attrs
         for i, each in enumerate(parents):
             # create condition node
-            condNd = utils.newNode('condition', name='{}SpSwitch'.format(each), side=self.side, operation=0)
+            condNd = utils.newNode('condition', name='{}SpSwitch'.format(each),
+                                   side=self.side, operation=0)
             # set cond vals
             cmds.setAttr('{}.secondTerm'.format(condNd.name), i)
             cmds.setAttr('{}.colorIfTrueR'.format(condNd.name), 1)
@@ -276,4 +280,3 @@ class ctrl:
         self.lockAttr()
         if ikfk:
             self.addAttr('ikfkSwitch', nn='IK / FK Switch', minVal=0, maxVal=1)
-

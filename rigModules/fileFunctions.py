@@ -69,17 +69,17 @@ def saveGuides(rigName, autoName=False):
             return False
     else:
         fileName = getLatestVersion(rigName, path, 'rig/WIP/guides', new=True)
+    removeReferences()
     cmds.file(rename=fileName)
     cmds.file(save=True, type='mayaAscii')
     print 'Saved guides: {}'.format(fileName)
     return True
 
-
 def loadGeo(rigName, group=None):
     path = getAssetDir()
     fileName = getLatestVersion(rigName, path, 'model/Published')
-    print 'Loaded geometry: {}'.format(fileName)
     nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
+    print 'Loaded geometry: {}'.format(fileName)
     mNodes = []
     for each in nodes:
         mNodes.append(api.getMObj(each))
@@ -89,6 +89,20 @@ def loadGeo(rigName, group=None):
             if cmds.nodeType(lN) == 'transform':
                 cmds.parent(lN, group)
     return True
+
+def referenceGeo(rigName):
+    path = getAssetDir()
+    fileName = getLatestVersion(rigName, path, 'model/Published')
+    cmds.file(fileName, r=1)
+    print 'Referenced geometry: {}'.format(fileName)
+    return True
+
+def removeReferences():
+    sel = cmds.ls()
+    for each in sel:
+        if cmds.objExists(each):
+            if cmds.nodeType(each) == 'reference':
+                cmds.file(rr=1, rfn=each)
 
 def fileDialogFilter(fileFormats):
     fileFilter = ''

@@ -14,7 +14,7 @@ reload(setupFn)
 
 def create():
 
-    rig = setupFn.rig()
+    rig = setupFn.rig(debug=True)
     fileFn.loadGuides(rigName)
     fileFn.loadGeo(rigName, rig.geoGrp.name)
 
@@ -27,7 +27,7 @@ def create():
     # ctrl2.constrain('joint2')
     spine = bodyFn.spineModule(rig, side='C')
     spine.createFromJnts(autoOrient=True)
-    for s in 'L':
+    for s in 'LR':
         arm = bodyFn.armModule(rig, side=s)
         arm.create(autoOrient=True, parent=spine.armJnt)
         leg = bodyFn.legModule(rig, side=s)

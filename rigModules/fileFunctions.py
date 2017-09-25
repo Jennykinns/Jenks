@@ -126,7 +126,7 @@ def saveJson(data, defaultDir=None, caption='Save Json', fileFormats=[('JSON', '
         else:
             return False
     else:
-        fileName = fileOverride
+        fileName = fileOverride[0]
     with open(fileName, 'w') as f:
         json.dump(data, f, indent=4)
     print 'File Saved to: {}'.format(fileName)

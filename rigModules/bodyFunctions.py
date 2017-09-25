@@ -270,7 +270,6 @@ class spineModule:
         self.spineMech(autoOrient, spineJnts)
 
 
-
     def createFromCrv(self, crv, numOfJnts=7):
         ##create jnts
         spineJnts = utils.createJntsFromCrv(crv, numOfJnts, name='{}spine'.format(self.extraName),
@@ -292,7 +291,6 @@ class spineModule:
         self.spineMech(autoOrient=False, spineJnts=spineJnts, crv=crv)
 
 
-
     def spineMech(self, autoOrient, spineJnts, crv=None):
         jntSuffix = suffix['joint']
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
@@ -307,6 +305,7 @@ class spineModule:
         chestJnt = spineJnts[len(spineJnts)/2]
         self.armJnt = spineJnts[int(len(spineJnts)-(len(spineJnts)/3.5))]
         self.baseJnt = spineJnts[0]
+        self.endJnt = spineJnts[-1]
         ## bind jnts
         hipBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
                                     name='{}spineIK_hipsBind'.format(extraName))
@@ -329,15 +328,18 @@ class spineModule:
                                     skipNum=True, parent=self.rig.ctrlsGrp.name)
         cmds.setAttr('{}.r'.format(self.bodyCtrl.rootGrp.name), 0, 0, 0)
         self.bodyCtrl.modifyShape(shape='fatPlus', color=col['col2'])
+        self.bodyCtrl.lockAttr(['s'])
         self.hipCtrl = ctrlFn.ctrl(name='{}hips'.format(extraName), side=self.side, gimbal=True,
                                    guide=hipBindJnt.name, deleteGuide=False, skipNum=True,
                                    parent=self.bodyCtrl.ctrlEnd)
         self.hipCtrl.modifyShape(shape='sphere', color=col['col1'])
+        self.hipCtrl.lockAttr(['s'])
         self.hipCtrl.constrain(hipBindJnt.name)
         self.chestCtrl = ctrlFn.ctrl(name='{}chest'.format(extraName), side=self.side, gimbal=True,
                                      guide=chestBindJnt.name, deleteGuide=False, skipNum=True,
                                      parent=self.bodyCtrl.ctrlEnd)
         self.chestCtrl.modifyShape(shape='sphere', color=col['col2'])
+        self.chestCtrl.lockAttr(['s'])
         self.chestCtrl.constrain(chestBindJnt.name)
         ## IK Adv twist
         spineIKStartLoc = utils.newNode('locator', name='{}spineStart'.format(extraName),
@@ -357,7 +359,7 @@ class legModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.arm, autoOrient=False,
+    def create(self, options=defaultBodyOptions.leg, autoOrient=False,
                customNodes=False, parent=None):
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
@@ -406,7 +408,6 @@ class legModule:
                                           skipNum=True, parent=ikCtrlGrp.name, deleteGuide=True)
             self.footIKCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
             self.footIKCtrl.lockAttr(attr=['s'])
-            # self.footIKCtrl.constrain(legIK.grp)
             # space switching
             ## polevector ctrl
             pvGuide = '{}legPV{}'.format(self.moduleName, suffix['locator'])
@@ -553,8 +554,72 @@ class legModule:
 
 
 class headModule:
-    def __init__(self):
-        print '## head'
+    def __init__(self, rig, extraName='', side='C'):
+        self.moduleName = utils.setupBodyPartName(extraName, side)
+        self.extraName = extraName
+        self.side = side
+        self.rig = rig
+
+    def create(self, options=defaultBodyOptions.head, autoOrient=True,
+               parent=None, extraSpaces=''):
+        if parent:
+            gParent = cmds.listRelatives(parent, p=1)[0]
+            ctrlSpaceSwitches = [self.rig.globalCtrl.ctrlEnd, gParent]
+        else:
+            cmds.error('FUCK, I DON\'T KNOW WHAT TO DO WITHOUT A PARENT FOR THE HEAD YET.')
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        jntSuffix = suffix['joint']
+        jnts = [
+            parent,
+            '{}head{}'.format(self.moduleName, jntSuffix),
+            '{}headEnd{}'.format(self.moduleName, jntSuffix),
+        ]
+        col = utils.getColors(self.side)
+        cmds.parent(jnts[1], jnts[0])
+        if autoOrient:
+            orientJoints.doOrientJoint(jointsToOrient=jnts,
+                                       aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+                                       upAxis=(0, 1, 0),
+                                       worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+                                       guessUp=1)
+        headCtrlsGrp = utils.newNode('group', name='{}headCtrls'.format(extraName), side=self.side,
+                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
+        if type(extraSpaces) == type(list()) and len(extraSpaces) > 1:
+            ctrlSpaceSwitches.extend(extraSpaces)
+        else:
+            ctrlSpaceSwitches.append(extraSpaces)
+        if options['IK']:
+            ## IK mechanics
+            headMechGrp = utils.newNode('group', name='{}headMech'.format(extraName),
+                                        side=self.side, parent=self.rig.mechGrp.name, skipNum=True)
+            headIKsGrp = utils.newNode('group', name='{}headIKs'.format(extraName),
+                                       side=self.side, parent=headMechGrp.name, skipNum=True)
+            neckIK = ikFn.ik(jnts[0], jnts[1], name='{}neckIK'.format(extraName), side=self.side)
+            neckIK.createIK(parent=headIKsGrp.name)
+            headIK = ikFn.ik(jnts[1], jnts[2], name='{}headIK'.format(extraName), side=self.side)
+            headIK.createIK(parent=headIKsGrp.name)
+            ## IK Control
+            self.headCtrl = ctrlFn.ctrl(name='{}head'.format(extraName), side=self.side,
+                                        guide=jnts[1], skipNum=True, parent=headCtrlsGrp.name)
+            self.headCtrl.modifyShape(shape='sphere', color=col['col3'], mirror=True,
+                                      translation=(2, 0, 0))
+            self.headCtrl.lockAttr(['s'])
+            self.headCtrl.constrain(headIKsGrp.name)
+            self.headCtrl.spaceSwitching(ctrlSpaceSwitches, dv=1)
+        else:
+            self.neckCtrl = ctrlFn.ctrl(name='{}neck'.format(extraName), side=self.side,
+                                        guide=jnts[0], skipNum=True, parent=headCtrlsGrp.name)
+            self.neckCtrl.modifyShape(shape='circle', color=col['col1'], mirror=True,
+                                      scale=(0.4, 0.4, 0.4))
+            self.neckCtrl.lockAttr(['s', 't'])
+            self.neckCtrl.constrain(jnts[0], typ='orient')
+            self.headCtrl = ctrlFn.ctrl(name='{}head'.format(extraName), side=self.side,
+                                        guide=jnts[1], skipNum=True, parent=self.neckCtrl.ctrlEnd)
+            self.headCtrl.modifyShape(shape='sphere', color=col['col3'], mirror=True,
+                                      translation=(2, 0, 0))
+            self.headCtrl.lockAttr(['s', 't'])
+            self.headCtrl.constrain(jnts[1])
+            self.neckCtrl.spaceSwitching(ctrlSpaceSwitches, dv=1)
 
 
 class digitsModule:

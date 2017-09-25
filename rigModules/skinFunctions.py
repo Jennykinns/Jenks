@@ -40,6 +40,7 @@ def loadSkin(rigName, geo, override=False):
     if not fileName:
         return False
     skinData = fileFn.loadJson(fileOverride=fileName)
+    print 'Loading Skin Data: {}'.format(skinData)
     # do stuff with skin data
     vtxList, skinCls = getSkinInfo(geo)
     if skinCls:
@@ -78,10 +79,13 @@ def saveAllSkin(rigName):
         return False
 
 def loadAllSkin(rigName):
+    print 'Starting Skinning From Saved Files.'
     geo = cmds.ls(type='transform')
     if geo:
         for each in geo:
             loadSkin(rigName, each)
+        print 'Finished Skinning From Saved Files.'
         return True
     else:
+        print 'Skinning From Saved Files FAILED.'
         return False

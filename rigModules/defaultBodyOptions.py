@@ -26,3 +26,7 @@ tail = {
     'IKLayers' : 2,
     'dynamics' : False,
 }
+
+digits = {
+    'butts' : True
+}

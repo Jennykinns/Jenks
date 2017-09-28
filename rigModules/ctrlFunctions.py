@@ -155,7 +155,7 @@ class ctrl:
             self.offsetGrps[-1].parent(par, relative=True)
             par = self.offsetGrps[-1]
 
-    def modifyShape(self, shape=None, color=None, rotation=(0, 0, 0),
+    def modifyShape(self, shape=None, color=False, rotation=(0, 0, 0),
                     translation=(0, 0, 0), scale=(1, 1, 1), mirror=False):
         if shape:
             scriptsPath = fileFn.getScriptDir()
@@ -166,7 +166,7 @@ class ctrl:
             rotation = (rotation[0]+180, rotation[1], rotation[2])
         applyShapeData(self.ctrl.name, crvData, transOffset=translation, rotOffset=rotation,
                        scaleOffset=scale)
-        if color:
+        if color or color is None:
             utils.setShapeColor(self.ctrl.name, color=color)
         else:
             print '## get existing colour and apply (for if the shape changes)'
@@ -174,34 +174,36 @@ class ctrl:
     def constrain(self, target, typ='parent', mo=True, offset=[0, 0, 0],
                   aimVector=[1, 0, 0], aimUp=[0, 1, 0], aimWorldUpType=2, aimWorldUp=[0, 1, 0],
                   aimWorldUpObject='C_global_CTRL', skipRot='none', skipTrans='none',
-                  skipScale='none'):
+                  skipScale='none', weight=1):
         if typ == 'parent':
-            cmds.parentConstraint(self.ctrlEnd, target, mo=mo, sr=skipRot, st=skipTrans)
+            c = cmds.parentConstraint(self.ctrlEnd, target, mo=mo, sr=skipRot,
+                                      st=skipTrans, w=weight)
         elif typ == 'point':
             if mo:
-                cmds.pointConstraint(self.ctrlEnd, target, mo=mo, sk=skipTrans)
+                c = cmds.pointConstraint(self.ctrlEnd, target, mo=mo, sk=skipTrans, w=weight)
             else:
-                cmds.pointConstraint(self.ctrlEnd, target, o=offset, sk=skipTrans)
+                c = cmds.pointConstraint(self.ctrlEnd, target, o=offset, sk=skipTrans, w=weight)
         elif typ == 'orient':
             if mo:
-                cmds.orientConstraint(self.ctrlEnd, target, mo=mo, sk=skipRot)
+                c = cmds.orientConstraint(self.ctrlEnd, target, mo=mo, sk=skipRot, w=weight)
             else:
-                cmds.orientConstraint(self.ctrlEnd, target, o=offset, sk=skipRot)
+                c = cmds.orientConstraint(self.ctrlEnd, target, o=offset, sk=skipRot, w=weight)
         elif typ == 'aim':
             if mo:
-                cmds.aimConstraint(self.ctrlEnd, target, mo=mo, aim=aimVector, u=aimUp,
-                                   wut=aimWorldUpType, wuo=aimWorldUpObject, wu=aimWorldUp,
-                                   sk=skipRot)
+                c = cmds.aimConstraint(self.ctrlEnd, target, mo=mo, aim=aimVector, u=aimUp,
+                                       wut=aimWorldUpType, wuo=aimWorldUpObject, wu=aimWorldUp,
+                                       sk=skipRot, w=weight)
             else:
-                cmds.aimConstraint(self.ctrlEnd, target, o=offset, aim=aimVector,
-                                   u=aimUp, wut=aimWorldUpType, wuo=aimWorldUpObject,
-                                   wu=aimWorldUp, sk=skipRot)
+                c = cmds.aimConstraint(self.ctrlEnd, target, o=offset, aim=aimVector,
+                                       u=aimUp, wut=aimWorldUpType, wuo=aimWorldUpObject,
+                                       wu=aimWorldUp, sk=skipRot, w=weight)
         elif typ == 'scale':
-            cmds.scaleConstraint(self.ctrlEnd, target, mo=mo, sk=skipScale)
+            c = cmds.scaleConstraint(self.ctrlEnd, target, mo=mo, sk=skipScale, w=weight)
         elif typ == 'poleVector' or typ == 'pv':
-            cmds.poleVectorConstraint(self.ctrlEnd, target)
+            c = cmds.poleVectorConstraint(self.ctrlEnd, target, w=weight)
         else:
             cmds.warning('Parent Type Unsupported. Use: parent, point, orient, aim or poleVector.')
+        return c[0]
 
     def lockAttr(self, attr='', hide=True, unlock=False):
         utils.lockAttr(self.ctrl.name, attr, hide, unlock)

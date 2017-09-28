@@ -19,6 +19,7 @@ suffix = {
     'multiplyDivide_pow' : '_POW',
     'curveInfo' : '_CIN',
     'setRange' : '_SETR',
-    'reverse' : '_REV'
+    'reverse' : '_REV',
+    'decomposeMatrix' : '_DCM',
 
 }

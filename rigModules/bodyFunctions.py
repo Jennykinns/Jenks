@@ -11,6 +11,7 @@ reload(orientJoints)
 reload(utils)
 reload(ikFn)
 reload(ctrlFn)
+reload(defaultBodyOptions)
 #reload(suffixDictionary)
 
 def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType):
@@ -159,6 +160,7 @@ class armModule:
             fkCtrlGrp = armCtrlsGrp
             clavChild = jnts[0]
         cmds.parentConstraint(clavJnts[1], clavChild, mo=1)
+        self.handJnt = jnts[2]
         ## ik
         if options['IK']:
             ##- mechanics
@@ -623,8 +625,146 @@ class headModule:
 
 
 class digitsModule:
-    def __init__(self):
-        print '## digits'
+    def __init__(self, rig, extraName='', side='C'):
+        self.moduleName = utils.setupBodyPartName(extraName, side)
+        self.extraName = extraName
+        self.side = side
+        self.rig = rig
+
+    def create(self, mode, options=defaultBodyOptions.digits, autoOrient=False, customNodes=False,
+               parent=None, thumb=True):
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        jntSuffix = suffix['joint']
+        col = utils.getColors(self.side)
+        handCtrlGrp = utils.newNode('group', name='{}{}Ctrls'.format(extraName, mode),
+                                    side=self.side, parent=self.rig.ctrlsGrp.name, skipNum=True)
+        cmds.parentConstraint(parent, handCtrlGrp.name, mo=1)
+        if mode == 'hand':
+            typ = 'fngr'
+        else:
+            typ = 'toe'
+        digitsList = ['Index', 'Middle', 'Ring', 'Pinky']
+        if thumb:
+            digitsList.append('Thumb')
+        digitCtrls = {}
+        palmMults = []
+        palmCtrl = ctrlFn.ctrl(name='{}{}Palm'.format(extraName, typ),
+                               side=self.side,
+                               guide='{}{}PalmGuide{}'.format(self.moduleName, mode,
+                                                              suffix['locator']),
+                               deleteGuide=True, skipNum=True, parent=handCtrlGrp.name)
+        palmCtrl.modifyShape(shape='sphere', color=col['col2'], scale=(0.2, 0.2, 0.3))
+        for each in digitsList:
+            segments = ['metacarpel', 'base', 'lowMid', 'highMid', 'tip']
+            jnts = [
+                '{}{}{}_{}{}'.format(self.moduleName, typ, each, segments[0], jntSuffix),
+                '{}{}{}_{}{}'.format(self.moduleName, typ, each, segments[1], jntSuffix),
+                '{}{}{}_{}{}'.format(self.moduleName, typ, each, segments[2], jntSuffix),
+                '{}{}{}_{}{}'.format(self.moduleName, typ, each, segments[3], jntSuffix),
+                '{}{}{}_{}{}'.format(self.moduleName, typ, each, segments[4], jntSuffix),
+            ]
+            ctrlParent = handCtrlGrp.name
+            if each == 'Pinky':
+                pinkyBaseJnt = jnts[0]
+                ctrlParent = palmCtrl.ctrlEnd
+            elif each == 'Index':
+                indexBaseJnt = jnts[0]
+            prevJnt = None
+            segmentCtrls = []
+            for i, seg in enumerate(segments):
+                ctrl = ctrlFn.ctrl(name='{}{}{}_{}'.format(extraName, typ, each, seg),
+                                   side=self.side, guide=jnts[i], skipNum=True,
+                                   parent=ctrlParent)
+                segmentCtrls.append(ctrl)
+                ctrlCol = col['col3']
+                ctrlShape = 'circle'
+                ctrlScale = (0.1, 0.1, 0.1)
+                if seg == 'metacarpel':
+                    if each == 'Thumb':
+                        ctrlShape = 'sphere'
+                        ctrlScale = (0.3, 0.2, 0.2)
+                        ctrlCol = col['col2']
+                    else:
+                        ctrlCol = None
+
+                ctrl.modifyShape(shape=ctrlShape, scale=ctrlScale, color=ctrlCol)
+                loc = utils.newNode('locator', name='{}{}{}_{}'.format(extraName, typ, each, seg),
+                                    side=self.side)
+                utils.setShapeColor(loc.name, color=None)
+                loc.parent(ctrl.ctrlEnd, relative=True)
+                ctrl.lockAttr(['s'])
+                if i > 0:
+                    bJnt = cmds.duplicate(jnts[i], po=1)[0]
+                    bJnt = cmds.rename(bJnt, '{}{}{}_{}B{}'.format(self.moduleName, typ, each,
+                                                                seg, jntSuffix))
+                    bTrans = utils.newNode('multDoubleLinear',
+                                           name='{}{}{}_{}BTrans'.format(extraName, typ,
+                                                                         each, seg),
+                                           side=self.side)
+                    bTrans.connect('input1', '{}.tx'.format(jnts[i]), mode='to')
+                    cmds.setAttr('{}.input2'.format(bTrans.name), 0.95)
+                    bTrans.connect('output', '{}.tx'.format(bJnt))
+                    ctrl.constrain(prevJnt, typ='aim', aimWorldUpObject=ctrlParent)
+                    distNd = utils.newNode('distanceBetween',
+                                           name='{}{}{}_{}'.format(extraName, typ, each, seg),
+                                           side=self.side)
+                    distNd.connect('point1', '{}.wp'.format(prevLoc.name), mode='to')
+                    distNd.connect('point2', '{}.wp'.format(loc.name), mode='to')
+                    distNd.connect('distance', '{}.tx'.format(jnts[i]))
+                else:
+                    palmOrientMult = utils.newNode('multiplyDivide',
+                                                   name='{}{}{}_baseOrient'.format(extraName, typ,
+                                                                                   each),
+                                                   side=self.side,
+                                                   suffixOverride='multiplyDivide_mult')
+                    palmOrientMult.connect('output', '{}.r'.format(ctrl.offsetGrps[0].name))
+                    if not each == 'Pinky':
+                        palmTransMult = utils.newNode('multiplyDivide',
+                                                      name='{}{}{}_baseTrans'.format(extraName, typ,
+                                                                                     each),
+                                                      side=self.side,
+                                                      suffixOverride='multiplyDivide_mult')
+                        palmTransMult.connect('output', '{}.t'.format(ctrl.offsetGrps[0].name))
+                    else:
+                        palmTransMult = False
+                    palmMults.append((palmOrientMult, palmTransMult))
+
+                prevJnt = jnts[i]
+                prevLoc = loc
+                ctrlParent = ctrl.ctrlEnd
+            digitCtrls[each] = segmentCtrls
+        self.indexCtrls = digitCtrls['Index']
+        self.middleCtrls = digitCtrls['Middle']
+        self.ringCtrls = digitCtrls['Ring']
+        self.pinkyCtrls = digitCtrls['Pinky']
+        if thumb:
+            self.thumbCtrls = digitCtrls['Thumb']
+
+        palmLoc = utils.newNode('locator', name='{}{}Palm'.format(extraName, mode),
+                                side=self.side, parent=parent)
+        palmLoc.matchTransforms(pinkyBaseJnt)
+        cmds.makeIdentity(palmLoc.name, a=1, t=1)
+        oConstr = palmCtrl.constrain(palmLoc.name, typ='orient')
+        cmds.setAttr('{}.offsetY'.format(oConstr), (cmds.getAttr('{}.offsetY'.format(oConstr))-360))
+        palmCtrl.constrain(palmLoc.name, typ='point')
+        for digit, multNds in zip(digitsList, palmMults):
+            orient, trans = multNds
+            if digit == 'Thumb' or digit == 'Index':
+                pass
+            else:
+                if digit == 'Pinky':
+                    val = 1
+                elif digit == 'Ring':
+                    val = 0.667
+                elif digit == 'Middle':
+                    val = 0.333
+                cmds.setAttr('{}.input2'.format(orient.name), val, val, val)
+                orient.connect('input1', '{}.r'.format(palmLoc.name), mode='to')
+                if trans:
+                    cmds.setAttr('{}.input2'.format(trans.name), val, val, val)
+                    trans.connect('input1', '{}.t'.format(palmLoc.name), mode='to')
+
+
 
 
 class tailModule:

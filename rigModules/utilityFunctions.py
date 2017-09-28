@@ -79,7 +79,11 @@ def setShapeColor(obj, color=None):
 
 def setColor(obj, color=None):
     cmds.setAttr('{}.overrideEnabled'.format(obj), 1)
-    cmds.setAttr('{}.overrideColor'.format(obj), color if color else 0)
+    if color:
+        cmds.setAttr('{}.overrideVisibility'.format(obj), 1)
+        cmds.setAttr('{}.overrideColor'.format(obj), color)
+    else:
+        cmds.setAttr('{}.overrideVisibility'.format(obj), 0)
 
 def setOutlinerColor(obj, color=None):
     cmds.setAttr('{}.useOutlinerColor'.format(obj), 1 if color else 0)

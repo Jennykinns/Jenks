@@ -40,7 +40,7 @@ def loadSkin(rigName, geo, override=False):
     if not fileName:
         return False
     skinData = fileFn.loadJson(fileOverride=fileName)
-    print 'Loading Skin Data: {}'.format(skinData)
+    print 'Loading Skin Data: {}'.format(fileName)
     # do stuff with skin data
     vtxList, skinCls = getSkinInfo(geo)
     if skinCls:

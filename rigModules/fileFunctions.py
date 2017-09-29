@@ -20,7 +20,7 @@ def getLatestVersion(rigName, path, location, new=False, name=None, suffix=None)
     fileDirectory = '{}{}/{}/'.format(path, rigName, location)
     ls = os.listdir(fileDirectory)
     relevantFiles = []
-    for each in ls:
+    for each in sorted(ls):
         lsGeo = each.rsplit('_', 1 if not location == 'model/Published' else 2)[0]
         if lsGeo == name:
             relevantFiles.append(each)
@@ -42,7 +42,11 @@ def getLatestVersion(rigName, path, location, new=False, name=None, suffix=None)
 def getScriptDir():
     ## MIGHT NEED CHANGING - not sure if the path list will be
     ## consistant between pcs (or even restarts)
-    scriptPath = sys.path[-1]
+    if os.path.isfile('C:\\Docs\\readMe.txt'):
+	    ## on uni computers
+	    scriptPath = 'C:\\Docs\\maya\\scripts'
+    else:
+	    scriptPath = sys.path[-1]
     return scriptPath
 
 def getAssetDir():
@@ -78,16 +82,17 @@ def saveGuides(rigName, autoName=False):
 def loadGeo(rigName, group=None):
     path = getAssetDir()
     fileName = getLatestVersion(rigName, path, 'model/Published')
-    nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
+    # nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
+    cmds.AbcImport(fileName, mode='import', rpr=group)
     print 'Loaded geometry: {}'.format(fileName)
-    mNodes = []
-    for each in nodes:
-        mNodes.append(api.getMObj(each))
-    if group:
-        for each in mNodes:
-            lN, sN = api.getPath(each)
-            if cmds.nodeType(lN) == 'transform':
-                cmds.parent(lN, group)
+    # mNodes = []
+    # for each in nodes:
+    #     mNodes.append(api.getMObj(each))
+    # if group:
+    #     for each in mNodes:
+    #         lN, sN = api.getPath(each)
+    #         if cmds.nodeType(lN) == 'transform':
+    #             cmds.parent(lN, group)
     return True
 
 def referenceGeo(rigName):

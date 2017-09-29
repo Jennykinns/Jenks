@@ -155,3 +155,92 @@ def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json
     with open(fileName, 'r') as f:
         data = json.load(f)
     return data
+    
+    
+def createNewPipelineAsset(assetName):
+    assetDir = getAssetDir()
+    newAssetDir = '{}{}'.format(assetDir, assetName)
+    if os.path.isdir(newAssetDir):
+        print 'Asset directory already exists.'
+        return False
+    else:
+        os.mkdir(newAssetDir)
+        folderList = {
+            'lookDev' : {'Published' : None, 'WIP': None},
+            'model' : {'Published' : None, 'WIP': None},
+            'rig' : {'Published' : None, 'WIP': {'controlShapes' : None, 'guides' : None, 'skin' : None}},
+            'texture' : {'Published' : None, 'WIP': None},
+        }
+        for k, v in folderList.iteritems():
+            os.mkdir('{}/{}'.format(newAssetDir, k))
+            if v is None:
+                continue
+            for k2, v2 in v.iteritems():
+                os.mkdir('{}/{}/{}'.format(newAssetDir, k, k2))
+                if v2 is None:
+                    continue
+                for k3, v3 in v2.iteritems():
+                    os.mkdir('{}/{}/{}/{}'.format(newAssetDir, k, k2, k3))
+        print 'Created asset directories: {}'.format(newAssetDir)
+                
+        
+        
+def loadMayaFile(assetName='', type='', prompt=True):
+    if prompt:
+        assetName = assetNamePrompt()
+        if assetName is None:
+            return False
+    assetDir = getAssetDir()
+    subDir = '{}{}/{}/WIP/'.format(assetDir, assetName, type)
+    if not os.path.isdir(subDir):
+        print '{} asset does not exist.'.format(assetName)
+        return False
+    fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    fileName = cmds.fileDialog2(dialogStyle=2,
+                                caption='Load {}'.format(type.capitalize()),
+                                fileMode=1,
+                                fileFilter=fileFilter,
+                                dir=subDir)
+    if fileName:
+        cmds.file(fileName, open=1, force=1)
+        print 'Opened File: {}'.format(fileName)
+        return True
+    return False
+    
+    
+    
+def assetNamePrompt():
+    result = cmds.promptDialog(title='Load {} File'.format(type),
+                               message='Asset Name:',
+		                       button=['OK', 'Cancel'],
+		                       defaultButton='OK',
+		                       cancelButton='Cancel',
+		                       dismissString='Cancel')
+    if result == 'OK':
+        assetName = cmds.promptDialog(query=True, text=True)
+    else:
+        assetName = None
+    return assetName
+  
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

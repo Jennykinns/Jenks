@@ -648,6 +648,9 @@ class digitsModule:
             digitsList.append('Thumb')
         digitCtrls = {}
         palmMults = []
+        utils.matchTransforms('{}{}PalmGuide{}'.format(self.moduleName, mode, suffix['locator']),
+                              '{}{}Pinky_base{}'.format(self.moduleName, typ, jntSuffix),
+                              skipTrans=True)
         palmCtrl = ctrlFn.ctrl(name='{}{}Palm'.format(extraName, typ),
                                side=self.side,
                                guide='{}{}PalmGuide{}'.format(self.moduleName, mode,
@@ -713,9 +716,7 @@ class digitsModule:
                     bTrans.connect('input1', '{}.tx'.format(jnts[i]), mode='to')
                     cmds.setAttr('{}.input2'.format(bTrans.name), 0.95)
                     bTrans.connect('output', '{}.tx'.format(bJnt))
-                    # aimVector = (1, 0, 0) if not self.side == 'R' else (-1, 0, 0)
                     ctrl.constrain(prevJnt, typ='aim', aimWorldUpObject=ctrlParent,
-                                   # aimVector=aimVector,
                                    mo=True)
                     distNd = utils.newNode('distanceBetween',
                                            name='{}{}{}_{}'.format(extraName, typ, each, seg),
@@ -760,13 +761,13 @@ class digitsModule:
         self.pinkyCtrls = digitCtrls['Pinky']
         if thumb:
             self.thumbCtrls = digitCtrls['Thumb']
-
+        palmLocParGrp = utils.newNode('group', name='{}{}PalmLoc'.format(extraName, mode),
+                                      side=self.side, parent=parent)
         palmLoc = utils.newNode('locator', name='{}{}Palm'.format(extraName, mode),
-                                side=self.side, parent=parent)
-        palmLoc.matchTransforms(pinkyBaseJnt)
+                                side=self.side, parent=palmLocParGrp.name)
+        palmLocParGrp.matchTransforms(pinkyBaseJnt)
         cmds.makeIdentity(palmLoc.name, a=1, t=1, r=1)
         oConstr = palmCtrl.constrain(palmLoc.name, typ='orient', mo=True)
-        cmds.setAttr('{}.offsetY'.format(oConstr), (cmds.getAttr('{}.offsetY'.format(oConstr))))
         palmCtrl.constrain(palmLoc.name, typ='point', mo=True)
         for digit, multNds in zip(digitsList, palmMults):
             orient, trans = multNds

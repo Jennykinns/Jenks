@@ -92,17 +92,31 @@ def loadShapeData(ctrlName, shape=False, path=None):
     else:
         return False
 
-def saveCtrls(rigName):
+def saveCtrls(assetName=None, prompt=False):
+    if prompt:
+        assetName = fileFn.assetNamePrompt()
+    if not assetName:
+        assetName = fileFn.getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = fileFn.getAssetDir()
     for ctrl in getAllControls():
         crvData = getShapeData(ctrl, color=True)
-        fo = fileFn.getLatestVersion(rigName, path, 'rig/WIP/controlShapes', new=True, name=ctrl)
+        fo = fileFn.getLatestVersion(assetName, path, 'rig/WIP/controlShapes', new=True, name=ctrl)
         fileFn.saveJson(crvData, fileOverride=fo)
 
-def loadCtrls(rigName):
+def loadCtrls(assetName=None, prompt=False):
+    if prompt:
+        assetName = fileFn.assetNamePrompt()
+    if not assetName:
+        assetName = fileFn.getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = fileFn.getAssetDir()
     for ctrl in getAllControls():
-        fo = fileFn.getLatestVersion(rigName, path, 'rig/WIP/controlShapes', name=ctrl)
+        fo = fileFn.getLatestVersion(assetName, path, 'rig/WIP/controlShapes', name=ctrl)
         if fo:
             crvData = fileFn.loadJson(fileOverride=fo)
             if crvData:

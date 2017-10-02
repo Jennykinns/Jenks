@@ -2,11 +2,12 @@ import os
 import json
 import sys
 import maya.cmds as cmds
+import maya.mel as mel
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFuncitons as api
 
-def getLatestVersion(rigName, path, location, new=False, name=None, suffix=None):
+def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None):
     if location == 'rig/WIP/guides':
         suffix = 'ma'
         name = 'guides'
@@ -16,8 +17,8 @@ def getLatestVersion(rigName, path, location, new=False, name=None, suffix=None)
         suffix = 'shape'
     elif location == 'model/Published':
         suffix = 'ma'
-        name = rigName
-    fileDirectory = '{}{}/{}/'.format(path, rigName, location)
+        name = assetName
+    fileDirectory = '{}{}/{}/'.format(path, assetName, location)
     ls = os.listdir(fileDirectory)
     relevantFiles = []
     for each in sorted(ls):
@@ -53,35 +54,72 @@ def getAssetDir():
     path = cmds.workspace(q=1, rd=1)
     return '{}assets/'.format(path)
 
-def loadGuides(rigName):
+def newScene():
+    if cmds.file(q=1, modified=1):
+        t = 'Opening New Scene'
+        m = 'This will override the current scene without saving. Save Now?'
+        confirm = cmds.confirmDialog(t=t, m=m, b=['Yes', 'No', 'Cancel'], db='Yes',
+                                     cb='Cancel', ds='Yes')
+        if confirm == 'Yes':
+            saveMayaFile()
+        elif confirm == 'Cancel':
+            return False
+    f = cmds.file(new=1, force=1)
+    return True
+
+def loadGuides(assetName=None, prompt=False, new=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = getAssetDir()
-    fileName = getLatestVersion(rigName, path, 'rig/WIP/guides')
+    fileName = getLatestVersion(assetName, path, 'rig/WIP/guides')
+    if new:
+        if not newScene():
+            return False
     cmds.file(fileName, i=1, dns=1, type='mayaAscii')
     print 'Loaded guides: {}'.format(fileName)
     return True
 
-def saveGuides(rigName, autoName=False):
+def saveGuides(assetName=None, autoName=False, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = getAssetDir()
     if not autoName:
         fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
         fileName = cmds.fileDialog2(dialogStyle=2, caption='Save Rig Guides',
                                     fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/rig/WIP/guides'.format(path, rigName))
+                                    dir='{}{}/rig/WIP/guides'.format(path, assetName))
         if fileName:
             fileName = fileName[0]
         else:
             return False
     else:
-        fileName = getLatestVersion(rigName, path, 'rig/WIP/guides', new=True)
+        fileName = getLatestVersion(assetName, path, 'rig/WIP/guides', new=True)
     removeReferences()
     cmds.file(rename=fileName)
     cmds.file(save=True, type='mayaAscii')
     print 'Saved guides: {}'.format(fileName)
     return True
 
-def loadGeo(rigName, group=None):
+def loadGeo(assetName=None, group=None, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = getAssetDir()
-    fileName = getLatestVersion(rigName, path, 'model/Published')
+    fileName = getLatestVersion(assetName, path, 'model/Published')
     # nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
     cmds.AbcImport(fileName, mode='import', rpr=group)
     print 'Loaded geometry: {}'.format(fileName)
@@ -95,9 +133,16 @@ def loadGeo(rigName, group=None):
     #             cmds.parent(lN, group)
     return True
 
-def referenceGeo(rigName):
+def referenceGeo(assetName=None, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = getAssetDir()
-    fileName = getLatestVersion(rigName, path, 'model/Published')
+    fileName = getLatestVersion(assetName, path, 'model/Published')
     cmds.file(fileName, r=1)
     print 'Referenced geometry: {}'.format(fileName)
     return True
@@ -155,8 +200,8 @@ def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json
     with open(fileName, 'r') as f:
         data = json.load(f)
     return data
-    
-    
+
+
 def createNewPipelineAsset(assetName):
     assetDir = getAssetDir()
     newAssetDir = '{}{}'.format(assetDir, assetName)
@@ -182,22 +227,25 @@ def createNewPipelineAsset(assetName):
                 for k3, v3 in v2.iteritems():
                     os.mkdir('{}/{}/{}/{}'.format(newAssetDir, k, k2, k3))
         print 'Created asset directories: {}'.format(newAssetDir)
-                
-        
-        
-def loadMayaFile(assetName='', type='', prompt=True):
+
+
+
+def loadMayaFile(assetName='', typ='', prompt=False):
     if prompt:
         assetName = assetNamePrompt()
-        if assetName is None:
-            return False
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     assetDir = getAssetDir()
-    subDir = '{}{}/{}/WIP/'.format(assetDir, assetName, type)
+    subDir = '{}{}/{}/WIP/'.format(assetDir, assetName, typ)
     if not os.path.isdir(subDir):
         print '{} asset does not exist.'.format(assetName)
         return False
     fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
     fileName = cmds.fileDialog2(dialogStyle=2,
-                                caption='Load {}'.format(type.capitalize()),
+                                caption='Load {}'.format(typ.capitalize()),
                                 fileMode=1,
                                 fileFilter=fileFilter,
                                 dir=subDir)
@@ -206,11 +254,29 @@ def loadMayaFile(assetName='', type='', prompt=True):
         print 'Opened File: {}'.format(fileName)
         return True
     return False
-    
-    
-    
+
+def saveMayaFile(assetName='', typ='', prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    assetDir = getAssetDir()
+    subDir = '{}{}/{}/WIP/'.format(assetDir, assetName, typ)
+    fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    fileName = cmds.fileDialog2(dialogStyle=2,
+                                caption='Save {}'.format(typ.capitalize()),
+                                fileMode=0,
+                                fileFilter=fileFilter,
+                                dir=subDir)[0]
+    if fileName:
+        cmds.file(rename=fileName)
+        cmds.file(save=True)
+
 def assetNamePrompt():
-    result = cmds.promptDialog(title='Load {} File'.format(type),
+    result = cmds.promptDialog(title='Asset Name',
                                message='Asset Name:',
 		                       button=['OK', 'Cancel'],
 		                       defaultButton='OK',
@@ -221,26 +287,14 @@ def assetNamePrompt():
     else:
         assetName = None
     return assetName
-  
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+def setAssetName():
+    name = assetNamePrompt()
+    if name:
+        mel.eval('putenv "assetName" {}'.format(name))
+
+
+def getAssetName():
+    name = mel.eval('getenv "assetName"')
+    return name

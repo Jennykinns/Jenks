@@ -34,9 +34,16 @@ def getSkinInfo(obj):
         vtxList.append('{}.vtx[{}]'.format(obj, x))
     return vtxList, skinCls
 
-def loadSkin(rigName, geo, override=False):
+def loadSkin(geo, assetName=None, prompt=False, override=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = fileFn.getAssetDir()
-    fileName = fileFn.getLatestVersion(rigName, path, 'rig/WIP/skin', name=geo)
+    fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', name=geo)
     if not fileName:
         return False
     skinData = fileFn.loadJson(fileOverride=fileName)
@@ -59,31 +66,52 @@ def loadSkin(rigName, geo, override=False):
             cmds.select(cl=1)
     return True
 
-def saveSkin(rigName, geo):
+def saveSkin(geo, assetName=None, prompt=False):
+    if prompt:
+        assetName = fileFn.assetNamePrompt()
+    if not assetName:
+        assetName = fileFn.getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     path = fileFn.getAssetDir()
     skinData = getSkinValues(geo)
     if skinData:
-        skinFile = fileFn.getLatestVersion(rigName, path, 'rig/WIP/skin', new=True, name=geo)
+        skinFile = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
         status = fileFn.saveJson(skinData, fileOverride=[skinFile])
         return status
     else:
         return False
 
-def saveAllSkin(rigName):
+def saveAllSkin(assetName=None, prompt=False):
+    if prompt:
+        assetName = fileFn.assetNamePrompt()
+    if not assetName:
+        assetName = fileFn.getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
     if geo:
         for each in geo:
-            saveSkin(rigName, each)
+            saveSkin(assetName, each)
         return True
     else:
         return False
 
-def loadAllSkin(rigName):
+def loadAllSkin(assetName=None, prompt=False):
+    if prompt:
+        assetName = fileFn.assetNamePrompt()
+    if not assetName:
+        assetName = fileFn.getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
     print 'Starting Skinning From Saved Files.'
     geo = cmds.ls(type='transform')
     if geo:
         for each in geo:
-            loadSkin(rigName, each)
+            loadSkin(assetName, each)
         print 'Finished Skinning From Saved Files.'
         return True
     else:

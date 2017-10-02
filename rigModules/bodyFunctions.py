@@ -54,7 +54,7 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType):
                            cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0.001, v=1)
     cmds.setDrivenKeyframe(fkCtrlGrp.name, at='visibility',
                            cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0, v=0)
-    return ikJnts, fkJnts, ikCtrlGrp, fkCtrlGrp
+    return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
 
 
 class armModule:
@@ -389,14 +389,16 @@ class legModule:
                                        guessUp=1)
         ## ik/fk
         if options['IK'] and options['FK']:
-            ikJnts, fkJnts, ikCtrlGrp, fkCtrlGrp = ikfkMechanics(self, extraName, jnts,
-                                                                 legMechSkelGrp, legCtrlsGrp,
-                                                                 moduleType='leg')
+            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = ikfkMechanics(self, extraName, jnts,
+                                                                       legMechSkelGrp, legCtrlsGrp,
+                                                                       moduleType='leg')
         else:
             ikJnts = jnts
             fkJnts = jnts
             ikCtrlGrp = legCtrlsGrp
             fkCtrlGrp = legCtrlsGrp
+
+        self.footJnt = jnts[3]
 
         if options['IK']:
             ## mechanics
@@ -641,11 +643,15 @@ class digitsModule:
         cmds.parentConstraint(parent, handCtrlGrp.name, mo=1)
         if mode == 'hand':
             typ = 'fngr'
+            digitsList = ['Index', 'Middle', 'Ring', 'Pinky']
+            if thumb:
+                digitsList.append('Thumb')
         else:
             typ = 'toe'
-        digitsList = ['Index', 'Middle', 'Ring', 'Pinky']
-        if thumb:
-            digitsList.append('Thumb')
+            digitsList = ['Big', 'Index', 'Middle', 'Ring', 'Pinky']
+            if thumb:
+                digitsList[0] = 'Thumb'
+
         digitCtrls = {}
         palmMults = []
         utils.matchTransforms('{}{}PalmGuide{}'.format(self.moduleName, mode, suffix['locator']),
@@ -771,7 +777,7 @@ class digitsModule:
         palmCtrl.constrain(palmLoc.name, typ='point', mo=True)
         for digit, multNds in zip(digitsList, palmMults):
             orient, trans = multNds
-            if digit == 'Thumb' or digit == 'Index':
+            if digit == 'Thumb' or digit == 'Index' or digit == 'Big':
                 pass
             else:
                 if digit == 'Pinky':

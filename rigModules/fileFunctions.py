@@ -202,7 +202,15 @@ def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json
     return data
 
 
-def createNewPipelineAsset(assetName):
+def createNewPipelineAsset(assetName=None, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    setAssetName(assetName)
     assetDir = getAssetDir()
     newAssetDir = '{}{}'.format(assetDir, assetName)
     if os.path.isdir(newAssetDir):
@@ -289,10 +297,11 @@ def assetNamePrompt():
     return assetName
 
 
-def setAssetName():
-    name = assetNamePrompt()
-    if name:
-        mel.eval('putenv "assetName" {}'.format(name))
+def setAssetName(assetName=None):
+    if not assetName:
+        assetName = assetNamePrompt()
+    if assetName:
+        mel.eval('putenv "assetName" {}'.format(assetName))
 
 
 def getAssetName():

@@ -111,7 +111,7 @@ def loadAllSkin(assetName=None, prompt=False):
     geo = cmds.ls(type='transform')
     if geo:
         for each in geo:
-            loadSkin(assetName, each)
+            loadSkin(each, assetName)
         print 'Finished Skinning From Saved Files.'
         return True
     else:

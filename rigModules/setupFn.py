@@ -14,16 +14,20 @@ class rig:
         self.worldLoc.lockAttr()
         self.geoGrp = utils.newNode('group', name='geometry',
                                     parent=self.grp.name, skipNum=True)
+        cmds.setAttr('{}.overrideEnabled'.format(self.geoGrp.name), 1)
         self.globalCtrl = ctrlFn.ctrl(name='global', parent=self.grp.name, skipNum=True)
         self.globalCtrl.modifyShape(color=30, shape='global')
         self.ctrlsGrp = utils.newNode('group', name='controls',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)
+        cmds.setAttr('{}.overrideEnabled'.format(self.ctrlsGrp.name), 1)
         self.settingCtrlsGrp = utils.newNode('group', name='settingCtrls',
                                              parent=self.ctrlsGrp.name, skipNum=True)
         self.skelGrp = utils.newNode('group', name='skeleton',
                                      parent=self.globalCtrl.ctrlEnd, skipNum=True)
+        cmds.setAttr('{}.overrideEnabled'.format(self.skelGrp.name), 1)
         self.mechGrp = utils.newNode('group', name='mechanics',
                                      parent=self.globalCtrl.ctrlEnd, skipNum=True)
+        cmds.setAttr('{}.overrideEnabled'.format(self.mechGrp.name), 1)
         cmds.setAttr('{}.v'.format(self.mechGrp.name), 0)
         self.scaleAttr = '{}.sy'.format(self.globalCtrl.ctrl.name)
         globalCtrlAttrs = [

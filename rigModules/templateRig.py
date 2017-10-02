@@ -26,14 +26,18 @@ def create():
     # ctrl2 = ctrlFn.ctrl(name='test', guide='joint2')
     # ctrl2.constrain('joint2')
     spine = bodyFn.spineModule(rig, side='C')
-    spine.createFromJnts(autoOrient=True)
+    spine.createFromJnts()
     head = bodyFn.headModule(rig, side='C')
     head.create(parent=spine.endJnt, extraSpaces=spine.bodyCtrl.ctrlEnd)
-    for s in 'LR':
+    for s in 'RL':
         arm = bodyFn.armModule(rig, side=s)
         arm.create(autoOrient=True, parent=spine.armJnt)
         leg = bodyFn.legModule(rig, side=s)
         leg.create(autoOrient=True, parent=spine.baseJnt)
+        fingers = bodyFn.digitsModule(rig, side=s)
+        fingers.create('hand', parent=arm.handJnt, thumb=True)
+        toes = bodyFn.digitsModule(rig, side=s)
+        toes.create('foot', parent=leg.footJnt, thumb=False)
 
     ##
 

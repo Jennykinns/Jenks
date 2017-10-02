@@ -304,6 +304,8 @@ def setAssetName(assetName=None):
         mel.eval('putenv "assetName" {}'.format(assetName))
 
 
-def getAssetName():
+def getAssetName(dialog=False):
     name = mel.eval('getenv "assetName"')
+    if dialog:
+        cmds.confirmDialog(m='Current Asset: {}'.format(name), button=['Ok'])
     return name

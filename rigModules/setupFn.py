@@ -5,8 +5,9 @@ from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 
 
 class rig:
-    def __init__(self, debug=False):
+    def __init__(self, scaleOffset=1, debug=False):
         cmds.file(force=1, new=1)
+        self.scaleOffset = scaleOffset
         self.grp = utils.newNode('group', name='RIG_', skipNum=True, side='')
         self.worldLoc = utils.newNode('locator', name='world',
                                       parent=self.grp.name, skipNum=True)
@@ -15,7 +16,8 @@ class rig:
         self.geoGrp = utils.newNode('group', name='geometry',
                                     parent=self.grp.name, skipNum=True)
         cmds.setAttr('{}.overrideEnabled'.format(self.geoGrp.name), 1)
-        self.globalCtrl = ctrlFn.ctrl(name='global', parent=self.grp.name, skipNum=True)
+        self.globalCtrl = ctrlFn.ctrl(name='global', parent=self.grp.name, skipNum=True,
+                                      scaleOffset=self.scaleOffset)
         self.globalCtrl.modifyShape(color=30, shape='global')
         self.ctrlsGrp = utils.newNode('group', name='controls',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)

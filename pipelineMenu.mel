@@ -1,0 +1,28 @@
+//--- Jenks Directory Location ---\\
+$mayaDir=`getenv "MAYA_APP_DIR"`;
+$jenksLoc = $mayaDir + "/scripts/Jenks";
+$scriptsLoc = $jenksLoc + "/scripts";
+$iconsLoc = $jenksLoc + "/icons";
+
+//--- Jenks menu system ---\\
+
+if (`menu -exists jenksPipeMenu`)
+deleteUI -menu jenksPipeMenu;
+global string $gMainWindow;
+setParent $gMainWindow;
+
+menu -label "Jenks Pipeline" -mn "JP" -tearOff true jenksPipeMenu;
+setParent -menu jenksPipeMenu;
+    menuItem -label "Set Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.setAssetName()\");";
+    menuItem -label "Get Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.getAssetName(dialog=True)\");";
+    menuItem -label "Create New Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.createNewPipelineAsset(prompt=True)\");";
+    menuItem -d true;
+    menuItem -label "Reference Geometry" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.referenceGeo()\");";
+    menuItem -d true;
+    menuItem -label "Load Rig Guides" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGuides(new=True)\");";
+    menuItem -label "Save Rig Guides" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveGuides(autoName=True)\");";
+    menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveGuides()\");";
+    menuItem -label "Save Rig Skin" -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.saveAllSkin()\");";
+    menuItem -label "Load Rig Skin" -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.loadAllSkin()\");";
+    menuItem -label "Save Rig Controls" -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.saveCtrls()\");";
+    menuItem -label "Load Rig Controls" -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.loadCtrls()\");";

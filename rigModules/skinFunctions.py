@@ -94,7 +94,7 @@ def saveAllSkin(assetName=None, prompt=False):
     geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
     if geo:
         for each in geo:
-            saveSkin(assetName, each)
+            saveSkin(each, assetName)
         return True
     else:
         return False

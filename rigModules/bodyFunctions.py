@@ -14,7 +14,7 @@ reload(ctrlFn)
 reload(defaultBodyOptions)
 #reload(suffixDictionary)
 
-def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType):
+def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig):
     jntSuffix = suffix['joint']
     newJntChains = []
     ## create duplicate chains
@@ -31,7 +31,8 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType):
                                      guide='{}{}Settings{}'.format(module.moduleName,
                                                                    moduleType, suffix['locator']),
                                      deleteGuide=True, side=module.side, skipNum=True,
-                                     parent=module.rig.settingCtrlsGrp.name)
+                                     parent=module.rig.settingCtrlsGrp.name,
+                                     scaleOffset=rig.scaleOffset)
     module.settingCtrl.makeSettingCtrl(ikfk=True, parent=jnts[2])
     ## parent constraints
     for jnt, ikJnt, fkJnt in zip(jnts, ikJnts, fkJnts):
@@ -99,7 +100,8 @@ class armModule:
                          name='{}clavicleIK'.format(extraName), side=self.side)
         clavIK.createIK(parent=armMechGrp.name)
         self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicle'.format(extraName), side=self.side,
-                                      guide=clavJnts[0], skipNum=True, parent=armCtrlsGrp.name)
+                                      guide=clavJnts[0], skipNum=True, parent=armCtrlsGrp.name,
+                                      scaleOffset=self.rig.scaleOffset)
         self.clavIKCtrl.modifyShape(shape='pringle', color=col['col2'], mirror=True)
         self.clavIKCtrl.lockAttr(attr=['t', 's'])
         self.clavIKCtrl.constrain(clavIK.grp)
@@ -126,7 +128,8 @@ class armModule:
                                            guide='{}armSettings{}'.format(self.moduleName,
                                                                           suffix['locator']),
                                            deleteGuide=True, side=self.side, skipNum=True,
-                                           parent=self.rig.settingCtrlsGrp.name)
+                                           parent=self.rig.settingCtrlsGrp.name,
+                                           scaleOffset=self.rig.scaleOffset)
             self.settingCtrl.makeSettingCtrl(ikfk=True, parent=jnts[2])
             ##- parent constraints
             for jnt, ikJnt, fkJnt in zip(jnts, ikJnts, fkJnts):
@@ -176,10 +179,11 @@ class armModule:
                 cmds.xform(tmpJnt, r=1, ro=(0, 0, 180))
                 self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
                                           guide=tmpJnt, skipNum=True, parent=ikCtrlGrp.name,
-                                          deleteGuide=True)
+                                          deleteGuide=True, scaleOffset=self.rig.scaleOffset)
             else:
                 self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
-                                              guide=ikJnts[2], skipNum=True, parent=ikCtrlGrp.name)
+                                              guide=ikJnts[2], skipNum=True, parent=ikCtrlGrp.name,
+                                              scaleOffset=self.rig.scaleOffset)
             self.handIKCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
             self.handIKCtrl.lockAttr(attr=['s'])
             self.handIKCtrl.constrain(armIK.grp)
@@ -193,7 +197,8 @@ class armModule:
             cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
             self.pvCtrl = ctrlFn.ctrl(name='{}armPV'.format(extraName), side=self.side,
                                       guide=pvGuide,
-                                      skipNum=True, deleteGuide=True, parent=ikCtrlGrp.name)
+                                      skipNum=True, deleteGuide=True, parent=ikCtrlGrp.name,
+                                      scaleOffset=self.rig.scaleOffset)
             self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
             self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
@@ -208,7 +213,8 @@ class armModule:
             ##- controls
             self.shoulderFKCtrl = ctrlFn.ctrl(name='{}shoulderFK'.format(extraName),
                                               side=self.side, guide=fkJnts[0], skipNum=True,
-                                              parent=fkCtrlGrp.name)
+                                              parent=fkCtrlGrp.name,
+                                              scaleOffset=self.rig.scaleOffset)
             self.shoulderFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                             scale=(0.6, 0.6, 0.6))
             self.shoulderFKCtrl.lockAttr(attr=['s'])
@@ -216,7 +222,8 @@ class armModule:
 
             self.elbowFKCtrl = ctrlFn.ctrl(name='{}elbowFK'.format(extraName), side=self.side,
                                            guide=fkJnts[1], skipNum=True,
-                                           parent=self.shoulderFKCtrl.ctrlEnd)
+                                           parent=self.shoulderFKCtrl.ctrlEnd,
+                                           scaleOffset=self.rig.scaleOffset)
             self.elbowFKCtrl.modifyShape(color=col['col2'], shape='circle',
                                          scale=(0.6, 0.6, 0.6))
             self.elbowFKCtrl.lockAttr(attr=['s'])
@@ -224,7 +231,8 @@ class armModule:
 
             self.wristFKCtrl = ctrlFn.ctrl(name='{}wristFK'.format(extraName), side=self.side,
                                           guide=fkJnts[2], skipNum=True,
-                                          parent=self.elbowFKCtrl.ctrlEnd)
+                                          parent=self.elbowFKCtrl.ctrlEnd,
+                                          scaleOffset=self.rig.scaleOffset)
             self.wristFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                          scale=(0.6, 0.6, 0.6))
             self.wristFKCtrl.lockAttr(attr=['s'])
@@ -327,19 +335,22 @@ class spineModule:
         ## ctrls
         self.bodyCtrl = ctrlFn.ctrl(name='{}body'.format(extraName), side=self.side,
                                     guide=hipBindJnt.name, deleteGuide=False,
-                                    skipNum=True, parent=self.rig.ctrlsGrp.name)
+                                    skipNum=True, parent=self.rig.ctrlsGrp.name,
+                                    scaleOffset=self.rig.scaleOffset)
         cmds.setAttr('{}.r'.format(self.bodyCtrl.rootGrp.name), 0, 0, 0)
         self.bodyCtrl.modifyShape(shape='fatPlus', color=col['col2'])
         self.bodyCtrl.lockAttr(['s'])
         self.hipCtrl = ctrlFn.ctrl(name='{}hips'.format(extraName), side=self.side, gimbal=True,
                                    guide=hipBindJnt.name, deleteGuide=False, skipNum=True,
-                                   parent=self.bodyCtrl.ctrlEnd)
+                                   parent=self.bodyCtrl.ctrlEnd,
+                                   scaleOffset=self.rig.scaleOffset)
         self.hipCtrl.modifyShape(shape='sphere', color=col['col1'])
         self.hipCtrl.lockAttr(['s'])
         self.hipCtrl.constrain(hipBindJnt.name)
         self.chestCtrl = ctrlFn.ctrl(name='{}chest'.format(extraName), side=self.side, gimbal=True,
                                      guide=chestBindJnt.name, deleteGuide=False, skipNum=True,
-                                     parent=self.bodyCtrl.ctrlEnd)
+                                     parent=self.bodyCtrl.ctrlEnd,
+                                     scaleOffset=self.rig.scaleOffset)
         self.chestCtrl.modifyShape(shape='sphere', color=col['col2'])
         self.chestCtrl.lockAttr(['s'])
         self.chestCtrl.constrain(chestBindJnt.name)
@@ -391,7 +402,8 @@ class legModule:
         if options['IK'] and options['FK']:
             ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = ikfkMechanics(self, extraName, jnts,
                                                                        legMechSkelGrp, legCtrlsGrp,
-                                                                       moduleType='leg')
+                                                                       moduleType='leg',
+                                                                       rig=self.rig)
         else:
             ikJnts = jnts
             fkJnts = jnts
@@ -409,7 +421,8 @@ class legModule:
             self.footIKCtrl = ctrlFn.ctrl(name='{}footIK'.format(extraName), side=self.side,
                                           guide='{}footCtrlGuide{}'.format(self.moduleName,
                                                                            suffix['locator']),
-                                          skipNum=True, parent=ikCtrlGrp.name, deleteGuide=True)
+                                          skipNum=True, parent=ikCtrlGrp.name, deleteGuide=True,
+                                          scaleOffset=self.rig.scaleOffset)
             self.footIKCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
             self.footIKCtrl.lockAttr(attr=['s'])
             # space switching
@@ -418,7 +431,7 @@ class legModule:
             cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
             self.pvCtrl = ctrlFn.ctrl(name='{}legPV'.format(extraName), side=self.side,
                                       guide=pvGuide, skipNum=True, deleteGuide=True,
-                                      parent=ikCtrlGrp.name)
+                                      parent=ikCtrlGrp.name, scaleOffset=self.rig.scaleOffset)
             self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
             self.pvCtrl.constrain(legIK.hdl, typ='poleVector')
@@ -469,7 +482,8 @@ class legModule:
             ##- controls
             self.footHeelIKCtrl = ctrlFn.ctrl(name='{}footHeelIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[0], skipNum=True,
-                                              parent=self.footIKCtrl.ctrlEnd)
+                                              parent=self.footIKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset)
             self.footHeelIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
                                             scale=(0.7, 0.7, 0.7), rotation=(-45, 0, 0))
             self.footHeelIKCtrl.lockAttr(attr=['t', 's'])
@@ -478,7 +492,8 @@ class legModule:
 
             self.footToesIKCtrl = ctrlFn.ctrl(name='{}footToesIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[1], skipNum=True,
-                                              parent=self.footHeelIKCtrl.ctrlEnd)
+                                              parent=self.footHeelIKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset)
             self.footToesIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
                                             scale=(0.7, 0.7, 0.7), rotation=(90, 0, 0),
                                             translation=(0, -1, 0))
@@ -487,7 +502,8 @@ class legModule:
 
             self.footBallIKCtrl = ctrlFn.ctrl(name='{}footBallIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[2], skipNum=True,
-                                              parent=self.footToesIKCtrl.ctrlEnd)
+                                              parent=self.footToesIKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset)
             self.footBallIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
                                             scale=(0.7, 0.7, 0.7), translation=(0, 1.5, 0))
             self.footBallIKCtrl.lockAttr(attr=['t', 's'])
@@ -502,7 +518,8 @@ class legModule:
             ## controls
             self.hipFKCtrl = ctrlFn.ctrl(name='{}hipFK'.format(extraName),
                                          side=self.side, guide=fkJnts[0], skipNum=True,
-                                         parent=fkCtrlGrp.name)
+                                         parent=fkCtrlGrp.name,
+                                         scaleOffset=self.rig.scaleOffset)
             self.hipFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                        scale=(0.6, 0.6, 0.6))
             self.hipFKCtrl.lockAttr(attr=['s'])
@@ -510,7 +527,8 @@ class legModule:
 
             self.kneeFKCtrl = ctrlFn.ctrl(name='{}kneeFK'.format(extraName),
                                           side=self.side, guide=fkJnts[1], skipNum=True,
-                                          parent=self.hipFKCtrl.ctrlEnd)
+                                          parent=self.hipFKCtrl.ctrlEnd,
+                                          scaleOffset=self.rig.scaleOffset)
             self.kneeFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                         scale=(0.6, 0.6, 0.6))
             self.kneeFKCtrl.lockAttr(attr=['s'])
@@ -518,7 +536,8 @@ class legModule:
 
             self.ankleFKCtrl = ctrlFn.ctrl(name='{}ankleFK'.format(extraName),
                                            side=self.side, guide=fkJnts[2], skipNum=True,
-                                           parent=self.kneeFKCtrl.ctrlEnd)
+                                           parent=self.kneeFKCtrl.ctrlEnd,
+                                           scaleOffset=self.rig.scaleOffset)
             self.ankleFKCtrl.modifyShape(color=col['col2'], shape='circle',
                                          scale=(0.6, 0.6, 0.6))
             self.ankleFKCtrl.lockAttr(attr=['s'])
@@ -526,7 +545,8 @@ class legModule:
 
             self.footBallFKCtrl = ctrlFn.ctrl(name='{}footBallFK'.format(extraName),
                                               side=self.side, guide=fkJnts[3], skipNum=True,
-                                              parent=self.ankleFKCtrl.ctrlEnd)
+                                              parent=self.ankleFKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset)
             self.footBallFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                             scale=(0.6, 0.6, 0.6))
             self.footBallFKCtrl.lockAttr(attr=['s'])
@@ -604,7 +624,8 @@ class headModule:
             headIK.createIK(parent=headIKsGrp.name)
             ## IK Control
             self.headCtrl = ctrlFn.ctrl(name='{}head'.format(extraName), side=self.side,
-                                        guide=jnts[1], skipNum=True, parent=headCtrlsGrp.name)
+                                        guide=jnts[1], skipNum=True, parent=headCtrlsGrp.name,
+                                        scaleOffset=self.rig.scaleOffset)
             self.headCtrl.modifyShape(shape='sphere', color=col['col3'], mirror=True,
                                       translation=(2, 0, 0))
             self.headCtrl.lockAttr(['s'])
@@ -612,13 +633,15 @@ class headModule:
             self.headCtrl.spaceSwitching(ctrlSpaceSwitches, dv=1)
         else:
             self.neckCtrl = ctrlFn.ctrl(name='{}neck'.format(extraName), side=self.side,
-                                        guide=jnts[0], skipNum=True, parent=headCtrlsGrp.name)
+                                        guide=jnts[0], skipNum=True, parent=headCtrlsGrp.name,
+                                        scaleOffset=self.rig.scaleOffset)
             self.neckCtrl.modifyShape(shape='circle', color=col['col1'], mirror=True,
                                       scale=(0.4, 0.4, 0.4))
             self.neckCtrl.lockAttr(['s', 't'])
             self.neckCtrl.constrain(jnts[0], typ='orient')
             self.headCtrl = ctrlFn.ctrl(name='{}head'.format(extraName), side=self.side,
-                                        guide=jnts[1], skipNum=True, parent=self.neckCtrl.ctrlEnd)
+                                        guide=jnts[1], skipNum=True, parent=self.neckCtrl.ctrlEnd,
+                                        scaleOffset=self.rig.scaleOffset)
             self.headCtrl.modifyShape(shape='sphere', color=col['col3'], mirror=True,
                                       translation=(2, 0, 0))
             self.headCtrl.lockAttr(['s', 't'])
@@ -661,7 +684,8 @@ class digitsModule:
                                side=self.side,
                                guide='{}{}PalmGuide{}'.format(self.moduleName, mode,
                                                               suffix['locator']),
-                               deleteGuide=True, skipNum=True, parent=handCtrlGrp.name)
+                               deleteGuide=True, skipNum=True, parent=handCtrlGrp.name,
+                               scaleOffset=self.rig.scaleOffset)
         palmCtrl.modifyShape(shape='sphere', color=col['col2'], scale=(0.3, 0.2, 0.2))
         for each in digitsList:
             if each == 'Thumb':
@@ -692,7 +716,7 @@ class digitsModule:
             for i, seg in enumerate(segments):
                 ctrl = ctrlFn.ctrl(name='{}{}{}_{}'.format(extraName, typ, each, seg),
                                    side=self.side, guide=jnts[i], skipNum=True,
-                                   parent=ctrlParent)
+                                   parent=ctrlParent, scaleOffset=self.rig.scaleOffset)
                 segmentCtrls.append(ctrl)
                 ctrlCol = col['col3']
                 ctrlShape = 'circle'
@@ -791,8 +815,6 @@ class digitsModule:
                 if trans:
                     cmds.setAttr('{}.input2'.format(trans.name), val, val, val)
                     trans.connect('input1', '{}.t'.format(palmLoc.name), mode='to')
-
-
 
 
 class tailModule:

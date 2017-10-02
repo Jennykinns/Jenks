@@ -124,9 +124,10 @@ def loadCtrls(assetName=None, prompt=False):
 
 class ctrl:
     def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None,
-                 deleteGuide=False, side='C', skipNum=False, parent=None):
+                 deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1):
         self.side = side
         self.gimbal = False
+        self.scaleOffset = scaleOffset
         if not guide:
             deleteGuide = True
             guideLoc = utils.newNode('locator', name='controlGuide')
@@ -171,6 +172,9 @@ class ctrl:
 
     def modifyShape(self, shape=None, color=False, rotation=(0, 0, 0),
                     translation=(0, 0, 0), scale=(1, 1, 1), mirror=False):
+        scale = (scale[0]*self.scaleOffset,
+                 scale[1]*self.scaleOffset,
+                 scale[2]*self.scaleOffset)
         if shape:
             scriptsPath = fileFn.getScriptDir()
             path = '{}/Jenks/scripts/controlShapes'.format(scriptsPath)

@@ -40,12 +40,17 @@ def doOrientJoint(jointsToOrient, aimAxis, upAxis, worldUp, guessUp):
                                 tol = 0.0001
 
                                 if (abs(posCurrentJoint[0] - posParentJoint[0]) <= tol
-                                      and abs(posCurrentJoint[1] - posParentJoint[1]) <= tol
-                                      and abs(posCurrentJoint[2] - posParentJoint[2]) <= tol):
+                                    and abs(posCurrentJoint[1] - posParentJoint[1]) <= tol
+                                    and abs(posCurrentJoint[2] - posParentJoint[2]) <= tol):
                                     aimChild = cmds.listRelatives(childNewName[0],
                                                                   type="joint", c=True)
                                     upDirRecalculated = crossProduct(eachJoint, childNewName[0],
                                                                      aimChild[0])
+                                    if upDirRecalculated == [0, 0, 0]:
+                                        if prevUpVector == [0, 0, 0]:
+                                            upDirRecalculated = [0, 1, 0]
+                                        else:
+                                            upDirRecalculated = prevUpVector
                                     cmds.delete(cmds.aimConstraint(childNewName[0], eachJoint,
                                                                    w=1, o=(0, 0, 0), aim=aimAxis,
                                                                    upVector=upAxis,
@@ -54,6 +59,11 @@ def doOrientJoint(jointsToOrient, aimAxis, upAxis, worldUp, guessUp):
                                 else:
                                     upDirRecalculated = crossProduct(parentJoint, eachJoint,
                                                                      childNewName[0])
+                                    if upDirRecalculated == [0, 0, 0]:
+                                        if prevUpVector == [0, 0, 0]:
+                                            upDirRecalculated = [0, 1, 0]
+                                        else:
+                                            upDirRecalculated = prevUpVector
                                     cmds.delete(cmds.aimConstraint(childNewName[0], eachJoint,
                                                                    w=1, o=(0, 0, 0), aim=aimAxis,
                                                                    upVector=upAxis,
@@ -68,12 +78,16 @@ def doOrientJoint(jointsToOrient, aimAxis, upAxis, worldUp, guessUp):
                             aimChild = cmds.listRelatives(childNewName[0], type="joint", c=True)
                             upDirRecalculated = crossProduct(eachJoint, childNewName[0],
                                                              aimChild[0])
+                            if upDirRecalculated == [0, 0, 0]:
+                                if prevUpVector == [0, 0, 0]:
+                                    upDirRecalculated = [0, 1, 0]
+                                else:
+                                    upDirRecalculated = prevUpVector
                             cmds.delete(cmds.aimConstraint(childNewName[0], eachJoint, w=1,
                                                            o=(0, 0, 0), aim=aimAxis,
                                                            upVector=upAxis,
                                                            worldUpVector=upDirRecalculated,
                                                            worldUpType="vector"))
-
 
 
 
@@ -126,9 +140,14 @@ def crossProduct(firstObj, secondObj, thirdObj):
     #the secondObject (generally the middle joint and the one to orient)
     #to the firstObject and from the secondObject to the thirdObject.
 
-    xformFirstObj = cmds.xform(firstObj, q=True, ws=True, rp=True)
-    xformSecondObj = cmds.xform(secondObj, q=True, ws=True, rp=True)
-    xformThirdObj = cmds.xform(thirdObj, q=True, ws=True, rp=True)
+    xformFirstObj = cmds.xform(firstObj, q=True, ws=True, t=True)
+    xformSecondObj = cmds.xform(secondObj, q=True, ws=True, t=True)
+    xformThirdObj = cmds.xform(thirdObj, q=True, ws=True, t=True)
+
+    for i in range(3):
+        xformFirstObj[i] = float('{:3f}'.format(xformFirstObj[i]))
+        xformSecondObj[i] = float('{:3f}'.format(xformSecondObj[i]))
+        xformThirdObj[i] = float('{:3f}'.format(xformThirdObj[i]))
 
     #B->A so A-B.
     firstVector = [0,0,0]
@@ -151,6 +170,12 @@ def crossProduct(firstObj, secondObj, thirdObj):
     crossProductResult[1] = firstVector[2]*secondVector[0] - firstVector[0]*secondVector[2]
     crossProductResult[2] = firstVector[0]*secondVector[1] - firstVector[1]*secondVector[0]
 
+    for i in range(3):
+        crossProductResult[i] = float('{:3f}'.format(crossProductResult[i]))
+
+    for i, x in enumerate(crossProductResult):
+        if x == -0.0:
+            crossProductResult[i] = 0
     return crossProductResult
 
 

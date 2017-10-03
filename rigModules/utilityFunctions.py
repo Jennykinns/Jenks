@@ -174,6 +174,16 @@ def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=Non
                                worldUp=(0, 1, 0), guessUp=1)
     return newJnts
 
+def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None):
+    pointList = []
+    for each in objs:
+        pos = cmds.xform(each, q=1, t=1, ws=1)
+        pointList.append(pos)
+    crv = cmds.curve(p=pointList, d=3)
+    crv = cmds.rename(crv, '{}_{}{}{}'.format(side, extraName, crvName,
+                                              suffixDictionary.suffix['nurbsCrv']))
+    return crv
+
 
 class newNode:
     def __init__(self, node, name='', suffixOverride='', parent='', side='C',

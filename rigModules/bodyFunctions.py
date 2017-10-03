@@ -3,6 +3,7 @@ import maya.cmds as cmds
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ikFunctions as ikFn
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
+from Jenks.scripts.rigModules import miscFunctions as miscFn
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 from Jenks.scripts.rigModules import defaultBodyOptions
 from Jenks.scripts.rigModules import orientJoints
@@ -11,6 +12,7 @@ reload(orientJoints)
 reload(utils)
 reload(ikFn)
 reload(ctrlFn)
+reload(miscFn)
 reload(defaultBodyOptions)
 #reload(suffixDictionary)
 
@@ -818,5 +820,25 @@ class digitsModule:
 
 
 class tailModule:
-    def __init__(self):
-        print '## tail'
+    def __init__(self, rig, extraName='', side='C'):
+        self.moduleName = utils.setupBodyPartName(extraName, side)
+        self.extraName = extraName
+        self.side = side
+        self.rig = rig
+
+    def create(self, crv=False, autoOrient=False):
+        jntSuffix = suffix['joint']
+        # extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        col = utils.getColors(self.side)
+        if crv:
+            pass
+        else:
+            baseJnt = '{}tail_base{}'.format(self.moduleName, jntSuffix)
+            endJnt = '{}tail_tip{}'.format(self.moduleName, jntSuffix)
+            jnts = utils.getChildrenBetweenObjs(baseJnt, endJnt)
+            if autoOrient:
+                orientJoints.doOrientJoint(jointsToOrient=jnts, aimAxis=(1, 0, 0),
+                                           upAxis=(0, 1, 0), worldUp=(0, 1, 0), guessUp=1)
+        ## create
+        miscFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
+                                     extraName=self.extraName)

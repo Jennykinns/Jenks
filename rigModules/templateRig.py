@@ -38,6 +38,8 @@ def create():
         fingers.create('hand', parent=arm.handJnt, thumb=True)
         toes = bodyFn.digitsModule(rig, side=s)
         toes.create('foot', parent=leg.footJnt, thumb=False)
+    tail = bodyFn.tailModule(rig, side='C')
+    tail.create()
 
     ##
 

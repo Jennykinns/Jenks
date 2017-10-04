@@ -21,5 +21,4 @@ suffix = {
     'setRange' : '_SETR',
     'reverse' : '_REV',
     'decomposeMatrix' : '_DCM',
-
 }

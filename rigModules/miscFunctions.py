@@ -33,13 +33,19 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
         baseLoc = utils.newNode('locator', name='{}{}_baseLayer'.format(extraName, name),
                                 side=side)
         baseLoc.parent(each, relative=True)
+        utils.setShapeColor(baseLoc.name, color=None)
         baseLayerLocs.append(baseLoc)
         baseCtrl = ctrlFn.ctrl(name='{}{}_baseLayer'.format(extraName, name), guide=each,
-                               side=side, parent=baseCtrlParent)
+                               side=side, parent=baseCtrlParent, rig=rig)
         baseCtrl.constrain(each)
         baseCtrl.modifyShape(shape='cube', color=12, scale=(1, 1, 1))
         baseLayerCtrls.append(baseCtrl)
         baseCtrlParent = baseCtrl.ctrlEnd
+    baseSpaces = [rig.globalCtrl.ctrlEnd]
+    if parent:
+        baseSpaces.insert(0, parent)
+    baseLayerCtrls[0].spaceSwitching(parents=baseSpaces, niceNames=None,
+                                     constraint='parent', dv=0)
 
     ## mid layer crv FROM BASE JNTS
     midCrv = utils.createCrvFromObjs(baseJnts, crvName='{}_midLayer'.format(name),
@@ -56,12 +62,13 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
     midCtrlParent = ctrlGrp.name
     for each in midJnts:
         midCtrl = ctrlFn.ctrl(name='{}{}_midLayer'.format(extraName, name), guide=each,
-                               side=side, parent=midCtrlParent)
+                               side=side, parent=midCtrlParent, rig=rig)
         cmds.parentConstraint(each, midCtrl.rootGrp.name, mo=1)
         midCtrl.modifyShape(shape='sphere', color=11, scale=(0.4, 0.4, 0.4))
         midLayerCtrls.append(midCtrl)
         midLoc = utils.newNode('locator', name='{}{}_midLayer'.format(extraName, name),
                                side=side)
+        utils.setShapeColor(midLoc.name, color=None)
         midLoc.parent(midCtrl.ctrlEnd, relative=True)
         midLayerLocs.append(midLoc)
         midCtrlParent = midCtrl.ctrlEnd

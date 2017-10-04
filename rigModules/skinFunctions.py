@@ -2,6 +2,26 @@ import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
+def getAllSkinJnts(rigNode):
+    jnts = cmds.listConnections('{}.rigSkinJnts'.format(rigNode), d=1, s=0)
+    return jnts
+
+def selectSkinJnts():
+    sel = cmds.ls(sl=1)
+    rigNodes = []
+    for each in sel:
+        if each.endswith('global_CTRL'):
+            rigNodes.append(each)
+        elif 'rigConnection' in cmds.listAttr(each):
+            rigNodes.append(cmds.listConnections('{}.rigConnection'.format(each), d=0, s=1)[0])
+    jnts = []
+    if rigNodes == list():
+        return False
+    for rigNode in rigNodes:
+        jnts.extend(getAllSkinJnts(rigNode))
+    cmds.select(jnts)
+    return True
+
 def getSkinValues(obj, tol=0.001):
     vtxList, skinCls = getSkinInfo(obj)
     if not vtxList or not skinCls:

@@ -37,6 +37,14 @@ def setupBodyPartName(extraName='', side='C'):
             i += 1
     return newName
 
+def addJntToSkinJnt(jnt, rig):
+    if 'rigConnection' not in cmds.listAttr(jnt):
+        rigConnection = addAttr(jnt, name='rigConnection',
+                                nn='Rig Connection', typ='message')
+    else:
+        rigConnection = '{}.rigConnection'.format(jnt)
+    cmds.connectAttr(rig.skinJntsAttr, rigConnection)
+
 def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
     sChilds = cmds.listRelatives(startObj, ad=1, type=typ)
     eChilds = cmds.listRelatives(endObj, ad=1, type=typ)
@@ -103,6 +111,31 @@ def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
             continue
         cmds.delete(cmds.parentConstraint(targetObj, each))
 
+def addAttr(node, name, nn, typ, defaultVal=0, minVal=None, maxVal=None, enumOptions=None):
+    attrs = cmds.listAttr(node)
+    if not name in attrs:
+        if typ == 'enum':
+            enumName = ':'.join(enumOptions)
+            cmds.addAttr(node, sn=name, nn=nn, at=typ, en=enumName, dv=defaultVal, k=1)
+        elif typ == 'message':
+            cmds.addAttr(node, sn=name, nn=nn, at=typ)
+        else:
+            if minVal is not None and maxVal is not None:
+                cmds.addAttr(node, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, min=minVal, max=maxVal, k=1)
+            elif minVal is not None:
+                cmds.addAttr(node, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, min=minVal, k=1)
+            elif maxVal is not None:
+                cmds.addAttr(node, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, max=maxVal, k=1)
+            else:
+                cmds.addAttr(node, sn=name, nn=nn, at=typ,
+                             dv=defaultVal, k=1)
+    else:
+        cmds.warning('{} already exists on {}'.format(name, node))
+    return '{}.{}'.format(node, name)
+
 def lockAttr(node, attr='', hide=True, unlock=False):
     if unlock:
         hide=False
@@ -129,6 +162,7 @@ def getShapeNodes(obj):
     return children
 
 def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
+    cmds.makeIdentity(crv, a=1, t=1, r=1)
     tmpCrv = cmds.rebuildCurve(crv, rt=0, end=1, kr=0, kt=0, s=numOfJnts-1, d=3)[0]
     parent = None
     jntList = []
@@ -210,6 +244,12 @@ class newNode:
         if parent == 'world':
             cmds.parent(self.name, w=True, r=relative)
         cmds.parent(self.name, parent, r=relative)
+
+    def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None,
+                enumOptions=None):
+        attr = addAttr(self.name, name, nn, typ, defaultVal, minVal, maxVal, enumOptions)
+        exec('self.{} = "{}"'.format(name, attr))
+        return True
 
     def lockAttr(self, attr='', hide=True, unlock=False):
         lockAttr(self.name, attr, hide, unlock)

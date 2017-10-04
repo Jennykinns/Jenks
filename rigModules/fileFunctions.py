@@ -8,7 +8,10 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFuncitons as api
 
 def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None):
-    if location == 'rig/WIP/guides':
+    if location == 'rig/Published':
+        suffix = 'ma'
+        name = assetName
+    elif location == 'rig/WIP/guides':
         suffix = 'ma'
         name = 'guides'
     elif location == 'rig/WIP/skin':
@@ -16,6 +19,12 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
     elif location == 'rig/WIP/controlShapes':
         suffix = 'shape'
     elif location == 'model/Published':
+        suffix = 'abc'
+        name = assetName
+    elif location == 'model/WIP':
+        suffix = 'ma'
+        name = assetName
+    else:
         suffix = 'ma'
         name = assetName
     fileDirectory = '{}{}/{}/'.format(path, assetName, location)
@@ -27,18 +36,28 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
             relevantFiles.append(each)
     if new:
         if not relevantFiles:
-            newFile = '{}{}_01.{}'.format(fileDirectory, name, suffix)
+            newFile = '{}{}_v001.{}'.format(fileDirectory, name, suffix)
         else:
             nameWithoutSuffix = relevantFiles[-1].rsplit('.')[0]
-            latestNum = nameWithoutSuffix.rsplit('_', 1)[1]
-            newNum = str(int(latestNum)+1).zfill(2)
-            newFile = '{}{}_{}.{}'.format(fileDirectory, name, newNum, suffix)
+            latestNum = nameWithoutSuffix.rsplit('_', 1)[1].strip('v')
+            newNum = str(int(latestNum)+1).zfill(3)
+
+            newFile = '{}{}_v{}.{}'.format(fileDirectory, name, newNum, suffix)
     else:
         if not relevantFiles:
             return False
         else:
             newFile = '{}{}'.format(fileDirectory, relevantFiles[-1])
     return newFile
+
+def newNameSpace(assetName):
+    ns = '{}'.format(assetName)
+    i = 1
+    while cmds.namespace(ex=ns):
+        i += 1
+        ns = '{}{}'.format(assetName, str(i).zfill(2))
+    return ns
+
 
 def getScriptDir():
     ## MIGHT NEED CHANGING - not sure if the path list will be
@@ -66,6 +85,18 @@ def newScene():
             return False
     f = cmds.file(new=1, force=1)
     return True
+
+def abcExport(fileName, selection=True, frameRange=(1, 1)):
+    if selection:
+        sel = cmds.ls(sl=True)
+    else:
+        a = cmds.ls(dag=1, v=1)
+        b = cmds.ls(lights=1, cameras=1)
+        sel = list(set(a)-set(b))
+    args = '-f {0} -fr {1[0]} {1[1]} -ro -sn -uv -ws -wv -ef'.format(fileName, frameRange, sel)
+    for each in sel:
+        args = '{} -rt {}'.format(args, each)
+    cmds.AbcExport(j=args)
 
 def loadGuides(assetName=None, prompt=False, new=False):
     if prompt:
@@ -110,6 +141,46 @@ def saveGuides(assetName=None, autoName=False, prompt=False):
     print 'Saved guides: {}'.format(fileName)
     return True
 
+def publishRig(assetName=None, autoName=True, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Rig',
+                                    fileMode=0, fileFilter=fileFilter,
+                                    dir='{}{}/rig/Published'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'rig/Published', new=True)
+    removeReferences()
+    cmds.select('_RIG__GRP')
+    cmds.file(fileName, es=True, type='mayaAscii')
+    print 'Saved Rig: {}'.format(fileName)
+    return True
+
+def referenceRig(assetName=None, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    fileName = getLatestVersion(assetName, path, 'rig/Published')
+    cmds.file(fileName, r=1, ns=newNameSpace(assetName))
+    print 'Referenced Rig: {}'.format(fileName)
+    return True
+
 def loadGeo(assetName=None, group=None, prompt=False):
     if prompt:
         assetName = assetNamePrompt()
@@ -121,7 +192,10 @@ def loadGeo(assetName=None, group=None, prompt=False):
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
     # nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
-    cmds.AbcImport(fileName, mode='import', rpr=group)
+    if group:
+        cmds.AbcImport(fileName, mode='import', rpr=group)
+    else:
+        cmds.AbcImport(fileName, mode='import')
     print 'Loaded geometry: {}'.format(fileName)
     # mNodes = []
     # for each in nodes:
@@ -131,6 +205,30 @@ def loadGeo(assetName=None, group=None, prompt=False):
     #         lN, sN = api.getPath(each)
     #         if cmds.nodeType(lN) == 'transform':
     #             cmds.parent(lN, group)
+    return True
+
+def publishGeo(assetName=None, autoName=True, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Geometry',
+                                    fileMode=0, fileFilter=fileFilter,
+                                    dir='{}{}/model/Published'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'model/Published', new=True)
+    removeReferences()
+    print 'Published Geometry: {}'.format(fileName)
     return True
 
 def referenceGeo(assetName=None, prompt=False):
@@ -143,8 +241,60 @@ def referenceGeo(assetName=None, prompt=False):
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
-    cmds.file(fileName, r=1)
+    cmds.file(fileName, r=1, ns=newNameSpace(assetName))
     print 'Referenced geometry: {}'.format(fileName)
+    return True
+
+def saveWipGeo(assetName=None, autoName=False, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Save WIP Model',
+                                    fileMode=0, fileFilter=fileFilter,
+                                    dir='{}{}/model/WIP'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'model/WIP', new=True)
+    removeReferences()
+    cmds.file(rename=fileName)
+    cmds.file(save=True, type='mayaAscii')
+    print 'Saved WIP Model: {}'.format(fileName)
+    return True
+
+def loadWipGeo(assetName=None, latest=False, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not latest:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP Model',
+                                    fileMode=1, fileFilter=fileFilter,
+                                    dir='{}{}/model/WIP'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'model/WIP', new=False)
+    if not newScene():
+        return False
+    cmds.file(fileName, o=1, dns=1, type='mayaAscii')
+    print 'Loaded WIP Model: {}'.format(fileName)
     return True
 
 def removeReferences():

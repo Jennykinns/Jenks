@@ -4,10 +4,17 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 
 
+def createRigNode(rigNode):
+    # rigNode = utils.newNode('unknown', name=assetName, suffixOverride='rig', skipNum=True)
+    # rigNode.addAttr(name='globalCtrl', nn='Rig Global Control', typ='message')
+    rigNode.addAttr(name='rigCtrls', nn='Rig Controls', typ='message')
+    rigNode.addAttr(name='rigSkinJnts', nn='Rig Skinning Joints', typ='message')
+    return rigNode, rigNode.rigCtrls, rigNode.rigSkinJnts
 class rig:
-    def __init__(self, scaleOffset=1, debug=False):
+    def __init__(self, name, scaleOffset=1, debug=False):
         cmds.file(force=1, new=1)
         self.scaleOffset = scaleOffset
+        # self.rigNode, self.ctrlsAttr, self.skinJntsAttr, self.globalCtrlAttr = createRigNode(name)
         self.grp = utils.newNode('group', name='RIG_', skipNum=True, side='')
         self.worldLoc = utils.newNode('locator', name='world',
                                       parent=self.grp.name, skipNum=True)
@@ -18,6 +25,8 @@ class rig:
         cmds.setAttr('{}.overrideEnabled'.format(self.geoGrp.name), 1)
         self.globalCtrl = ctrlFn.ctrl(name='global', parent=self.grp.name, skipNum=True,
                                       scaleOffset=self.scaleOffset)
+        self.rigNode, self.ctrlsAttr, self.skinJntsAttr = createRigNode(self.globalCtrl.ctrl)
+        # cmds.connectAttr(self.globalCtrlAttr, self.globalCtrl.ctrl.rigConnection)
         self.globalCtrl.modifyShape(color=30, shape='global')
         self.ctrlsGrp = utils.newNode('group', name='controls',
                                       parent=self.globalCtrl.ctrlEnd, skipNum=True)

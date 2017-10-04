@@ -4,12 +4,26 @@ import maya.api.OpenMaya as om
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFuncitons as api
 from Jenks.scripts.rigModules import fileFunctions as fileFn
+from Jenks.scripts.rigModules.suffixDictionary import suffix
 
 reload(utils)
 
-def getAllControls():
-    ctrls = cmds.ls('*_CTRL')
+def getAllControls(rigNode):
+    ctrls = cmds.listConnections('{}.rigCtrls'.format(rigNode), d=1, s=0)
     return ctrls
+
+def selectRigControls():
+    sel = cmds.ls(sl=1)
+    rigNodes = []
+    for each in sel:
+        if each.endswith('global_CTRL'):
+            rigNodes.append(each)
+        elif 'rigConnection' in cmds.listAttr(each):
+            rigNodes.append(cmds.listConnections('{}.rigConnection'.format(each), d=0, s=1)[0])
+    ctrls = []
+    for rigNode in rigNodes:
+        ctrls.extend(getAllControls(rigNode))
+    cmds.select(ctrls)
 
 def getShapeData(ctrlName, color=False):
     curveShapes = utils.getShapeNodes(ctrlName)
@@ -115,7 +129,8 @@ def loadCtrls(assetName=None, prompt=False):
         print 'Asset Name not specified.'
         return False
     path = fileFn.getAssetDir()
-    for ctrl in getAllControls():
+    # for ctrl in getAllControls('C_{}{}'.format(assetName, suffix['rig'])):
+    for ctrl in getAllControls('C_global_CTRL'):
         fo = fileFn.getLatestVersion(assetName, path, 'rig/WIP/controlShapes', name=ctrl)
         if fo:
             crvData = fileFn.loadJson(fileOverride=fo)
@@ -123,7 +138,7 @@ def loadCtrls(assetName=None, prompt=False):
                 applyShapeData(ctrl, crvData)
 
 class ctrl:
-    def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None,
+    def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None, rig=None,
                  deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1):
         self.side = side
         self.gimbal = False
@@ -151,6 +166,10 @@ class ctrl:
             cmds.delete(guide)
         if parent:
             cmds.parent(self.ctrlRoot, parent)
+        self.ctrl.rigConnection = utils.addAttr(self.ctrl.name, name='rigConnection',
+                                                nn='Rig Connection', typ='message')
+        if rig:
+            cmds.connectAttr(rig.ctrlsAttr, self.ctrl.rigConnection)
         cmds.select(cl=1)
 
     def createCtrlOffsetGrps(self, num, name, guide=None, skipNum=False):
@@ -228,28 +247,10 @@ class ctrl:
 
     def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None,
                 enumOptions=None):
-        ctrlAttr = cmds.listAttr(self.ctrl.name)
-        if not name in ctrlAttr:
-            if typ == 'enum':
-                enumName = ':'.join(enumOptions)
-                cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                             en=enumName, dv=defaultVal, k=1)
-            else:
-                if minVal is not None and maxVal is not None:
-                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                                 dv=defaultVal, min=minVal, max=maxVal, k=1)
-                elif minVal is not None:
-                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                                 dv=defaultVal, min=minVal, k=1)
-                elif maxVal is not None:
-                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                                 dv=defaultVal, max=maxVal, k=1)
-                else:
-                    cmds.addAttr(self.ctrl.name, sn=name, nn=nn, at=typ,
-                                 dv=defaultVal, k=1)
-            exec('self.ctrl.{0} = "{1}.{0}"'.format(name, self.ctrl.name))
-        else:
-            cmds.warning('{} already exists on {}.'.format(name, self.ctrl.name))
+        attr = utils.addAttr(self.ctrl.name, name, nn, typ, defaultVal,
+                             minVal, maxVal, enumOptions)
+        exec('self.ctrl.{} = "{}"'.format(name, attr))
+        return True
 
     def spaceSwitching(self, parents, niceNames=None, constraint='parent', dv=0):
         target = self.offsetGrps[0].name
@@ -257,7 +258,7 @@ class ctrl:
             niceNames=[]
             for each in parents:
                 splitParent = each.partition('_')[-1].rpartition('_')[0]
-                if splitParent == 'globalConst':
+                if splitParent == 'global':
                     splitParent = 'World'
                 niceNames.append(splitParent.capitalize())
 

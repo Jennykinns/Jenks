@@ -14,7 +14,7 @@ reload(setupFn)
 
 def create():
 
-    rig = setupFn.rig(debug=True)
+    rig = setupFn.rig(rigName, debug=True)
     fileFn.loadGuides(rigName)
     fileFn.loadGeo(rigName, rig.geoGrp.name)
 

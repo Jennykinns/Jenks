@@ -20,11 +20,6 @@ def create():
 
     ## DO STUFF
 
-    # ctrl1 = ctrlFn.ctrl(name='test', guide='joint1')
-    # ctrl1.modifyShape(color=10, shape='cube', scale=(0.3, 0.3, 0.3), rotation=(10, 10, 10))
-    # ctrl1.constrain('joint1')
-    # ctrl2 = ctrlFn.ctrl(name='test', guide='joint2')
-    # ctrl2.constrain('joint2')
     spine = bodyFn.spineModule(rig, side='C')
     spine.createFromJnts()
     head = bodyFn.headModule(rig, side='C')

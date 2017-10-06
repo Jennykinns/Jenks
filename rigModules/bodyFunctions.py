@@ -36,7 +36,7 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
                                      deleteGuide=True, side=module.side, skipNum=True,
                                      parent=module.rig.settingCtrlsGrp.name,
                                      scaleOffset=rig.scaleOffset, rig=rig)
-    module.settingCtrl.makeSettingCtrl(ikfk=True, parent=jnts[2])
+    module.settingCtrl.makeSettingCtrl(ikfk=True, parent=jnts[3])
     ## parent constraints
     for jnt, ikJnt, fkJnt in zip(jnts, ikJnts, fkJnts):
         parConstr = cmds.parentConstraint(ikJnt, fkJnt, jnt)
@@ -73,18 +73,14 @@ class armModule:
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
+            '{}clavicle{}'.format(self.moduleName, jntSuffix),
             '{}shoulder{}'.format(self.moduleName, jntSuffix),
             '{}elbow{}'.format(self.moduleName, jntSuffix),
             '{}wrist{}'.format(self.moduleName, jntSuffix),
             '{}handEnd{}'.format(self.moduleName, jntSuffix),
         ]
-        clavJnts = [
-            '{}clavicle{}'.format(self.moduleName, jntSuffix),
-            '{}clavicleEnd{}'.format(self.moduleName, jntSuffix),
-        ]
-        utils.addJntToSkinJnt(clavJnts[0], rig=self.rig)
         col = utils.getColors(self.side)
-        cmds.parent(clavJnts[0], self.rig.skelGrp.name)
+        cmds.parent(jnts[0], self.rig.skelGrp.name)
         armCtrlsGrp = utils.newNode('group', name='{}armCtrls'.format(extraName), side=self.side,
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         armMechGrp = utils.newNode('group', name='{}armMech'.format(extraName),
@@ -94,21 +90,11 @@ class armModule:
                                            side=self.side, skipNum=True, parent=armMechGrp.name)
         ## orient joints
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=jnts,
+            orientJoints.doOrientJoint(jointsToOrient=jnts[1:],
                                        aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
                                        upAxis=(0, 1, 0),
                                        worldUp=(0, 1 if not self.side == 'R' else -1, 0),
                                        guessUp=1)
-        ## clav stuff
-        clavIK = ikFn.ik(clavJnts[0], clavJnts[1],
-                         name='{}clavicleIK'.format(extraName), side=self.side)
-        clavIK.createIK(parent=armMechGrp.name)
-        self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicle'.format(extraName), side=self.side,
-                                      guide=clavJnts[0], skipNum=True, parent=armCtrlsGrp.name,
-                                      scaleOffset=self.rig.scaleOffset, rig=self.rig)
-        self.clavIKCtrl.modifyShape(shape='pringle', color=col['col2'], mirror=True)
-        self.clavIKCtrl.lockAttr(attr=['t', 's'])
-        self.clavIKCtrl.constrain(clavIK.grp)
         ## ik/fk
         if options['IK'] and options['FK']:
             clavChild = armMechSkelGrp.name
@@ -120,21 +106,21 @@ class armModule:
             fkJnts = jnts
             ikCtrlGrp = armCtrlsGrp
             fkCtrlGrp = armCtrlsGrp
-            clavChild = jnts[0]
-        cmds.parentConstraint(clavJnts[1], clavChild, mo=1)
-        self.handJnt = jnts[2]
+            # clavChild = jnts[0]
+        # cmds.parentConstraint(clavJnts[1], clavChild, mo=1)
+        self.handJnt = jnts[3]
         ## ik
         if options['IK']:
             ##- mechanics
-            armIK = ikFn.ik(ikJnts[0], ikJnts[2], name='{}armIK'.format(extraName),
+            armIK = ikFn.ik(ikJnts[1], ikJnts[3], name='{}armIK'.format(extraName),
                             side=self.side)
             armIK.createIK(parent=armMechGrp.name)
-            handIK = ikFn.ik(ikJnts[2], ikJnts[3], name='{}handIK'.format(extraName),
+            handIK = ikFn.ik(ikJnts[3], ikJnts[4], name='{}handIK'.format(extraName),
                              side=self.side)
             handIK.createIK(parent=armMechGrp.name)
             ##- controls
             if self.side == 'R':
-                tmpJnt = cmds.duplicate(ikJnts[2], po=1)
+                tmpJnt = cmds.duplicate(ikJnts[3], po=1)
                 cmds.xform(tmpJnt, r=1, ro=(0, 0, 180))
                 self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
                                           guide=tmpJnt, skipNum=True, parent=ikCtrlGrp.name,
@@ -142,7 +128,7 @@ class armModule:
                                           rig=self.rig)
             else:
                 self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
-                                              guide=ikJnts[2], skipNum=True, parent=ikCtrlGrp.name,
+                                              guide=ikJnts[3], skipNum=True, parent=ikCtrlGrp.name,
                                               scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.handIKCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
             self.handIKCtrl.lockAttr(attr=['s'])
@@ -154,7 +140,7 @@ class armModule:
             #                                niceNames=['World', 'Chest', 'Clavicle'], dv=0)
             ##-- PoleVector
             pvGuide = '{}armPV{}'.format(self.moduleName, suffix['locator'])
-            cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
+            cmds.delete(cmds.aimConstraint(ikJnts[2], pvGuide))
             self.pvCtrl = ctrlFn.ctrl(name='{}armPV'.format(extraName), side=self.side,
                                       guide=pvGuide,
                                       skipNum=True, deleteGuide=True, parent=ikCtrlGrp.name,
@@ -164,41 +150,158 @@ class armModule:
             self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
             self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.handIKCtrl.ctrlEnd],
                                            niceNames=['World', 'Hand'], dv=0)
-
             ## autoClav
             if options['autoClav']:
-                print '## do auto clav'
+                self.settingCtrl.addAttr(name='autoClav', nn='Automatic Clavicle Switch',
+                                          defaultVal=1, minVal=0, maxVal=1)
+                autoClavMechGrp = utils.newNode('group', name='{}autoClavMech'.format(extraName),
+                                                side=self.side, parent=armMechGrp.name,
+                                                skipNum=True)
+                ## create dupe arm
+                dupeArmJnts = []
+                dupeArmPar = autoClavMechGrp.name
+                for jnt in jnts[1:-1]:
+                    if '_result_' in jnt:
+                        newJntName = jnt.replace('_result_', '_autoClav_')
+                    else:
+                        newJntName = '{}_autoClav{}'.format(jnt.rstrip(suffix['joint']),
+                                                            suffix['joint'])
+                    newJnt = cmds.duplicate(jnt, po=1, n=newJntName)[0]
+                    if dupeArmPar is None:
+                        cmds.parent(newJnt, w=1)
+                    else:
+                        cmds.parent(newJnt, dupeArmPar)
+                    dupeArmJnts.append(newJnt)
+                    dupeArmPar = newJnt
+                ## create elbow locators
+                nonBindElbow = utils.newNode('locator', name='{}autoClavElbow'.format(extraName),
+                                             side=self.side)
+                nonBindElbow.parent(dupeArmJnts[1], relative=True)
+                bindElbow = utils.newNode('locator', name='{}autoClavElbowBind'.format(extraName),
+                                          side=self.side, parent=autoClavMechGrp.name)
+                bindElbow.matchTransforms(dupeArmJnts[1])
+                ## ik
+                dupeArmIK = ikFn.ik(sj=dupeArmJnts[0], ej=dupeArmJnts[-1],
+                                    name='autoclavArmIK', side=self.side)
+                dupeArmIK.createIK(parent=autoClavMechGrp.name)
+                ## parent constrain to hand ctrl
+                self.handIKCtrl.constrain(dupeArmIK.grp)
+                ## pole vector to arm pv
+                self.pvCtrl.constrain(dupeArmIK.hdl, typ='pv')
+                ## create duplicate spine joint + clav
+                newClavJnts = []
+                newClavJnts.append(utils.newNode('joint',
+                                                 name='{}autoClavSpine'.format(extraName),
+                                                 side=self.side, skipNum=True,
+                                                 parent=autoClavMechGrp.name))
+                newClavJnts.append(utils.newNode('joint',
+                                                 name='{}autoClavClavicle'.format(extraName),
+                                                 side=self.side, skipNum=True,
+                                                 parent=newClavJnts[0].name))
+                newClavJnts[0].matchTransforms(parent)
+                newClavJnts[0] = newClavJnts[0].name
+                newClavJnts[1].matchTransforms(jnts[0])
+                newClavJnts[1] = newClavJnts[1].name
+                # autoClavSwConstr = cmds.parentConstraint(parent, newClavJnts[1], ikJnts[0], mo=1)
+                cmds.parentConstraint(newClavJnts[1], ikJnts[0], mo=1)
+                ## ik
+                autoClavClavIK = ikFn.ik(sj=newClavJnts[0], ej=newClavJnts[-1], side=self.side,
+                                         name='{}autoClavClavicleIK'.format(extraName))
+                autoClavClavIK.createIK(parent=autoClavMechGrp.name)
+                ## create clav ctrl
+                self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
+                                              guide=newClavJnts[-1], skipNum=True,
+                                              deleteGuide=False, parent=ikCtrlGrp.name,
+                                              scaleOffset=self.rig.scaleOffset, rig=self.rig)
+                self.clavIKCtrl.modifyShape(shape='pin', color=col['col2'], mirror=True,
+                                            scale=(2, 2, 2))
+                clavIKCtrlPiv = cmds.xform(newClavJnts[0], q=1, t=1, ws=1)
+                cmds.xform(self.clavIKCtrl.ctrl.name, piv=clavIKCtrlPiv, ws=1)
+                self.clavIKCtrl.lockAttr(attr=['t', 's'])
+                ## parent constrain clavIK
+                self.clavIKCtrl.constrain(autoClavClavIK.grp)
+                ## create autoclav jnts (spine and elbow)
+                aCMechJnts = []
+                aCMechJnts.append(utils.newNode('joint',
+                                                name='{}autoClavMechSpine'.format(extraName),
+                                                side=self.side, skipNum=True,
+                                                parent=autoClavMechGrp.name))
+                aCMechJnts.append(utils.newNode('joint',
+                                                name='{}autoClavMechElbow'.format(extraName),
+                                                side=self.side, skipNum=True,
+                                                parent=aCMechJnts[0].name))
+                aCMechJnts[0].matchTransforms(parent)
+                aCMechJnts[0] = aCMechJnts[0].name
+                aCMechJnts[1].matchTransforms(jnts[2])
+                aCMechJnts[1] = aCMechJnts[1].name
+                ## ik
+                autoClavMechIK = ikFn.ik(sj=aCMechJnts[0], ej=aCMechJnts[-1], side=self.side,
+                                         name='{}autoClavMechIK'.format(extraName))
+                autoClavMechIK.createIK(parent=autoClavMechGrp.name)
+                ## constrain ik
+                aCMechParConstr = cmds.parentConstraint(bindElbow.name, nonBindElbow.name,
+                                                        autoClavMechIK.grp, mo=1)[0]
+                cmds.setAttr('{}.interpType'.format(aCMechParConstr), 2)
+                ## constrain clav ctrl
+                autoClavSwCtrlConstr = cmds.parentConstraint(parent, aCMechJnts[-1],
+                                                             self.clavIKCtrl.offsetGrps[0].name,
+                                                             mo=1)[0]
+                revNd = utils.newNode('reverse', name='{}autoClavSw'.format(extraName),
+                                      side=self.side)
+                revNd.connect('inputX', self.settingCtrl.ctrl.autoClav, mode='to')
+                # for constr, p in zip([autoClavSwConstr, autoClavSwCtrlConstr],
+                #                      [newClavJnts[1], aCMechJnts[-1]]):
+                cmds.connectAttr(self.settingCtrl.ctrl.autoClav,
+                                 '{}.{}W1'.format(autoClavSwCtrlConstr, aCMechJnts[-1]))
+                revNd.connect('outputX', '{}.{}W0'.format(autoClavSwCtrlConstr, parent))
+                    # for i, each in enumerate([parent, p]):
+                    #     condNd = utils.newNode('condition', name='{}autoClavSw'.format(extraName),
+                    #                            side=self.side, operation=0)
+                    #     cmds.setAttr('{}.secondTerm'.format(condNd.name), i)
+                    #     cmds.setAttr('{}.colorIfTrueR'.format(condNd.name), 1)
+                    #     cmds.setAttr('{}.colorIfFalseR'.format(condNd.name), 0)
+                    #     condNd.connect('firstTerm', self.settingCtrl.ctrl.autoClav, mode='to')
+                    #     condNd.connect('outColorR', '{}.{}W{}'.format(constr[0], each, i),
+                    #                    mode='from')
+
         ## fk
         if options['FK']:
+            cmds.parentConstraint(parent, fkJnts[0], mo=1)
             ##- controls
+            self.clavFKCtrl = ctrlFn.ctrl(name='{}clavicleFK'.format(extraName), side=self.side,
+                                          guide=jnts[0], skipNum=True, parent=fkCtrlGrp.name,
+                                          scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            self.clavFKCtrl.modifyShape(shape='pringle', color=col['col2'], mirror=True)
+            self.clavFKCtrl.lockAttr(attr=['t', 's'])
+            self.clavFKCtrl.constrain(fkJnts[0])
             self.shoulderFKCtrl = ctrlFn.ctrl(name='{}shoulderFK'.format(extraName),
-                                              side=self.side, guide=fkJnts[0], skipNum=True,
-                                              parent=fkCtrlGrp.name, rig=self.rig,
+                                              side=self.side, guide=fkJnts[1], skipNum=True,
+                                              parent=self.clavFKCtrl.ctrlEnd, rig=self.rig,
                                               scaleOffset=self.rig.scaleOffset)
             self.shoulderFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                             scale=(0.6, 0.6, 0.6))
             self.shoulderFKCtrl.lockAttr(attr=['s'])
-            self.shoulderFKCtrl.constrain(fkJnts[0], typ='parent')
+            self.shoulderFKCtrl.constrain(fkJnts[1], typ='parent')
 
             self.elbowFKCtrl = ctrlFn.ctrl(name='{}elbowFK'.format(extraName), side=self.side,
-                                           guide=fkJnts[1], skipNum=True,
+                                           guide=fkJnts[2], skipNum=True,
                                            parent=self.shoulderFKCtrl.ctrlEnd,
                                            scaleOffset=self.rig.scaleOffset,
                                            rig=self.rig)
             self.elbowFKCtrl.modifyShape(color=col['col2'], shape='circle',
                                          scale=(0.6, 0.6, 0.6))
             self.elbowFKCtrl.lockAttr(attr=['s'])
-            self.elbowFKCtrl.constrain(fkJnts[1], typ='parent')
+            self.elbowFKCtrl.constrain(fkJnts[2], typ='parent')
 
             self.wristFKCtrl = ctrlFn.ctrl(name='{}wristFK'.format(extraName), side=self.side,
-                                          guide=fkJnts[2], skipNum=True,
+                                          guide=fkJnts[3], skipNum=True,
                                           parent=self.elbowFKCtrl.ctrlEnd,
                                           scaleOffset=self.rig.scaleOffset,
                                           rig=self.rig)
             self.wristFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                          scale=(0.6, 0.6, 0.6))
             self.wristFKCtrl.lockAttr(attr=['s'])
-            self.wristFKCtrl.constrain(fkJnts[2], typ='parent')
+            self.wristFKCtrl.constrain(fkJnts[3], typ='parent')
         ## stretchy
         if options['stretchy']:
             if options['IK']:
@@ -220,9 +323,9 @@ class armModule:
         if parent:
             armParentLoc = utils.newNode('locator', name='{}armParent'.format(extraName),
                                          side=self.side, skipNum=True, parent=parent)
-            armParentLoc.matchTransforms(clavJnts[0])
-            cmds.parentConstraint(armParentLoc.name, clavJnts[0], mo=1)
-            cmds.parentConstraint(armParentLoc.name, self.clavIKCtrl.rootGrp.name, mo=1)
+            armParentLoc.matchTransforms(jnts[0])
+            # cmds.parentConstraint(armParentLoc.name, jnts[0], mo=1)
+            # cmds.parentConstraint(armParentLoc.name, self.clavIKCtrl.rootGrp.name, mo=1)
         return True
 
 

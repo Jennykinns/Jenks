@@ -36,7 +36,11 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
                                      deleteGuide=True, side=module.side, skipNum=True,
                                      parent=module.rig.settingCtrlsGrp.name,
                                      scaleOffset=rig.scaleOffset, rig=rig)
-    module.settingCtrl.makeSettingCtrl(ikfk=True, parent=jnts[3])
+    if moduleType == 'arm':
+        settingJnt = jnts[3]
+    else:
+        settingJnt = jnts[2]
+    module.settingCtrl.makeSettingCtrl(ikfk=True, parent=settingJnt)
     ## parent constraints
     for jnt, ikJnt, fkJnt in zip(jnts, ikJnts, fkJnts):
         parConstr = cmds.parentConstraint(ikJnt, fkJnt, jnt)
@@ -547,10 +551,6 @@ class legModule:
             rfAnkleIK = ikFn.ik(rfJnts[2], rfJnts[3], side=self.side,
                                name='{}RF_ankleIK'.format(extraName))
             rfAnkleIK.createIK(parent=rfMechGrp.name)
-            ##- constraints
-            cmds.parentConstraint(rfJnts[1], footToesIK.grp, mo=1)
-            cmds.parentConstraint(rfJnts[2], footBallIK.grp, mo=1)
-            cmds.parentConstraint(rfJnts[3], legIK.grp, mo=1)
             ##- controls
             self.footHeelIKCtrl = ctrlFn.ctrl(name='{}footHeelIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[0], skipNum=True,
@@ -560,9 +560,17 @@ class legModule:
             self.footHeelIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
                                             scale=(0.7, 0.7, 0.7), rotation=(-45, 0, 0))
             self.footHeelIKCtrl.lockAttr(attr=['t', 's'])
-            self.footHeelIKCtrl.constrain(rfToesIK.grp)
             self.footHeelIKCtrl.constrain(rfJnts[0])
-
+            self.footToesFKCtrl = ctrlFn.ctrl(name='{}footToesFK'.format(extraName),
+                                              side=self.side, guide=jnts[3], skipNum=True,
+                                              parent=self.footHeelIKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig)
+            self.footToesFKCtrl.modifyShape(color=col['col3'], shape='arc', mirror=True,
+                                            scale=(0.2, 0.2, 0.2),
+                                            translation=(3, 1, 0),
+                                            rotation=(90, 0, 0))
+            self.footToesFKCtrl.constrain(footToesIK.grp)
             self.footToesIKCtrl = ctrlFn.ctrl(name='{}footToesIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[1], skipNum=True,
                                               parent=self.footHeelIKCtrl.ctrlEnd,
@@ -584,8 +592,11 @@ class legModule:
             self.footBallIKCtrl.lockAttr(attr=['t', 's'])
             cmds.xform(self.footBallIKCtrl.offsetGrps[0].name, ro=(-90, 0, 90))
             self.footBallIKCtrl.constrain(rfAnkleIK.grp)
-            print ('## probably should add a ctrl for the ik toes to just'
-                   +' bend the toes without any of the foot')
+            ##- constraints
+            # cmds.parentConstraint(rfJnts[1], footToesIK.grp, mo=1)
+            cmds.parentConstraint(rfJnts[1], self.footToesFKCtrl.offsetGrps[0].name, mo=1)
+            cmds.parentConstraint(rfJnts[2], footBallIK.grp, mo=1)
+            cmds.parentConstraint(rfJnts[3], legIK.grp, mo=1)
             if cmds.objExists('{}footGuides{}'.format(self.moduleName, suffix['group'])):
                 cmds.delete('{}footGuides{}'.format(self.moduleName, suffix['group']))
 

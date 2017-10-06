@@ -201,6 +201,7 @@ class ctrl:
         crvData = getShapeData(self.ctrl.name)
         if self.side == 'R' and mirror:
             rotation = (rotation[0]+180, rotation[1], rotation[2])
+            translation = (-translation[0], translation[1], translation[2])
         applyShapeData(self.ctrl.name, crvData, transOffset=translation, rotOffset=rotation,
                        scaleOffset=scale)
         if color or color is None:

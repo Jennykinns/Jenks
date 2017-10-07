@@ -38,7 +38,7 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
         baseCtrl = ctrlFn.ctrl(name='{}{}_baseLayer'.format(extraName, name), guide=each,
                                side=side, parent=baseCtrlParent, rig=rig)
         baseCtrl.constrain(each)
-        baseCtrl.modifyShape(shape='cube', color=12, scale=(1, 1, 1))
+        baseCtrl.modifyShape(shape='cube', color=col['col2'], scale=(1, 1, 1))
         baseLayerCtrls.append(baseCtrl)
         baseCtrlParent = baseCtrl.ctrlEnd
     baseSpaces = [rig.globalCtrl.ctrlEnd]
@@ -64,7 +64,7 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
         midCtrl = ctrlFn.ctrl(name='{}{}_midLayer'.format(extraName, name), guide=each,
                                side=side, parent=midCtrlParent, rig=rig)
         cmds.parentConstraint(each, midCtrl.rootGrp.name, mo=1)
-        midCtrl.modifyShape(shape='sphere', color=11, scale=(0.4, 0.4, 0.4))
+        midCtrl.modifyShape(shape='sphere', color=col['col1'], scale=(0.4, 0.4, 0.4))
         midLayerCtrls.append(midCtrl)
         midLoc = utils.newNode('locator', name='{}{}_midLayer'.format(extraName, name),
                                side=side)

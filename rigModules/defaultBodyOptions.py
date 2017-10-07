@@ -1,5 +1,4 @@
 arm = {
-    'fingers' : True,
     'IK' : True,
     'FK' : True,
     'stretchy' : True,
@@ -9,7 +8,6 @@ arm = {
 }
 
 leg = {
-    'toes' : False,
     'IK' : True,
     'FK' : True,
     'stretchy' : True,
@@ -25,8 +23,4 @@ tail = {
     'IK' : True,
     'IKLayers' : 2,
     'dynamics' : False,
-}
-
-digits = {
-    'butts' : True
 }

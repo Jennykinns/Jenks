@@ -17,6 +17,7 @@ reload(defaultBodyOptions)
 #reload(suffixDictionary)
 
 def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig):
+    ### MOVE TO MISC FUNCTIONS???
     jntSuffix = suffix['joint']
     newJntChains = []
     ## create duplicate chains
@@ -151,6 +152,7 @@ class armModule:
                                       scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
+            self.pvCtrl.lockAttr(['r', 's'])
             self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
             self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.handIKCtrl.ctrlEnd],
                                            niceNames=['World', 'Hand'], dv=0)
@@ -161,6 +163,7 @@ class armModule:
                 autoClavMechGrp = utils.newNode('group', name='{}autoClavMech'.format(extraName),
                                                 side=self.side, parent=armMechGrp.name,
                                                 skipNum=True)
+                cmds.parentConstraint(parent, autoClavMechGrp.name)
                 ## create dupe arm
                 dupeArmJnts = []
                 dupeArmPar = autoClavMechGrp.name
@@ -270,13 +273,13 @@ class armModule:
 
         ## fk
         if options['FK']:
-            cmds.parentConstraint(parent, fkJnts[0], mo=1)
             ##- controls
             self.clavFKCtrl = ctrlFn.ctrl(name='{}clavicleFK'.format(extraName), side=self.side,
                                           guide=jnts[0], skipNum=True, parent=fkCtrlGrp.name,
                                           scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.clavFKCtrl.modifyShape(shape='pringle', color=col['col2'], mirror=True)
             self.clavFKCtrl.lockAttr(attr=['t', 's'])
+            cmds.parentConstraint(parent, self.clavFKCtrl.offsetGrps[0].name, mo=1)
             self.clavFKCtrl.constrain(fkJnts[0])
             self.shoulderFKCtrl = ctrlFn.ctrl(name='{}shoulderFK'.format(extraName),
                                               side=self.side, guide=fkJnts[1], skipNum=True,
@@ -395,6 +398,8 @@ class spineModule:
         chestBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
                                      name='{}spineIK_chestBind'.format(extraName))
         chestBindJnt.matchTransforms(chestJnt)
+        tmpEndBindJnt = utils.newNode('joint', parent=chestBindJnt.name)
+        tmpEndBindJnt.matchTransforms(self.endJnt)
         ## splineIK
         spineIK = ikFn.ik(spineJnts[0], spineJnts[-1], name='spineIK', side=self.side)
         if crv:
@@ -403,7 +408,9 @@ class spineModule:
             spineIK.createSplineIK(parent=spineMechGrp.name)
         spineIK.addStretch(globalScaleAttr=self.rig.scaleAttr, mode='length', operation='both')
         ## skin bindJnts to crv
-        cmds.skinCluster(hipBindJnt.name, chestBindJnt.name, spineIK.crv)
+        spineSkin = cmds.skinCluster(hipBindJnt.name, chestBindJnt.name, tmpEndBindJnt.name, spineIK.crv)
+        cmds.skinCluster(spineSkin, e=1, ri=tmpEndBindJnt.name)
+        cmds.delete(tmpEndBindJnt.name)
         ## ctrls
         self.bodyCtrl = ctrlFn.ctrl(name='{}body'.format(extraName), side=self.side,
                                     guide=hipBindJnt.name, deleteGuide=False,
@@ -510,6 +517,7 @@ class legModule:
                                       rig=self.rig)
             self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
+            self.pvCtrl.lockAttr(['r', 's'])
             self.pvCtrl.constrain(legIK.hdl, typ='poleVector')
             self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.footIKCtrl.ctrlEnd],
                                        niceNames=['World', 'Foot'], dv=0)
@@ -571,6 +579,7 @@ class legModule:
                                             translation=(3, 1, 0),
                                             rotation=(90, 0, 0))
             self.footToesFKCtrl.constrain(footToesIK.grp)
+            self.footToesFKCtrl.lockAttr(['t', 's'])
             self.footToesIKCtrl = ctrlFn.ctrl(name='{}footToesIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[1], skipNum=True,
                                               parent=self.footHeelIKCtrl.ctrlEnd,
@@ -594,6 +603,7 @@ class legModule:
             self.footBallIKCtrl.constrain(rfAnkleIK.grp)
             ##- constraints
             # cmds.parentConstraint(rfJnts[1], footToesIK.grp, mo=1)
+            cmds.parentConstraint(self.footHeelIKCtrl.ctrlEnd, rfToesIK.grp, mo=1)
             cmds.parentConstraint(rfJnts[1], self.footToesFKCtrl.offsetGrps[0].name, mo=1)
             cmds.parentConstraint(rfJnts[2], footBallIK.grp, mo=1)
             cmds.parentConstraint(rfJnts[3], legIK.grp, mo=1)
@@ -751,8 +761,7 @@ class digitsModule:
         self.side = side
         self.rig = rig
 
-    def create(self, mode, options=defaultBodyOptions.digits, autoOrient=False, customNodes=False,
-               parent=None, thumb=True):
+    def create(self, mode, autoOrient=False, customNodes=False, parent=None, thumb=True):
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         col = utils.getColors(self.side)
@@ -783,6 +792,7 @@ class digitsModule:
                                scaleOffset=self.rig.scaleOffset,
                                rig=self.rig)
         palmCtrl.modifyShape(shape='sphere', color=col['col2'], scale=(0.3, 0.2, 0.2))
+        palmCtrl.lockAttr(['s'])
         for each in digitsList:
             if each == 'Thumb':
                 segments = ['metacarpel', 'base', 'lowMid','tip']
@@ -924,7 +934,8 @@ class tailModule:
         self.side = side
         self.rig = rig
 
-    def create(self, crv=False, jntNum=16, autoOrient=False, parent=None):
+    def create(self, crv=False, jntNum=16, options=defaultBodyOptions.tail,
+               autoOrient=False, parent=None):
         jntSuffix = suffix['joint']
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         col = utils.getColors(self.side)
@@ -938,7 +949,21 @@ class tailModule:
             if autoOrient:
                 orientJoints.doOrientJoint(jointsToOrient=jnts, aimAxis=(1, 0, 0),
                                            upAxis=(0, 1, 0), worldUp=(0, 1, 0), guessUp=1)
-        for jnt in jnts:
-            utils.addJntToSkinJnt(jnt, self.rig)
-        miscFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
-                                     extraName=self.extraName, parent=parent)
+        if options['IK']:
+            for jnt in jnts:
+                utils.addJntToSkinJnt(jnt, self.rig)
+            miscFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
+                                         extraName=self.extraName, parent=parent)
+        else:
+            tailCtrls = []
+            ctrlParent = parent
+            for i, jnt in enumerate(jnts):
+                ctrlCol = col['col1'] if i % 2 else col['col2']
+                ctrl = ctrlFn.ctrl(name='{}tail'.format(extraName), side=self.side, guide=jnt,
+                                   rig=self.rig, parent=ctrlParent,
+                                   scaleOffset=self.rig.scaleOffset)
+                ctrl.modifyShape(shape='circle', color=ctrlCol)
+                ctrl.constrain(jnt)
+                ctrl.lockAttr(['t', 's'])
+                ctrlParent = ctrl.ctrlEnd
+                tailCtrls.append(ctrl)

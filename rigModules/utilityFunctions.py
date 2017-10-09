@@ -6,6 +6,19 @@ from Jenks.scripts.rigModules import orientJoints
 reload(suffixDictionary)
 
 def setupName(name, obj='', suffix='', side='C', extraName='', skipNumber=False):
+    """ Sets up a suitable name for a node to avoid naming conflicts.
+        [Args]:
+        name (string) - The base name
+        obj (string) - The object type of the node
+                       (used for the suffix)
+        suffix (string) - An override for the suffix
+        side (string) - The side of the node
+        extraName (string) - An extra name option
+        skipNumber (bool) - Toggles whether or not to skip the number
+                            if possible
+        [Returns]:
+        newName (string) - The new name for the node
+    """
     if not suffix and obj:
         suffix = suffixDictionary.suffix[obj]
     freeName = False
@@ -23,6 +36,14 @@ def setupName(name, obj='', suffix='', side='C', extraName='', skipNumber=False)
     return newName
 
 def setupBodyPartName(extraName='', side='C'):
+    """ Sets up a suitable name for a body part to avoid naming
+        conflicts.
+        [Args]:
+        side (string) - The side of the node
+        extraName (string) - An extra name option
+        [Returns]:
+        newName (string) - The new name for the body part
+    """
     freeName = False
     i = 1
     num = ''
@@ -38,6 +59,11 @@ def setupBodyPartName(extraName='', side='C'):
     return newName
 
 def addJntToSkinJnt(jnt, rig):
+    """ Adds the specified joint to the rig's skin joints category.
+        [Args]:
+        jnt (string) - The name of the joint node
+        rig (class) - The rig Class of the destination rig
+    """
     if 'rigConnection' not in cmds.listAttr(jnt):
         rigConnection = addAttr(jnt, name='rigConnection',
                                 nn='Rig Connection', typ='message')
@@ -46,6 +72,15 @@ def addJntToSkinJnt(jnt, rig):
     cmds.connectAttr(rig.skinJntsAttr, rigConnection)
 
 def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
+    """ Gets the children DAGs between two objects.
+        [Args]:
+        startObj (string) - The name of the start DAG
+        endObj (string) - The name of the end DAG
+        typ (string) - The type of object to limit the function to
+        [Returns]:
+        objs (list) - A list of the names of the DAG nodes that are
+                      between the specified nodes.
+    """
     sChilds = cmds.listRelatives(startObj, ad=1, type=typ)
     eChilds = cmds.listRelatives(endObj, ad=1, type=typ)
     if eChilds:
@@ -57,6 +92,14 @@ def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
     return objs
 
 def getColors(typ):
+    """ Gets the specified colours depending on the position
+        on the rig.
+        [Args]:
+        typ (string) - The position on the rig
+                       (usually 'L', 'R' or 'C')
+        [Returns]:
+        colors (dictionary) - a dictionary of the colour ID values.
+    """
     colors = {}
     if typ == 'L':
         colors['col1'] = 15
@@ -81,11 +124,23 @@ def getColors(typ):
     return colors
 
 def setShapeColor(obj, color=None):
+    """ Sets the specified objects shape node colour.
+        [Args]:
+        obj (string) - The name of the object to change colour
+        color (int) - The colour ID value
+                      (can also be None to remove colour)
+    """
     shapes = cmds.listRelatives(obj, s=1)
     for each in shapes:
         setColor(each, color)
 
 def setColor(obj, color=None):
+    """ Sets the specified objects colour.
+        [Args]:
+        obj (string) - The name of the object to change colour
+        color (int) - The colour ID value
+                      (can also be None to remove colour)
+    """
     cmds.setAttr('{}.overrideEnabled'.format(obj), 1)
     if color:
         cmds.setAttr('{}.overrideVisibility'.format(obj), 1)
@@ -94,10 +149,23 @@ def setColor(obj, color=None):
         cmds.setAttr('{}.overrideVisibility'.format(obj), 0)
 
 def setOutlinerColor(obj, color=None):
+    """ Sets the outliner colour for the specified node.
+        [Args]:
+        obj (string) - the name of the node to change
+        color (int) - The colour ID value
+                      (can also be None to remove colour)
+    """
     cmds.setAttr('{}.useOutlinerColor'.format(obj), 1 if color else 0)
     cmds.setAttr('{}.outlinerColor'.format(obj), color[0], color[1], color[2])
 
 def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
+    """ Matches the transforms of one object to another.
+        [Args]:
+        obj (string) - The object to move
+        targetObj (string) - The object to match to
+        skipTrans (bool) - Toggles skipping translation
+        skipRot (bool) - Toggles skipping rotation
+    """
     if type(objs) is not type(list()):
         objs = [objs]
     for each in objs:
@@ -112,6 +180,22 @@ def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
         cmds.delete(cmds.parentConstraint(targetObj, each))
 
 def addAttr(node, name, nn, typ, defaultVal=0, minVal=None, maxVal=None, enumOptions=None):
+    """ Adds an attribute to a node.
+        [Args]:
+        node (string) - The name of the node to add the attribute to
+        name (string) - The name of the attribute
+        nn (string) - The nice name of the attribute
+        typ (string) - The type of the attribute
+        defaultVal (float) - The default Value for the attribute
+                             (if applicable)
+        minVal (float) - The minimum value of the attribute
+                         (if applicable)
+        maxVal (float) - The maximum value of the attribute
+                         (if applicable)
+        enumOptions (list) - A list of enum otions
+        [Returns]:
+        (string) the long name of the attribute
+    """
     attrs = cmds.listAttr(node)
     if not name in attrs:
         if typ == 'enum':
@@ -137,6 +221,13 @@ def addAttr(node, name, nn, typ, defaultVal=0, minVal=None, maxVal=None, enumOpt
     return '{}.{}'.format(node, name)
 
 def lockAttr(node, attr='', hide=True, unlock=False):
+    """ Locks attributes of specified node.
+        [Args]:
+        node (string) - name of the node
+        attr (list) - A list of attributes to lock
+        hide (bool) - Toggles hiding the attributes as well
+        unlock (bool) - Unlocks the attributes instead
+    """
     if unlock:
         hide=False
     if not attr:

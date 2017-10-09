@@ -31,6 +31,8 @@ setParent -menu jenksPipeMenu;
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadWipGeo()\");";
     menuItem -label "Import Published Geometry" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGeo()\");";
     menuItem -d true;
+    menuItem -label "Load Rig Script" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadRigScript()\");";
+    menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadRigScript(build=True)\");";
     menuItem -label "Save Rig Guides" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveGuides(autoName=True)\");";
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveGuides()\");";
     menuItem -label "Load Rig Guides" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGuides(new=True)\");";

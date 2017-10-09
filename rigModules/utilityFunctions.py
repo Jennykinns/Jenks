@@ -2,8 +2,12 @@ import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import suffixDictionary
 from Jenks.scripts.rigModules import orientJoints
+from Jenks.scripts.rigModules import apiFuncitons as apiFn
+
+import re
 
 reload(suffixDictionary)
+reload(apiFn)
 
 def setupName(name, obj='', suffix='', side='C', extraName='', skipNumber=False):
     """ Sets up a suitable name for a node to avoid naming conflicts.
@@ -57,6 +61,63 @@ def setupBodyPartName(extraName='', side='C'):
             num = str(i).zfill(2)
             i += 1
     return newName
+
+def hashToNumber(name, suffix, startNum=1):
+    hashes = re.findall('#+', name)
+    if hashes:
+        i = 0
+        for each in hashes:
+            numFill = len(each)
+            newName = '{}{}'.format(str(i+startNum).zfill(numFill).join(name.split(each)),
+                                    suffix)
+            while cmds.objExists(newName):
+                i += 1
+                newName = '{}{}'.format(str(i+startNum).zfill(numFill).join(name.split(each)),
+                                        suffix)
+    else:
+        newName = name
+        i = 0
+        while cmds.objExists(newName):
+            i += 1
+            newName = '{}{}{}'.format(newName, i, suffix)
+    return newName
+
+def rename(mObj, newName, startNum=1):
+    lN, sN = apiFn.getPath(mObj, returnString=True)
+    cmds.rename(lN, 'TMPNAME_OOGIEOOGIE_POOP')
+    lN, sN = apiFn.getPath(mObj, returnString=True)
+    shapeNode = cmds.listRelatives(lN, s=1, f=1)
+    objType = cmds.objectType(shapeNode[0] if shapeNode else lN)
+    if objType in suffixDictionary.suffix.keys():
+        suffix = suffixDictionary.suffix[objType]
+    else:
+        cmds.warning('{} {}'.format(objType,
+                     'Node type not in suffixDictionary, contact the Pipeline TD to add it.'))
+        suffix = ''
+    if newName.endswith(suffix):
+        suffix = ''
+    newName = hashToNumber(newName, suffix, startNum)
+    r = cmds.rename(lN, newName)
+    return r
+
+def findReplace(mObj, find, replace, startNum=1):
+    lN, sN = apiFn.getPath(mObj, returnString=True)
+    # newName = sN.replace(find, replace)
+    newName = re.sub(find, replace, sN)
+    r = rename(mObj, newName, startNum)
+    return r
+
+def renameSelection(newName):
+    sel = apiFn.getSelectionAsMObjs()
+    for i, mObj in enumerate(sel, 1):
+        rename(mObj, newName, i)
+    return True
+
+def findReplaceSelection(find, replace):
+    sel = apiFn.getSelectionAsMObjs()
+    for i, mObj in enumerate(sel, 1):
+        findReplace(mObj, find, replace, startNum=i)
+
 
 def addJntToSkinJnt(jnt, rig):
     """ Adds the specified joint to the rig's skin joints category.

@@ -7,6 +7,7 @@ from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 
 reload(utils)
+reload(fileFn)
 
 def getAllControls(rigNode):
     ctrls = cmds.listConnections('{}.rigCtrls'.format(rigNode), d=1, s=0)
@@ -106,16 +107,22 @@ def loadShapeData(ctrlName, shape=False, path=None):
     else:
         return False
 
-def saveCtrls(assetName=None, prompt=False):
+def saveCtrls(assetName=None, prompt=False, selectedOnly=False):
     if prompt:
         assetName = fileFn.assetNamePrompt()
     if not assetName:
         assetName = fileFn.getAssetName()
     if not assetName:
+        assetName = fileFn.assetNamePrompt()
+    if not assetName:
         print 'Asset Name not specified.'
         return False
     path = fileFn.getAssetDir()
-    for ctrl in getAllControls():
+    if not selectedOnly:
+        ctrlsToSave = getAllControls()
+    else:
+        ctrlsToSave = cmds.ls(sl=1)
+    for ctrl in ctrlsToSave:
         crvData = getShapeData(ctrl, color=True)
         fo = fileFn.getLatestVersion(assetName, path, 'rig/WIP/controlShapes', new=True, name=ctrl)
         fileFn.saveJson(crvData, fileOverride=fo)
@@ -125,6 +132,8 @@ def loadCtrls(assetName=None, prompt=False):
         assetName = fileFn.assetNamePrompt()
     if not assetName:
         assetName = fileFn.getAssetName()
+    if not assetName:
+        assetName = fileFn.assetNamePrompt()
     if not assetName:
         print 'Asset Name not specified.'
         return False

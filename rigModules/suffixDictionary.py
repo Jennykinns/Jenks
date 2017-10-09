@@ -1,5 +1,6 @@
 suffix = {
     'group' : '_GRP',
+    'transform' : '_GRP',
     'joint' : '_JNT',
     'locator' : '_LOC',
     'control' : '_CTRL',
@@ -7,6 +8,7 @@ suffix = {
     'controlOffset' : '_OFFS',
     'controlConst' : '_CONST',
     'geometry' : '_GEO',
+    'mesh' : '_GEO',
     'nurbsCrv' : '_CRV',
     'ikHandle' : '_HDL',
     'ikEffector' : '_EFF',

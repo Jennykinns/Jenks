@@ -10,6 +10,14 @@ def getMObj(objName):
     mObj = mSelList.getDependNode(0)
     return mObj
 
+def getSelectionAsMObjs():
+    selectionList = om.MGlobal.getActiveSelectionList()
+    objs = []
+    for i in range(selectionList.length()):
+        mObj = selectionList.getDependNode(i)
+        objs.append(mObj)
+    return objs
+
 def getPath(mObj, returnString=True):
     if mObj.hasFn(om.MFn.kTransform) or mObj.hasFn(om.MFn.kShape):
         dagNode = om.MFnDagNode(mObj)

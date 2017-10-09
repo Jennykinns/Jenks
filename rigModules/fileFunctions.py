@@ -181,6 +181,26 @@ def referenceRig(assetName=None, prompt=False):
     print 'Referenced Rig: {}'.format(fileName)
     return True
 
+def loadRigScript(assetName=None, prompt=False, build=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    fileName = '{}rigScripts/{}.py'.format(path, assetName)
+    print 'Loading rig script: {}'.format(fileName)
+    f = open(fileName, 'r')
+    rigScriptTxt = f.read()
+    f.close()
+    mel.eval('buildNewExecuterTab -1  "{}_rig"  "python" 1'.format(assetName))
+    # executer=mel.eval("$v=$gLastFocusedCommandExecuter")
+    executer = mel.eval('$a=$gCommandExecuter;')[-1]
+    cmds.cmdScrollFieldExecuter(executer, e=1, t=rigScriptTxt, exc=build, sla=1)
+
+
 def loadGeo(assetName=None, group=None, prompt=False):
     if prompt:
         assetName = assetNamePrompt()

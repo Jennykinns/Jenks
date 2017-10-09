@@ -249,10 +249,26 @@ def lockAttr(node, attr='', hide=True, unlock=False):
             cmds.setAttr('{}.{}'.format(node, each), l=not unlock, k=not hide)
 
 def getShapeNodes(obj):
+    """ Gets the shape nodes of the specified object.
+        [Args]:
+        obj (string) - The name of the object
+        [Returns]:
+        children (list) - A list of children shapes
+    """
     children = cmds.listRelatives(obj, s=1)
     return children
 
 def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
+    """ Creates joints on a curve.
+        [Args]:
+        crv (string) - The name of the curve
+        numOfJnts (int) - The amount of joints to create
+        chain (bool) - A toggle for creating the joints as a chain
+        name (string) - The name of the new joints
+        side (string) - The side of the new joints
+        [Returns]:
+        jntList (list) - A list of the new joint names
+    """
     cmds.makeIdentity(crv, a=1, t=1, r=1)
     tmpCrv = cmds.rebuildCurve(crv, rt=0, end=1, kr=0, kt=0, s=numOfJnts-1, d=3)[0]
     parent = None
@@ -272,6 +288,15 @@ def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
     return jntList
 
 def duplicateJntChain(chainName, jnts, parent=None):
+    """ Duplicates a joint chain.
+        [Args]:
+        chainName (string) - The name of the new joint chain
+        jnts (list) - a list of the joints in the chain to duplicate
+        parent (string) - The name of the object to parent the
+                          new joint chain
+        [Returns]:
+        newJnts (list) - A list of the new joints created
+    """
     newJnts = []
     dupeChain = cmds.duplicate(jnts[0], rc=1)
     for each in reversed(dupeChain):
@@ -286,6 +311,19 @@ def duplicateJntChain(chainName, jnts, parent=None):
     return newJnts
 
 def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=None, parent=None):
+    """ Creates a joint chain from a list of objects.
+        [Args]:
+        objs (list) - A list of object names to create the joints from
+        chainName (string) - The name of the new joint chain
+        side (string) - The side of the new chain
+        extraName (string) - The optional extra name for the
+                             new joint chain
+        jntNames (list) - A list of optional extra names for each joint
+        parent (string) - The name of the object to parent the
+                          new joint chain
+        [Returns]:
+        newJnts (list) - A list of the new joints created
+    """
     newJnts = []
     for i, each in enumerate(objs):
         newJntName = '{}{}_{}'.format(extraName, chainName,
@@ -300,6 +338,17 @@ def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=Non
     return newJnts
 
 def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None):
+    """ Creates a curve from a list of objects.
+        [Args]:
+        objs (list) - Names of objects to create the curve from
+        crvName (string) - The name of the new curve
+        side (string) - The side of the new curve
+        extraName (string) - The optional extra name for the new curve
+        parent (string) - The name of the object to parent the
+                          new curve to
+        [Returns]:
+        crv (string) - The name of the new curve
+    """
     pointList = []
     for each in objs:
         pos = cmds.xform(each, q=1, t=1, ws=1)
@@ -311,8 +360,25 @@ def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None
 
 
 class newNode:
+    """ Used for creating new nodes.
+    """
     def __init__(self, node, name='', suffixOverride='', parent='', side='C',
                  operation=None, skipNum=False):
+        """ The creation function to create new nodes.
+        [Args]:
+        node (string) - The type of node to create
+        name (string) - The name of the new node
+        suffixOverride (string) - The optional override for the suffix
+                                  (Uses object type not custom string
+                                   e.g 'locator' or 'group')
+        parent (string) - The name of the object to parent the
+                          new node to
+        side (string) - The side of the new node
+        operation (int) - The value of the new node's operation
+                          attribute (if applicable)
+        skipNumber (bool) - Toggles whether or not to skip the number
+                            if possible
+        """
         self.node = node
         nodeName = setupName(name if name else node,
                              obj=node if not suffixOverride else suffixOverride,
@@ -332,20 +398,55 @@ class newNode:
         cmds.select(cl=1)
 
     def parent(self, parent, relative=False):
+        """ Parents the node.
+        [Args]:
+        parent (string) - The name of the parent
+        relative (bool) - Toggles if the parent should be relative
+        """
         if parent == 'world':
             cmds.parent(self.name, w=True, r=relative)
         cmds.parent(self.name, parent, r=relative)
 
     def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None,
                 enumOptions=None):
+        """ Adds an attribute to the node.
+        [Args]:
+        node (string) - The name of the node to add the attribute to
+        name (string) - The name of the attribute
+        nn (string) - The nice name of the attribute
+        typ (string) - The type of the attribute
+        defaultVal (float) - The default Value for the attribute
+                             (if applicable)
+        minVal (float) - The minimum value of the attribute
+                         (if applicable)
+        maxVal (float) - The maximum value of the attribute
+                         (if applicable)
+        enumOptions (list) - A list of enum otions
+        [Returns]:
+        (bool) If sucessful
+        """
         attr = addAttr(self.name, name, nn, typ, defaultVal, minVal, maxVal, enumOptions)
         exec('self.{} = "{}"'.format(name, attr))
         return True
 
     def lockAttr(self, attr='', hide=True, unlock=False):
+        """ Locks attrubutes on node.
+        [Args]:
+        attr (list) - A list of attributes to lock
+        hide (bool) - Toggles hiding the attributes as well
+        unlock (bool) - Unlocks the attributes instead
+        """
         lockAttr(self.name, attr, hide, unlock)
 
     def connect(self, nodeAttr, dest, mode='from'):
+        """ Connects an attribute to the node.
+        [Args]:
+        nodeAttr (string) - The name of the node's attribute
+        dest (string) - The long name of the another node's attribute
+        mode (string) - Changes the mode of the function
+                        ('from' the node's attribute,
+                         'to' the node's attribute)
+        """
         nodeAttrFull = '{}.{}'.format(self.name, nodeAttr)
         if mode == 'from':
             cmds.connectAttr(nodeAttrFull, dest)
@@ -357,6 +458,12 @@ class newNode:
             cmds.connectAttr(dest, nodeAttrFull)
 
     def matchTransforms(self, obj, skipTrans=False, skipRot=False):
+        """ Matches the transforms of one object to another.
+        [Args]:
+        obj (string) - The object to match to
+        skipTrans (bool) - Toggles skipping translation
+        skipRot (bool) - Toggles skipping rotation
+        """
         matchTransforms(self.name, obj, skipTrans, skipRot)
         if self.node == 'joint':
             cmds.makeIdentity(self.name, a=1, r=1)

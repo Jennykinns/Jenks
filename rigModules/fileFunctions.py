@@ -6,6 +6,7 @@ import maya.mel as mel
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFuncitons as api
+from Jenks.scripts.rigModules.suffixDictionary import suffix
 
 def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None):
     if location == 'rig/Published':
@@ -222,6 +223,7 @@ def loadRigScript(assetName=None, prompt=False, build=False):
     f = open(fileName, 'r')
     rigScriptTxt = f.read()
     f.close()
+    cmds.ScriptEditor()
     mel.eval('buildNewExecuterTab -1  "{}_rig"  "python" 1'.format(assetName))
     executer = mel.eval('$a=$gCommandExecuter;')[-1]
     cmds.cmdScrollFieldExecuter(executer, e=1, t=rigScriptTxt, exc=build, sla=1)
@@ -341,6 +343,115 @@ def loadWipGeo(assetName=None, latest=False, prompt=False):
         return False
     cmds.file(fileName, o=1, dns=1, type='mayaAscii')
     print 'Loaded WIP Model: {}'.format(fileName)
+    return True
+
+def setupLookDevScene(assetName=None, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    geoGrp = utils.newNode('group', name='geometry', skipNum=True)
+    loadGeo(assetName, geoGrp.name)
+    for each in cmds.listRelatives(geoGrp.name, c=1):
+        print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
+        cmds.sets(each, n='{}_geoSet'.format(each.rstrip(suffix['geometry'])))
+
+
+def saveWipLookDev(assetName=None, autoName=False, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Save WIP LookDev',
+                                    fileMode=0, fileFilter=fileFilter,
+                                    dir='{}{}/lookDev/WIP'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'lookDev/WIP', new=True)
+    removeReferences()
+    cmds.file(rename=fileName)
+    cmds.file(save=True, type='mayaAscii')
+    print 'Saved WIP LookDev: {}'.format(fileName)
+    return True
+
+def loadWipLookDev(assetName=None, latest=False, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not latest:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP LookDev',
+                                    fileMode=1, fileFilter=fileFilter,
+                                    dir='{}{}/lookDev/WIP'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'lookDev/WIP', new=False)
+    if not newScene():
+        return False
+    cmds.file(fileName, o=1, dns=1, type='mayaAscii')
+    print 'Loaded WIP LookDev: {}'.format(fileName)
+    return True
+
+def publishLookDev(assetName=None, autoName=True, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish LookDev',
+                                    fileMode=0, fileFilter=fileFilter,
+                                    dir='{}{}/lookDev/Published'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'lookDev/Published', new=True)
+    setsToSave = []
+    for each in cmds.listRelatives('C_geometry_GRP', c=1):
+        setsToSave.extend(cmds.listSets(o='Mesh'))
+    cmds.select(setsToSave, add=1, noExpand=True)
+    cmds.file(fileName, es=True, type='mayaAscii')
+    print 'Saved LookDev: {}'.format(fileName)
+    return True
+
+def referenceLookDev(assetName=None, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    fileName = getLatestVersion(assetName, path, 'lookDev/Published')
+    cmds.file(fileName, r=1, ns=newNameSpace(assetName))
+    print 'Referenced LookDev: {}'.format(fileName)
     return True
 
 def removeReferences():

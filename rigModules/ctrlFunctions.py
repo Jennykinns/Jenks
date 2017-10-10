@@ -10,10 +10,19 @@ reload(utils)
 reload(fileFn)
 
 def getAllControls(rigNode):
+    """ Returns a list of controls that are part of the rig.
+    [Args]:
+    rigNode (string) - The name of the rig node
+    [Returns]:
+    ctrls (list) - A list of the control names
+    """
     ctrls = cmds.listConnections('{}.rigCtrls'.format(rigNode), d=1, s=0)
     return ctrls
 
 def selectRigControls():
+    """ Selects the controls that are part of the currently selected
+        rig.
+    """
     sel = cmds.ls(sl=1)
     rigNodes = []
     for each in sel:
@@ -27,12 +36,21 @@ def selectRigControls():
     cmds.select(ctrls)
 
 def resetCtrlToBind(ctrl):
+    """ Resets the control to bind position.
+    [Args]:
+    ctrl (string) - The name of the control to reset
+    """
     attr = cmds.listAttr(ctrl, keyable=True)
     for each in attr:
         dv = cmds.attributeQuery(each, n=ctrl, ld=1)
         cmds.setAttr('{}.{}'.format(ctrl, each), dv[0])
 
 def resetRigControlsToBind(selectedOnly=False):
+    """ Resets controls of the rig to bind position.
+    [Args]:
+    selectedOnly (bool) - Toggles if the function will only effect the
+                          selected controls or all the rig controls
+    """
     if not selectedOnly:
         selectRigControls()
     sel = cmds.ls(sl=1)
@@ -40,6 +58,14 @@ def resetRigControlsToBind(selectedOnly=False):
         resetCtrlToBind(each)
 
 def getShapeData(ctrlName, color=False):
+    """ Gets the shape data of the control.
+    [Args]:
+    ctrlName (string) - The name of the control
+    color (bool) - Toggles if the function will store the colour
+                   information
+    [Returns]:
+    crvData (string) - The point data of the control shape
+    """
     curveShapes = utils.getShapeNodes(ctrlName)
     crvData = {}
     for i, each in enumerate(curveShapes):
@@ -69,6 +95,17 @@ def getShapeData(ctrlName, color=False):
 
 def applyShapeData(ctrlName, crvData, transOffset=(0, 0, 0),
                    rotOffset=(0, 0, 0), scaleOffset=(1, 1, 1)):
+    """ Applies the supplied curve data to the specified control.
+    [Args]:
+    ctrlName (string) - The name of the control to change
+    crvData (string) - The point data to apply
+    transOffset (int, int, int) - The translation offset to apply
+                                  to the new crv data
+    rotOffset (int, int, int) - The rotation offset to apply
+                                to the new crv data
+    scaleOffset (int, int, int) - The scale offset to apply
+                                  to the new crv data
+    """
     curveShapes = utils.getShapeNodes(ctrlName)
     ctrlMObj = api.getMObj(ctrlName)
     if curveShapes:
@@ -96,6 +133,12 @@ def applyShapeData(ctrlName, crvData, transOffset=(0, 0, 0),
 
 
 def saveShapeData(ctrlName):
+    """ Saves control shape data to json file.
+    [Args]:
+    ctrlName (string) - The name of the control
+    [Returns]:
+    status (bool) - success
+    """
     crvData = getShapeData(ctrlName)
     status = fileFn.saveJson(crvData,
                            defaultDir='/home/Jenks/maya/scripts/Jenks/scripts/controlShapes',
@@ -104,6 +147,15 @@ def saveShapeData(ctrlName):
     return status
 
 def loadShapeData(ctrlName, shape=False, path=None):
+    """ Loads the shape data from a json file.
+    [Args]:
+    ctrlName (string) - The name of the control to apply the
+                        shape data to
+    shape (string) - The name of the json file
+    path (string) - The path to the shape data directory
+    [Returns]:
+    (bool) - success
+    """
     fo = '{}/{}.shape'.format(path, shape) if shape and path else False
     defDir = '{}/Jenks/scripts/controlShapes'.format(fileFn.getScriptDir())
     crvData = fileFn.loadJson(defaultDir=defDir,
@@ -117,6 +169,13 @@ def loadShapeData(ctrlName, shape=False, path=None):
         return False
 
 def saveCtrls(assetName=None, prompt=False, selectedOnly=False):
+    """ Saves the rig controls to the asset control shapes directory.
+    [Args]:
+    assetName (string) - The name of the asset
+    prompt (bool) - Toggles a window prompt for asset name
+    selectedOnly (bool) - Toggles saving of all the rig controls
+                          or just the selected
+    """
     if prompt:
         assetName = fileFn.assetNamePrompt()
     if not assetName:
@@ -137,6 +196,11 @@ def saveCtrls(assetName=None, prompt=False, selectedOnly=False):
         fileFn.saveJson(crvData, fileOverride=fo)
 
 def loadCtrls(assetName=None, prompt=False):
+    """ Loads all the saved rig control shapes.
+    [Args]:
+    assetName (string) - The name of the asset
+    prompt (bool) - Toggles a window prompt for asset name
+    """
     if prompt:
         assetName = fileFn.assetNamePrompt()
     if not assetName:

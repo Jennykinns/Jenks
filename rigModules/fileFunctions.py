@@ -65,10 +65,10 @@ def getScriptDir():
     ## MIGHT NEED CHANGING - not sure if the path list will be
     ## consistant between pcs (or even restarts)
     if os.path.isfile('C:\\Docs\\readMe.txt'):
-	    ## on uni computers
-	    scriptPath = 'C:\\Docs\\maya\\scripts'
+        ## on uni computers
+        scriptPath = 'C:\\Docs\\maya\\scripts'
     else:
-	    scriptPath = sys.path[-1]
+        scriptPath = sys.path[-1]
     return scriptPath
 
 def getAssetDir():
@@ -100,82 +100,25 @@ def abcExport(fileName, selection=True, frameRange=(1, 1)):
         args = '{} -rt {}'.format(args, each)
     cmds.AbcExport(j=args)
 
-def loadGuides(assetName=None, prompt=False, new=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    fileName = getLatestVersion(assetName, path, 'rig/WIP/guides')
-    if new:
-        if not newScene():
-            return False
-    cmds.file(fileName, i=1, dns=1, type='mayaAscii')
-    print 'Loaded guides: {}'.format(fileName)
+def loadGuides(assetName=None, prompt=False, new=False, latest=True):
+    loadMayaFile(assetName, typ='rig/WIP/guides', prompt=prompt, new=new, latest=latest)
     return True
 
 def saveGuides(assetName=None, autoName=False, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not autoName:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Save Rig Guides',
-                                    fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/rig/WIP/guides'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'rig/WIP/guides', new=True)
-    removeReferences()
-    cmds.file(rename=fileName)
-    cmds.file(save=True, type='mayaAscii')
-    print 'Saved guides: {}'.format(fileName)
+    saveMayaFile(assetName, typ='rig/WIP/guides', prompt=prompt, autoName=autoName,
+                 removeRefs=True)
     return True
 
 def publishRig(assetName=None, autoName=True, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not autoName:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Rig',
-                                    fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/rig/Published'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'rig/Published', new=True)
     removeReferences()
     cmds.select('_RIG__GRP')
-    cmds.file(fileName, es=True, type='mayaAscii')
-    print 'Saved Rig: {}'.format(fileName)
+    saveMayaFile(assetName, typ='rig/Published', prompt=prompt, autoName=autoName,
+                 selectionOnly=True)
     return True
 
 def referenceRig(assetName=None, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'rig/Published')
@@ -184,38 +127,12 @@ def referenceRig(assetName=None, prompt=False):
     return True
 
 def loadWipRig(assetName=None, latest=False, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not latest:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP Rig',
-                                    fileMode=1, fileFilter=fileFilter,
-                                    dir='{}{}/rig/WIP'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'rig/WIP', new=False)
-    if not newScene():
-        return False
-    cmds.file(fileName, o=1, dns=1, type='mayaAscii')
-    print 'Loaded WIP Model: {}'.format(fileName)
+    loadMayaFile(assetName, typ='rig/WIP', prompt=prompt, latest=latest)
     return True
 
 def loadRigScript(assetName=None, prompt=False, build=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     path = getAssetDir()
     fileName = '{}rigScripts/{}.py'.format(path, assetName)
@@ -229,39 +146,33 @@ def loadRigScript(assetName=None, prompt=False, build=False):
     cmds.cmdScrollFieldExecuter(executer, e=1, t=rigScriptTxt, exc=build, sla=1)
 
 
-def loadGeo(assetName=None, group=None, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+def loadGeo(assetName=None, group=None, prompt=False, abc=True):
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
-    # nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
-    if group:
-        cmds.AbcImport(fileName, mode='import', rpr=group)
+    if abc:
+        if group:
+            cmds.AbcImport(fileName, mode='import', rpr=group)
+        else:
+            cmds.AbcImport(fileName, mode='import')
     else:
-        cmds.AbcImport(fileName, mode='import')
+        nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
+        mNodes = []
+        for each in nodes:
+            mNodes.append(api.getMObj(each))
+        if group:
+            for each in mNodes:
+                lN, sN = api.getPath(each)
+                if cmds.nodeType(lN) == 'transform':
+                    cmds.parent(lN, group)
     print 'Loaded geometry: {}'.format(fileName)
-    # mNodes = []
-    # for each in nodes:
-    #     mNodes.append(api.getMObj(each))
-    # if group:
-    #     for each in mNodes:
-    #         lN, sN = api.getPath(each)
-    #         if cmds.nodeType(lN) == 'transform':
-    #             cmds.parent(lN, group)
     return True
 
 def publishGeo(assetName=None, autoName=True, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     path = getAssetDir()
     if not autoName:
@@ -276,16 +187,13 @@ def publishGeo(assetName=None, autoName=True, prompt=False):
     else:
         fileName = getLatestVersion(assetName, path, 'model/Published', new=True)
     removeReferences()
+    ### NEEDS WORK YOU FUCK
     print 'Published Geometry: {}'.format(fileName)
     return True
 
 def referenceGeo(assetName=None, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
@@ -294,64 +202,55 @@ def referenceGeo(assetName=None, prompt=False):
     return True
 
 def saveWipGeo(assetName=None, autoName=False, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not autoName:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Save WIP Model',
-                                    fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/model/WIP'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'model/WIP', new=True)
-    removeReferences()
-    cmds.file(rename=fileName)
-    cmds.file(save=True, type='mayaAscii')
-    print 'Saved WIP Model: {}'.format(fileName)
+    saveMayaFile(assetName, typ='model/WIP', prompt=prompt, autoName=autoName,
+                 removeReferences=True)
+    # assetName = assetNamePrompt(assetname, prompt)
+    # if not assetName:
+    #     return False
+    # path = getAssetDir()
+    # if not autoName:
+    #     fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    #     fileName = cmds.fileDialog2(dialogStyle=2, caption='Save WIP Model',
+    #                                 fileMode=0, fileFilter=fileFilter,
+    #                                 dir='{}{}/model/WIP'.format(path, assetName))
+    #     if fileName:
+    #         fileName = fileName[0]
+    #     else:
+    #         return False
+    # else:
+    #     fileName = getLatestVersion(assetName, path, 'model/WIP', new=True)
+    # removeReferences()
+    # cmds.file(rename=fileName)
+    # cmds.file(save=True, type='mayaAscii')
+    # print 'Saved WIP Model: {}'.format(fileName)
     return True
 
 def loadWipGeo(assetName=None, latest=False, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not latest:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP Model',
-                                    fileMode=1, fileFilter=fileFilter,
-                                    dir='{}{}/model/WIP'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'model/WIP', new=False)
-    if not newScene():
-        return False
-    cmds.file(fileName, o=1, dns=1, type='mayaAscii')
-    print 'Loaded WIP Model: {}'.format(fileName)
+    loadMayaFile(assetName, typ='model/WIP', prompt=prompt, latest=latest, new=True)
+    # assetName = assetNamePrompt(assetname, prompt)
+    # if not assetName:
+    #     return False
+    # path = getAssetDir()
+    # if not latest:
+    #     fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    #     fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP Model',
+    #                                 fileMode=1, fileFilter=fileFilter,
+    #                                 dir='{}{}/model/WIP'.format(path, assetName))
+    #     if fileName:
+    #         fileName = fileName[0]
+    #     else:
+    #         return False
+    # else:
+    #     fileName = getLatestVersion(assetName, path, 'model/WIP', new=False)
+    # if not newScene():
+    #     return False
+    # cmds.file(fileName, o=1, dns=1, type='mayaAscii')
+    # print 'Loaded WIP Model: {}'.format(fileName)
     return True
 
 def setupLookDevScene(assetName=None, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     geoGrp = utils.newNode('group', name='geometry', skipNum=True)
     loadGeo(assetName, geoGrp.name)
@@ -361,92 +260,85 @@ def setupLookDevScene(assetName=None, prompt=False):
 
 
 def saveWipLookDev(assetName=None, autoName=False, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not autoName:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Save WIP LookDev',
-                                    fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/lookDev/WIP'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'lookDev/WIP', new=True)
-    removeReferences()
-    cmds.file(rename=fileName)
-    cmds.file(save=True, type='mayaAscii')
-    print 'Saved WIP LookDev: {}'.format(fileName)
+    saveMayaFile(assetName, typ='lookDev/WIP', prompt=prompt, autoName=autoName,
+                 removeReferences=True)
+    # assetName = assetNamePrompt(assetname, prompt)
+    # if not assetName:
+    #     return False
+    # path = getAssetDir()
+    # if not autoName:
+    #     fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    #     fileName = cmds.fileDialog2(dialogStyle=2, caption='Save WIP LookDev',
+    #                                 fileMode=0, fileFilter=fileFilter,
+    #                                 dir='{}{}/lookDev/WIP'.format(path, assetName))
+    #     if fileName:
+    #         fileName = fileName[0]
+    #     else:
+    #         return False
+    # else:
+    #     fileName = getLatestVersion(assetName, path, 'lookDev/WIP', new=True)
+    # removeReferences()
+    # cmds.file(rename=fileName)
+    # cmds.file(save=True, type='mayaAscii')
+    # print 'Saved WIP LookDev: {}'.format(fileName)
     return True
 
 def loadWipLookDev(assetName=None, latest=False, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not latest:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP LookDev',
-                                    fileMode=1, fileFilter=fileFilter,
-                                    dir='{}{}/lookDev/WIP'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'lookDev/WIP', new=False)
-    if not newScene():
-        return False
-    cmds.file(fileName, o=1, dns=1, type='mayaAscii')
-    print 'Loaded WIP LookDev: {}'.format(fileName)
+    loadMayaFile(assetName, typ='lookDev/WIP', prompt=prompt, latest=latest, new=True)
+    # assetName = assetNamePrompt(assetname, prompt)
+    # if not assetName:
+    #     return False
+    # path = getAssetDir()
+    # if not latest:
+    #     fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    #     fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP LookDev',
+    #                                 fileMode=1, fileFilter=fileFilter,
+    #                                 dir='{}{}/lookDev/WIP'.format(path, assetName))
+    #     if fileName:
+    #         fileName = fileName[0]
+    #     else:
+    #         return False
+    # else:
+    #     fileName = getLatestVersion(assetName, path, 'lookDev/WIP', new=False)
+    # if not newScene():
+    #     return False
+    # cmds.file(fileName, o=1, dns=1, type='mayaAscii')
+    # print 'Loaded WIP LookDev: {}'.format(fileName)
     return True
 
 def publishLookDev(assetName=None, autoName=True, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
-    path = getAssetDir()
-    if not autoName:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish LookDev',
-                                    fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/lookDev/Published'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
-        else:
-            return False
-    else:
-        fileName = getLatestVersion(assetName, path, 'lookDev/Published', new=True)
     setsToSave = []
     for each in cmds.listRelatives('C_geometry_GRP', c=1):
-        setsToSave.extend(cmds.listSets(o='Mesh'))
-    cmds.select(setsToSave, add=1, noExpand=True)
-    cmds.file(fileName, es=True, type='mayaAscii')
-    print 'Saved LookDev: {}'.format(fileName)
+        setsToSave.extend(cmds.listSets(o=each))
+    cmds.select(setsToSave, add=1, noExpand=1)
+    saveMayaFile(assetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
+                 removeReferences=True, selectionOnly=True)
+    # assetName = assetNamePrompt(assetname, prompt)
+    # if not assetName:
+    #     return False
+    # path = getAssetDir()
+    # if not autoName:
+    #     fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+    #     fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish LookDev',
+    #                                 fileMode=0, fileFilter=fileFilter,
+    #                                 dir='{}{}/lookDev/Published'.format(path, assetName))
+    #     if fileName:
+    #         fileName = fileName[0]
+    #     else:
+    #         return False
+    # else:
+    #     fileName = getLatestVersion(assetName, path, 'lookDev/Published', new=True)
+    # setsToSave = []
+    # for each in cmds.listRelatives('C_geometry_GRP', c=1):
+    #     setsToSave.extend(cmds.listSets(o='Mesh'))
+    # cmds.select(setsToSave, add=1, noExpand=True)
+    # cmds.file(fileName, es=True, type='mayaAscii')
+    # print 'Saved LookDev: {}'.format(fileName)
     return True
 
 def referenceLookDev(assetName=None, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'lookDev/Published')
@@ -513,12 +405,8 @@ def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json
 
 
 def createNewPipelineAsset(assetName=None, prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     setAssetName(assetName)
     assetDir = getAssetDir()
@@ -548,58 +436,69 @@ def createNewPipelineAsset(assetName=None, prompt=False):
 
 
 
-def loadMayaFile(assetName='', typ='', prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True):
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     assetDir = getAssetDir()
-    subDir = '{}{}/{}/WIP/'.format(assetDir, assetName, typ)
+    subDir = '{}{}/{}/'.format(assetDir, assetName, typ)
     if not os.path.isdir(subDir):
         print '{} asset does not exist.'.format(assetName)
         return False
-    fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-    fileName = cmds.fileDialog2(dialogStyle=2,
-                                caption='Load {}'.format(typ.capitalize()),
-                                fileMode=1,
-                                fileFilter=fileFilter,
-                                dir=subDir)
+    if latest:
+        fileName = getLatestVersion(assetName, assetDir, typ)
+    else:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2,
+                                    caption='Load {}'.format(typ),
+                                    fileMode=1,
+                                    fileFilter=fileFilter,
+                                    dir=subDir)
+        fileName = fileName[0] if fileName else False
     if fileName:
-        cmds.file(fileName, open=1, force=1)
+        if new:
+            newScene()
+            cmds.file(fileName, open=1, force=1)
+        else:
+            cmds.file(fileName, i=1, dns=1, type='mayaAscii')
         print 'Opened File: {}'.format(fileName)
         return True
     return False
 
-def saveMayaFile(assetName='', typ='', prompt=False):
-    if prompt:
-        assetName = assetNamePrompt()
+def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=False,
+                 selectionOnly=False):
+    assetName = assetNameSetup(assetName, prompt)
     if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
         return False
     assetDir = getAssetDir()
-    subDir = '{}{}/{}/WIP/'.format(assetDir, assetName, typ)
-    fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-    fileName = cmds.fileDialog2(dialogStyle=2,
-                                caption='Save {}'.format(typ.capitalize()),
-                                fileMode=0,
-                                fileFilter=fileFilter,
-                                dir=subDir)[0]
+    subDir = '{}{}/{}/'.format(assetDir, assetName, typ)
+    if autoName:
+        fileName = getLatestVersion(assetName, assetDir, typ, new=1)
+    else:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2,
+                                    caption='Save {}'.format(typ.capitalize()),
+                                    fileMode=0,
+                                    fileFilter=fileFilter,
+                                    dir=subDir)
+        fileName = fileName[0] if fileName else False
     if fileName:
-        cmds.file(rename=fileName)
-        cmds.file(save=True)
+        if removeRefs:
+            removeReferences()
+        if selectionOnly:
+            pass
+        else:
+            cmds.file(rename=fileName)
+            cmds.file(save=True, type='mayaAscii')
+            print 'Saved File: {}'.format(fileName)
 
 def assetNamePrompt():
     result = cmds.promptDialog(title='Asset Name',
                                message='Asset Name:',
-		                       button=['OK', 'Cancel'],
-		                       defaultButton='OK',
-		                       cancelButton='Cancel',
-		                       dismissString='Cancel')
+                               button=['OK', 'Cancel'],
+                               defaultButton='OK',
+                               cancelButton='Cancel',
+                               dismissString='Cancel')
     if result == 'OK':
         assetName = cmds.promptDialog(query=True, text=True)
     else:
@@ -619,3 +518,14 @@ def getAssetName(dialog=False):
     if dialog:
         cmds.confirmDialog(m='Current Asset: {}'.format(name), button=['Ok'])
     return name
+
+def assetNameSetup(assetName, prompt):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        assetName = assetNamePrompt()
+    if not assetName:
+        print 'Asset Name not specified.'
+    return assetName

@@ -26,6 +26,19 @@ def selectRigControls():
         ctrls.extend(getAllControls(rigNode))
     cmds.select(ctrls)
 
+def resetCtrlToBind(ctrl):
+    attr = cmds.listAttr(ctrl, keyable=True)
+    for each in attr:
+        dv = cmds.attributeQuery(each, n=ctrl, ld=1)
+        cmds.setAttr('{}.{}'.format(ctrl, each), dv[0])
+
+def resetRigControlsToBind(selectedOnly=False):
+    if not selectedOnly:
+        selectRigControls()
+    sel = cmds.ls(sl=1)
+    for each in sel:
+        resetCtrlToBind(each)
+
 def getShapeData(ctrlName, color=False):
     curveShapes = utils.getShapeNodes(ctrlName)
     crvData = {}
@@ -37,13 +50,9 @@ def getShapeData(ctrlName, color=False):
         nurbsCrv = api.getNurbsCurve(each)
         cvArray = om.MPointArray()
         knotArray = om.MDoubleArray()
-
-        #nurbsCrv.getCVs(cvArray, om.MSpace.kObject)
         cvArray = nurbsCrv.cvPositions(om.MSpace.kObject)
-        #nurbsCrv.getKnots(knotArray)
         knotArray = nurbsCrv.knots()
 
-        #for cvNum in range(cvArray.length()):
         for cvNum in range(len(cvArray)):
             cv = {'x' : cvArray[cvNum].x,
                   'y' : cvArray[cvNum].y,

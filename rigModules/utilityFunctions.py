@@ -63,6 +63,15 @@ def setupBodyPartName(extraName='', side='C'):
     return newName
 
 def hashToNumber(name, suffix, startNum=1):
+    """ Turns all the hashes in string to numbers. (also checks for
+        naming conflicts)
+        [Args]:
+        name (string) - The base string with hashes
+        suffix (string) - Suffix for the name
+        startNum (int) - The number to start on
+        [Returns]:
+        newName (string) - The new name with hashes replaced
+    """
     hashes = re.findall('#+', name)
     if hashes:
         i = 0
@@ -83,6 +92,14 @@ def hashToNumber(name, suffix, startNum=1):
     return newName
 
 def rename(mObj, newName, startNum=1):
+    """ Renames object with suffix to avoid conflicts.
+        [Args]:
+        mObj (mObj) - The mObj for the node to rename
+        newName (string) - The new name for the node
+        startNum (int) - The number to start on
+        [Returns]:
+        r (string) - renamed object name
+    """
     lN, sN = apiFn.getPath(mObj, returnString=True)
     cmds.rename(lN, 'TMPNAME_OOGIEOOGIE_POOP')
     lN, sN = apiFn.getPath(mObj, returnString=True)
@@ -101,19 +118,39 @@ def rename(mObj, newName, startNum=1):
     return r
 
 def findReplace(mObj, find, replace, startNum=1):
+    """ Finds a string and replaces it with another.
+        (supports regex)
+        [Args]:
+        mObj (mObj) - The mObj for the node to rename
+        find (string) - The string to find
+        replace (string) - The string to replace with
+        startNum (int) - The number to start with
+        [Returns]:
+        r (string) - The new string
+    """
     lN, sN = apiFn.getPath(mObj, returnString=True)
-    # newName = sN.replace(find, replace)
     newName = re.sub(find, replace, sN)
     r = rename(mObj, newName, startNum)
     return r
 
 def renameSelection(newName):
+    """ Renames the selected objects.
+        [Args]:
+        newName (string) - The new name for the objects
+        [Returns]:
+        True on success
+    """
     sel = apiFn.getSelectionAsMObjs()
     for i, mObj in enumerate(sel, 1):
         rename(mObj, newName, i)
     return True
 
 def findReplaceSelection(find, replace):
+    """ Find and replace for the current selection.
+        [Args]:
+        find (string) - The string to find
+        replace (string) - The string to replace with
+    """
     sel = apiFn.getSelectionAsMObjs()
     for i, mObj in enumerate(sel, 1):
         findReplace(mObj, find, replace, startNum=i)

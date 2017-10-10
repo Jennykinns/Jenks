@@ -28,7 +28,8 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
         suffix = 'ma'
         name = assetName
     fileDirectory = '{}{}/{}/'.format(path, assetName, location)
-    ls = os.listdir(fileDirectory)
+    # ls = os.listdir(fileDirectory)
+    ls = [f for f in os.listdir(fileDirectory) if os.path.isfile('{}/{}'.format(fileDirectory, f))]
     relevantFiles = []
     for each in sorted(ls):
         lsGeo = each.rsplit('_', 1 if not location == 'model/Published' else 2)[0]
@@ -181,6 +182,32 @@ def referenceRig(assetName=None, prompt=False):
     print 'Referenced Rig: {}'.format(fileName)
     return True
 
+def loadWipRig(assetName=None, latest=False, prompt=False):
+    if prompt:
+        assetName = assetNamePrompt()
+    if not assetName:
+        assetName = getAssetName()
+    if not assetName:
+        print 'Asset Name not specified.'
+        return False
+    path = getAssetDir()
+    if not latest:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Load WIP Rig',
+                                    fileMode=1, fileFilter=fileFilter,
+                                    dir='{}{}/rig/WIP'.format(path, assetName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(assetName, path, 'rig/WIP', new=False)
+    if not newScene():
+        return False
+    cmds.file(fileName, o=1, dns=1, type='mayaAscii')
+    print 'Loaded WIP Model: {}'.format(fileName)
+    return True
+
 def loadRigScript(assetName=None, prompt=False, build=False):
     if prompt:
         assetName = assetNamePrompt()
@@ -196,7 +223,6 @@ def loadRigScript(assetName=None, prompt=False, build=False):
     rigScriptTxt = f.read()
     f.close()
     mel.eval('buildNewExecuterTab -1  "{}_rig"  "python" 1'.format(assetName))
-    # executer=mel.eval("$v=$gLastFocusedCommandExecuter")
     executer = mel.eval('$a=$gCommandExecuter;')[-1]
     cmds.cmdScrollFieldExecuter(executer, e=1, t=rigScriptTxt, exc=build, sla=1)
 

@@ -487,6 +487,14 @@ class newNode:
             self.name = cmds.group(n=nodeName, em=1)
         elif node == 'control':
             self.name = cmds.circle(n=nodeName, ch=0)[0]
+        elif node == 'follicle':
+            fol = cmds.createNode(node, ss=1)
+            folTransform = cmds.listRelatives(fol, p=1)
+            self.name = cmds.rename(folTransform, nodeName)
+        elif node == 'hairSystem':
+            hs = cmds.createNode(node, ss=1)
+            hsTransform = cmds.listRelatives(hs, p=1)
+            self.name = cmds.rename(hsTransform, nodeName)
         else:
             self.name = cmds.createNode(node, n=nodeName, ss=1)
         if parent:

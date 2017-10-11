@@ -14,7 +14,6 @@ reload(ikFn)
 reload(ctrlFn)
 reload(miscFn)
 reload(defaultBodyOptions)
-#reload(suffixDictionary)
 
 def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig):
     ### MOVE TO MISC FUNCTIONS???
@@ -256,20 +255,9 @@ class armModule:
                 revNd = utils.newNode('reverse', name='{}autoClavSw'.format(extraName),
                                       side=self.side)
                 revNd.connect('inputX', self.settingCtrl.ctrl.autoClav, mode='to')
-                # for constr, p in zip([autoClavSwConstr, autoClavSwCtrlConstr],
-                #                      [newClavJnts[1], aCMechJnts[-1]]):
                 cmds.connectAttr(self.settingCtrl.ctrl.autoClav,
                                  '{}.{}W1'.format(autoClavSwCtrlConstr, aCMechJnts[-1]))
                 revNd.connect('outputX', '{}.{}W0'.format(autoClavSwCtrlConstr, parent))
-                    # for i, each in enumerate([parent, p]):
-                    #     condNd = utils.newNode('condition', name='{}autoClavSw'.format(extraName),
-                    #                            side=self.side, operation=0)
-                    #     cmds.setAttr('{}.secondTerm'.format(condNd.name), i)
-                    #     cmds.setAttr('{}.colorIfTrueR'.format(condNd.name), 1)
-                    #     cmds.setAttr('{}.colorIfFalseR'.format(condNd.name), 0)
-                    #     condNd.connect('firstTerm', self.settingCtrl.ctrl.autoClav, mode='to')
-                    #     condNd.connect('outColorR', '{}.{}W{}'.format(constr[0], each, i),
-                    #                    mode='from')
 
         ## fk
         if options['FK']:
@@ -953,7 +941,8 @@ class tailModule:
             for jnt in jnts:
                 utils.addJntToSkinJnt(jnt, self.rig)
             miscFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
-                                         extraName=self.extraName, parent=parent)
+                                         extraName=self.extraName, parent=parent,
+                                         dyn=options['dynamics'])
         else:
             tailCtrls = []
             ctrlParent = parent

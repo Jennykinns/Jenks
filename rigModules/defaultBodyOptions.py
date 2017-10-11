@@ -21,6 +21,6 @@ head = {
 
 tail = {
     'IK' : True,
-    'IKLayers' : 2,
+    # 'IKLayers' : 2,
     'dynamics' : False,
 }

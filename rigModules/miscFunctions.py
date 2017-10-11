@@ -9,7 +9,56 @@ from Jenks.scripts.rigModules import orientJoints
 reload(utils)
 reload(orientJoints)
 
-def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLayers=2, parent=None):
+def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig):
+    jntSuffix = suffix['joint']
+    newJntChains = []
+    ## create duplicate chains
+    for chain in ['IK', 'FK']:
+        newJnts = utils.duplicateJntChain(chain, jnts, parent=mechSkelGrp.name)
+        newJntChains.append(newJnts)
+    ikJnts = newJntChains[0]
+    fkJnts = newJntChains[1]
+    for i, each in enumerate(jnts):
+        newName = '{}_result{}'.format(each.rsplit('_', 1)[0], jntSuffix)
+        jnts[i] = cmds.rename(each, newName)
+        utils.addJntToSkinJnt(jnts[i], rig=rig)
+    ## settings control
+    module.settingCtrl = ctrlFn.ctrl(name='{}{}Settings'.format(extraName, moduleType),
+                                     guide='{}{}Settings{}'.format(module.moduleName,
+                                                                   moduleType, suffix['locator']),
+                                     deleteGuide=True, side=module.side, skipNum=True,
+                                     parent=module.rig.settingCtrlsGrp.name,
+                                     scaleOffset=rig.scaleOffset, rig=rig)
+    if moduleType == 'arm':
+        settingJnt = jnts[3]
+    else:
+        settingJnt = jnts[2]
+    module.settingCtrl.makeSettingCtrl(ikfk=True, parent=settingJnt)
+    ## parent constraints
+    for jnt, ikJnt, fkJnt in zip(jnts, ikJnts, fkJnts):
+        parConstr = cmds.parentConstraint(ikJnt, fkJnt, jnt)
+        cmds.connectAttr(module.settingCtrl.ctrl.ikfkSwitch, '{}.{}W1'.format(parConstr[0], fkJnt))
+        swRev = utils.newNode('reverse', name='{}{}IKFKSw'.format(extraName, moduleType),
+                              side=module.side)
+        swRev.connect('inputX', module.settingCtrl.ctrl.ikfkSwitch, mode='to')
+        swRev.connect('outputX', '{}.{}W0'.format(parConstr[0], ikJnt), mode='from')
+    ## control vis groups
+    ikCtrlGrp = utils.newNode('group', name='{}{}IKCtrls'.format(extraName, moduleType),
+                              side=module.side, parent=ctrlGrp.name, skipNum=True)
+    fkCtrlGrp = utils.newNode('group', name='{}{}FKCtrls'.format(extraName, moduleType),
+                              side=module.side, parent=ctrlGrp.name, skipNum=True)
+    cmds.setDrivenKeyframe(ikCtrlGrp.name, at='visibility',
+                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0.999, v=1)
+    cmds.setDrivenKeyframe(ikCtrlGrp.name, at='visibility',
+                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=1, v=0)
+    cmds.setDrivenKeyframe(fkCtrlGrp.name, at='visibility',
+                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0.001, v=1)
+    cmds.setDrivenKeyframe(fkCtrlGrp.name, at='visibility',
+                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0, v=0)
+    return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
+
+def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLayers=2,
+                          parent=None, dyn=False):
     moduleName = utils.setupBodyPartName(extraName, side)
     extraName = '{}_'.format(extraName) if extraName else ''
     col = utils.getColors(side)
@@ -84,8 +133,65 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
     for i, each in enumerate(baseLayerLocs):
         cmds.connectAttr('{}.wp'.format(each.name), '{}Shape.cv[{}]'.format(midCrv, i))
     ## create skin crv FROM MID JNTS
-    skinCrv = utils.createCrvFromObjs(midJnts, crvName='{}_skinLayer'.format(name),
-                                      side=side, extraName=extraName)
+    skinCrvIn = utils.createCrvFromObjs(midJnts, side=side, extraName=extraName,
+                                        crvName='{}_skinLayer{}'.format(name,
+                                                                        'DynIn' if dyn else ''))
+    skinCrvInShape = cmds.listRelatives(skinCrvIn, s=1)[0]
+    if dyn:
+        dynMechGrp = utils.newNode('group', name='{}Dynamics'.format(name), side=side,
+                                   parent=mechGrp.name, skipNum=True)
+        cmds.parent(skinCrvIn, dynMechGrp.name)
+        skinCrv = utils.createCrvFromObjs(midJnts, crvName='{}_skinLayer'.format(name),
+                                          side=side, extraName=extraName)
+        ## create output curve
+        dynOutCrv = utils.createCrvFromObjs(midJnts, side=side, extraName=extraName,
+                                            crvName='{}_skinLayerDynOut'.format(name))
+        cmds.parent(dynOutCrv, dynMechGrp.name)
+        dynOutCrvShape = cmds.listRelatives(dynOutCrv, s=1)[0]
+        ## create follicle
+        fol = utils.newNode('follicle', name='{}_skinLayerDyn'.format(name), side=side,
+                            parent=dynMechGrp.name)
+        cmds.setAttr('{}.restPose'.format(fol.name),  1)
+        cmds.setAttr('{}.startDirection'.format(fol.name),  1)
+        cmds.setAttr('{}.degree'.format(fol.name),  3)
+        ## create hair system
+        hs = utils.newNode('hairSystem', name='{}_skinLayerDyn'.format(name), side=side,
+                           parent=dynMechGrp.name)
+        ## create nucleus
+        nuc = utils.newNode('nucleus', name='{}_skinLayerDyn'.format(name), side=side,
+                            parent=dynMechGrp.name)
+        ## connect shit
+        fol.connect('startPosition', '{}.local'.format(skinCrvInShape), mode='to')
+        fol.connect('startPositionMatrix', '{}.wm'.format(skinCrvIn), mode='to')
+        fol.connect('currentPosition', '{}.outputHair[0]'.format(hs.name), mode='to')
+        fol.connect('outCurve', '{}.create'.format(dynOutCrvShape), mode='from')
+        fol.connect('outHair', '{}.inputHair[0]'.format(hs.name), mode='from')
+        hs.connect('currentState', '{}.inputActive[0]'.format(nuc.name), mode='from')
+        hs.connect('startState', '{}.inputActiveStart[0]'.format(nuc.name), mode='from')
+        hs.connect('nextState', '{}.outputObjects[0]'.format(nuc.name), mode='to')
+        hs.connect('startFrame', '{}.startFrame'.format(nuc.name), mode='to')
+        hs.connect('currentTime', 'time1.outTime', mode='to')
+        nuc.connect('currentTime', 'time1.outTime', mode='to')
+        ## blend shape curves
+        blendNode = cmds.blendShape(skinCrvIn, dynOutCrv, skinCrv,
+                                    n='{}_{}Dynamics{}'.format(side, name, suffix['blend']))[0]
+        ## connect blend shape to attribute
+        ##- create dyn control
+        dynCtrl = ctrlFn.ctrl(name='{}Settings'.format(name),
+                              guide='{}_{}SettingsGuide{}'.format(side, name, suffix['locator']),
+                              rig=rig, deleteGuide=True, side=side, skipNum=True,
+                              parent=rig.settingCtrlsGrp.name)
+        dynCtrl.makeSettingCtrl(ikfk=False, parent=jnts[0])
+        dynCtrl.addAttr('dynSwitch', nn='Dynamics Switch', minVal=0, maxVal=1, defaultVal=1)
+        dynSwitchRev = utils.newNode('reverse',  name='{}DynamicsSwitch'.format(name), side=side)
+        cmds.connectAttr(dynCtrl.ctrl.dynSwitch, '{}.{}'.format(blendNode, dynOutCrv))
+        dynSwitchRev.connect('inputX', dynCtrl.ctrl.dynSwitch, mode='to')
+        dynSwitchRev.connect('outputX', '{}.{}'.format(blendNode, skinCrvIn), mode='from')
+
+    else:
+        skinCrv = skinCrvIn
+
+
     ## ik spline skin crv to skin jnts
     skinIKSpline = ikFn.ik(sj=jnts[0], ej=jnts[-1],
                            name='{}{}_skinLayerIK'.format(extraName, name), side=side)
@@ -96,6 +202,6 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
                                wuType=4)
     ## connect skin crv cvs to mid locators
     for i, each in enumerate(midLayerLocs):
-        cmds.connectAttr('{}.wp'.format(each.name), '{}Shape.cv[{}]'.format(skinCrv, i))
+        cmds.connectAttr('{}.wp'.format(each.name), '{}Shape.cv[{}]'.format(skinCrvIn, i))
 
     ##

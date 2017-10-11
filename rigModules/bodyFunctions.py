@@ -14,56 +14,6 @@ reload(ikFn)
 reload(ctrlFn)
 reload(miscFn)
 reload(defaultBodyOptions)
-#reload(suffixDictionary)
-
-def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig):
-    ### MOVE TO MISC FUNCTIONS???
-    jntSuffix = suffix['joint']
-    newJntChains = []
-    ## create duplicate chains
-    for chain in ['IK', 'FK']:
-        newJnts = utils.duplicateJntChain(chain, jnts, parent=mechSkelGrp.name)
-        newJntChains.append(newJnts)
-    ikJnts = newJntChains[0]
-    fkJnts = newJntChains[1]
-    for i, each in enumerate(jnts):
-        newName = '{}_result{}'.format(each.rsplit('_', 1)[0], jntSuffix)
-        jnts[i] = cmds.rename(each, newName)
-        utils.addJntToSkinJnt(jnts[i], rig=rig)
-    ## settings control
-    module.settingCtrl = ctrlFn.ctrl(name='{}{}Settings'.format(extraName, moduleType),
-                                     guide='{}{}Settings{}'.format(module.moduleName,
-                                                                   moduleType, suffix['locator']),
-                                     deleteGuide=True, side=module.side, skipNum=True,
-                                     parent=module.rig.settingCtrlsGrp.name,
-                                     scaleOffset=rig.scaleOffset, rig=rig)
-    if moduleType == 'arm':
-        settingJnt = jnts[3]
-    else:
-        settingJnt = jnts[2]
-    module.settingCtrl.makeSettingCtrl(ikfk=True, parent=settingJnt)
-    ## parent constraints
-    for jnt, ikJnt, fkJnt in zip(jnts, ikJnts, fkJnts):
-        parConstr = cmds.parentConstraint(ikJnt, fkJnt, jnt)
-        cmds.connectAttr(module.settingCtrl.ctrl.ikfkSwitch, '{}.{}W1'.format(parConstr[0], fkJnt))
-        swRev = utils.newNode('reverse', name='{}{}IKFKSw'.format(extraName, moduleType),
-                              side=module.side)
-        swRev.connect('inputX', module.settingCtrl.ctrl.ikfkSwitch, mode='to')
-        swRev.connect('outputX', '{}.{}W0'.format(parConstr[0], ikJnt), mode='from')
-    ## control vis groups
-    ikCtrlGrp = utils.newNode('group', name='{}{}IKCtrls'.format(extraName, moduleType),
-                              side=module.side, parent=ctrlGrp.name, skipNum=True)
-    fkCtrlGrp = utils.newNode('group', name='{}{}FKCtrls'.format(extraName, moduleType),
-                              side=module.side, parent=ctrlGrp.name, skipNum=True)
-    cmds.setDrivenKeyframe(ikCtrlGrp.name, at='visibility',
-                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0.999, v=1)
-    cmds.setDrivenKeyframe(ikCtrlGrp.name, at='visibility',
-                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=1, v=0)
-    cmds.setDrivenKeyframe(fkCtrlGrp.name, at='visibility',
-                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0.001, v=1)
-    cmds.setDrivenKeyframe(fkCtrlGrp.name, at='visibility',
-                           cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0, v=0)
-    return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
 
 
 class armModule:
@@ -103,7 +53,7 @@ class armModule:
         ## ik/fk
         if options['IK'] and options['FK']:
             clavChild = armMechSkelGrp.name
-            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = ikfkMechanics(self, extraName, jnts,
+            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = miscFn.ikfkMechanics(self, extraName, jnts,
                                                                        armMechSkelGrp, armCtrlsGrp,
                                                                        moduleType='arm', rig=self.rig)
         else:
@@ -256,20 +206,9 @@ class armModule:
                 revNd = utils.newNode('reverse', name='{}autoClavSw'.format(extraName),
                                       side=self.side)
                 revNd.connect('inputX', self.settingCtrl.ctrl.autoClav, mode='to')
-                # for constr, p in zip([autoClavSwConstr, autoClavSwCtrlConstr],
-                #                      [newClavJnts[1], aCMechJnts[-1]]):
                 cmds.connectAttr(self.settingCtrl.ctrl.autoClav,
                                  '{}.{}W1'.format(autoClavSwCtrlConstr, aCMechJnts[-1]))
                 revNd.connect('outputX', '{}.{}W0'.format(autoClavSwCtrlConstr, parent))
-                    # for i, each in enumerate([parent, p]):
-                    #     condNd = utils.newNode('condition', name='{}autoClavSw'.format(extraName),
-                    #                            side=self.side, operation=0)
-                    #     cmds.setAttr('{}.secondTerm'.format(condNd.name), i)
-                    #     cmds.setAttr('{}.colorIfTrueR'.format(condNd.name), 1)
-                    #     cmds.setAttr('{}.colorIfFalseR'.format(condNd.name), 0)
-                    #     condNd.connect('firstTerm', self.settingCtrl.ctrl.autoClav, mode='to')
-                    #     condNd.connect('outColorR', '{}.{}W{}'.format(constr[0], each, i),
-                    #                    mode='from')
 
         ## fk
         if options['FK']:
@@ -482,7 +421,7 @@ class legModule:
                                        guessUp=1)
         ## ik/fk
         if options['IK'] and options['FK']:
-            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = ikfkMechanics(self, extraName, jnts,
+            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = miscFn.ikfkMechanics(self, extraName, jnts,
                                                                        legMechSkelGrp, legCtrlsGrp,
                                                                        moduleType='leg',
                                                                        rig=self.rig)
@@ -953,7 +892,8 @@ class tailModule:
             for jnt in jnts:
                 utils.addJntToSkinJnt(jnt, self.rig)
             miscFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
-                                         extraName=self.extraName, parent=parent)
+                                         extraName=self.extraName, parent=parent,
+                                         dyn=options['dynamics'])
         else:
             tailCtrls = []
             ctrlParent = parent

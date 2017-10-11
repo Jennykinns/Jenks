@@ -23,4 +23,8 @@ suffix = {
     'setRange' : '_SETR',
     'reverse' : '_REV',
     'decomposeMatrix' : '_DCM',
+    'follicle' : '_FOL',
+    'hairSystem' : '_HS',
+    'nucleus' : '_NUC',
+    'blend' : '_BLND',
 }

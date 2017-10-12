@@ -269,7 +269,7 @@ class ctrl:
                                                  skipNum=skipNum))
             utils.setOutlinerColor(self.offsetGrps[-1].name, color=(0.6, 0.6, 0.55))
             self.offsetGrps[-1].parent(par, relative=True)
-            par = self.offsetGrps[-1]
+            par = self.offsetGrps[-1].name
 
     def modifyShape(self, shape=None, color=False, rotation=(0, 0, 0),
                     translation=(0, 0, 0), scale=(1, 1, 1), mirror=False):

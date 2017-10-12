@@ -84,14 +84,25 @@ def hashToNumber(name, suffix, startNum=1):
                 newName = '{}{}'.format(str(i+startNum).zfill(numFill).join(name.split(each)),
                                         suffix)
     else:
-        newName = name
+        newName = '{}{}'.format(name, suffix)
         i = 0
         while cmds.objExists(newName):
             i += 1
             newName = '{}{}{}'.format(newName, i, suffix)
     return newName
 
-def rename(mObj, newName, startNum=1):
+def getSuffixForObjType(obj):
+    shapeNode = cmds.listRelatives(obj, s=1, f=1)
+    objType = cmds.objectType(shapeNode[0] if shapeNode else obj)
+    if objType in suffixDictionary.suffix.keys():
+        suffix = suffixDictionary.suffix[objType]
+    else:
+        cmds.warning('{} {}'.format(objType,
+                     'Node type not in suffixDictionary, contact the Pipeline TD to add it.'))
+        suffix = ''
+    return suffix
+
+def rename(mObj, newName, startNum=1, skipSuff=False):
     """ Renames object with suffix to avoid conflicts.
         [Args]:
         mObj (mObj) - The mObj for the node to rename
@@ -103,15 +114,8 @@ def rename(mObj, newName, startNum=1):
     lN, sN = apiFn.getPath(mObj, returnString=True)
     cmds.rename(lN, 'TMPNAME_OOGIEOOGIE_POOP')
     lN, sN = apiFn.getPath(mObj, returnString=True)
-    shapeNode = cmds.listRelatives(lN, s=1, f=1)
-    objType = cmds.objectType(shapeNode[0] if shapeNode else lN)
-    if objType in suffixDictionary.suffix.keys():
-        suffix = suffixDictionary.suffix[objType]
-    else:
-        cmds.warning('{} {}'.format(objType,
-                     'Node type not in suffixDictionary, contact the Pipeline TD to add it.'))
-        suffix = ''
-    if newName.endswith(suffix):
+    suffix = getSuffixForObjType(lN)
+    if newName.endswith(suffix) or skipSuff:
         suffix = ''
     newName = hashToNumber(newName, suffix, startNum)
     r = cmds.rename(lN, newName)
@@ -133,6 +137,44 @@ def findReplace(mObj, find, replace, startNum=1):
     r = rename(mObj, newName, startNum)
     return r
 
+def stripName(mObj, stripFromRight=False, startNum=1):
+    """ Strips the left (or right) character from the name segment
+        of an object.
+        [Args]:
+        mObj (mObj) - The mObj for the node to rename
+        stripFromRight (bool) - Toggles stripping from the right
+                                instead of left
+        startNum (int) - The number to start with
+        [Returns]:
+        r (string) - The new string
+    """
+    lN, sN = apiFn.getPath(mObj, returnString=True)
+    side, nameSegment = sN.split('_', 1)
+    nameSegment = nameSegment.rsplit('_', 1)[0]
+    if stripFromRight:
+        newName = nameSegment[:-1]
+    else:
+        newName = nameSegment[1:]
+    newName = '{}_{}'.format(side, newName)
+    r = rename(mObj, newName, startNum)
+    return r
+
+def swapSide(mObj, side='C', startNum=1):
+    """ Swaps the side prefix.
+        [Args]:
+        mObj (mObj) - The mObj for the node to rename
+        side (string) - The side to swap to ('R', 'L' or 'C')
+        startNum (int) - The number to start with
+        [Returns]:
+        r (string) - The new string
+    """
+    lN, sN = apiFn.getPath(mObj, returnString=True)
+    nameSegment = sN[1:]
+    newName = '{}{}'.format(side, nameSegment)
+    r = rename(mObj, newName, startNum, skipSuff=True)
+    return r
+
+
 def renameSelection(newName):
     """ Renames the selected objects.
         [Args]:
@@ -150,10 +192,38 @@ def findReplaceSelection(find, replace):
         [Args]:
         find (string) - The string to find
         replace (string) - The string to replace with
+        [Returns]:
+        True on success
     """
     sel = apiFn.getSelectionAsMObjs()
     for i, mObj in enumerate(sel, 1):
         findReplace(mObj, find, replace, startNum=i)
+    return True
+
+def stripNameSelection(stripFromRight=False):
+    """ Strips the name of the selected objects.
+        [Args]:
+        stripFromRight (bool) - Toggles stripping from the right
+                                instead of the left
+        [Returns]:
+        True on success
+    """
+    sel = apiFn.getSelectionAsMObjs()
+    for i, mObj in enumerate(sel, 1):
+        stripName(mObj, stripFromRight=stripFromRight, startNum=i)
+    return True
+
+def swapSideSelection(side='C'):
+    """ Swaps the side prefix of the selected objects.
+        [Args]:
+        side (string) - The side to swap to ('R', 'L' or 'C')
+        [Returns]:
+        True on success
+    """
+    sel = apiFn.getSelectionAsMObjs()
+    for i, mObj in enumerate(sel, 1):
+        swapSide(mObj, side, startNum=i)
+    return True
 
 
 def addJntToSkinJnt(jnt, rig):

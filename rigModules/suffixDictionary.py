@@ -10,6 +10,7 @@ suffix = {
     'geometry' : '_GEO',
     'mesh' : '_GEO',
     'nurbsCrv' : '_CRV',
+    'nurbsCurve' : '_CRV',
     'ikHandle' : '_HDL',
     'ikEffector' : '_EFF',
     'distanceBetween' : '_DIST',

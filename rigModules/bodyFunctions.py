@@ -945,13 +945,17 @@ class tailModule:
                                          extraName=self.extraName, parent=parent,
                                          dyn=options['dynamics'])
         else:
+            cmds.parent(jnts[0], self.rig.skelGrp.name)
             tailCtrls = []
-            ctrlParent = parent
+            ctrlParent = self.rig.ctrlsGrp.name
             for i, jnt in enumerate(jnts):
+                utils.addJntToSkinJnt(jnt, self.rig)
                 ctrlCol = col['col1'] if i % 2 else col['col2']
                 ctrl = ctrlFn.ctrl(name='{}tail'.format(extraName), side=self.side, guide=jnt,
                                    rig=self.rig, parent=ctrlParent,
                                    scaleOffset=self.rig.scaleOffset)
+                if i < 1:
+                    cmds.parentConstraint(parent, ctrl.offsetGrps[0].name, mo=1)
                 ctrl.modifyShape(shape='circle', color=ctrlCol)
                 ctrl.constrain(jnt)
                 ctrl.lockAttr(['t', 's'])

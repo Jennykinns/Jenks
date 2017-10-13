@@ -284,9 +284,9 @@ class spineModule:
 
     def createFromJnts(self, autoOrient=False):
         jntSuffix = suffix['joint']
-        spineJnts = utils.getChildrenBetweenObjs('{}spineBase{}'.format(self.moduleName,
+        spineJnts = utils.getChildrenBetweenObjs('{}spine_base{}'.format(self.moduleName,
                                                                         jntSuffix),
-                                                 '{}spineEnd{}'.format(self.moduleName,
+                                                 '{}spine_end{}'.format(self.moduleName,
                                                                        jntSuffix))
         self.spineMech(autoOrient, spineJnts)
 
@@ -961,3 +961,133 @@ class tailModule:
                 ctrl.lockAttr(['t', 's'])
                 ctrlParent = ctrl.ctrlEnd
                 tailCtrls.append(ctrl)
+
+
+def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    partGrp = '{}{}{}'.format(moduleName, typ, suffix['group'])
+    partGuidesJnts = cmds.listRelatives(partGrp, type='joint', ad=1)
+    partGuidesJnts.reverse()
+    if not chain:
+        oldNewNames = zip(partGuidesJnts, jntNames)
+    else:
+        oldNewNames = []
+        for i, each in enumerate(partGuidesJnts):
+            if i == 0:
+                oldNewNames.append((each, jntNames[0]))
+            elif i == (len(partGuidesJnts)-1):
+                oldNewNames.append((each, jntNames[-1]))
+            else:
+                oldNewNames.append((each, jntNames[1]))
+    for each, name in oldNewNames:
+        cmds.select(each)
+        utils.renameSelection(name)
+
+def renameBodyPartLocGuides(typ, locNames, side='C', extraName=''):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    partGrp = '{}{}{}'.format(moduleName, typ, suffix['group'])
+    locators = cmds.listRelatives(partGrp)[1:]
+    # locators = list(set(cmds.listRelatives(partGrp))
+    #                 - set(cmds.listRelatives(partGrp, type='joint')))
+    for each, name in zip(locators, locNames):
+        cmds.select(each)
+        utils.renameSelection(name)
+    return locators
+
+def renameLegGuides(side='C', extraName=''):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    legGrp = '{}leg{}'.format(moduleName, suffix['group'])
+    jntNameList = [
+        '{}hip'.format(moduleName),
+        '{}knee'.format(moduleName),
+        '{}ankle'.format(moduleName),
+        '{}footBall'.format(moduleName),
+        '{}footToes'.format(moduleName),
+    ]
+    renameBodyPartJntGuides('leg', jntNameList, side, extraName)
+
+    locators = renameBodyPartLocGuides('leg', ['{}legPV'.format(moduleName),
+                                               '{}legSettings'.format(moduleName)],
+                                       side, extraName)
+
+    footGuides = cmds.listRelatives(locators[2])
+    cmds.select(locators[2])
+    utils.renameSelection('{}footGuides'.format(moduleName))
+    footGuideNames = [
+        '{}footCtrlGuide'.format(moduleName),
+        '{}footHeelGuide'.format(moduleName),
+        '{}footToesGuide'.format(moduleName),
+        '{}footInnerGuide'.format(moduleName),
+        '{}footOuterGuide'.format(moduleName),
+    ]
+    for each, name in zip(footGuides, footGuideNames):
+        cmds.select(each)
+        utils.renameSelection(name)
+
+    cmds.parent(cmds.listRelatives(legGrp), w=1)
+    cmds.delete(legGrp)
+    cmds.select(cl=1)
+
+def renameArmGuides(side='C', extraName=''):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    armGrp = '{}arm{}'.format(moduleName, suffix['group'])
+    jntNameList = [
+        '{}clavicle'.format(moduleName),
+        '{}shoulder'.format(moduleName),
+        '{}elbow'.format(moduleName),
+        '{}wrist'.format(moduleName),
+        '{}handEnd'.format(moduleName),
+    ]
+    renameBodyPartJntGuides('arm', jntNameList, side, extraName)
+    renameBodyPartLocGuides('arm', ['{}armPV'.format(moduleName),
+                                    '{}armSettings'.format(moduleName)],
+                            side, extraName)
+
+    cmds.parent(cmds.listRelatives(armGrp), w=1)
+    cmds.delete(armGrp)
+    cmds.select(cl=1)
+
+def renameSpineGuides(side='C', extraName=''):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    spineGrp = '{}spine{}'.format(moduleName, suffix['group'])
+    jntNameList = [
+        '{}spine_base'.format(moduleName),
+        '{}spine_##'.format(moduleName),
+        '{}spine_end'.format(moduleName),
+    ]
+    renameBodyPartJntGuides('spine', jntNameList, chain=True)
+    cmds.parent(cmds.listRelatives(spineGrp), w=1)
+    cmds.delete(spineGrp)
+    cmds.select(cl=1)
+
+def renameHeadGuides(side='C', extraName=''):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    headGrp = '{}head{}'.format(moduleName, suffix['group'])
+    jntNameList = [
+        '{}head'.format(moduleName),
+        '{}headEnd'.format(moduleName),
+    ]
+    renameBodyPartJntGuides('head', jntNameList)
+    cmds.parent(cmds.listRelatives(headGrp), w=1)
+    cmds.delete(headGrp)
+    cmds.select(cl=1)
+
+def renameTailGuides(side='C', extraName=''):
+    moduleName = utils.setupBodyPartName(extraName, side)
+    tailGrp = '{}tail{}'.format(moduleName, suffix['group'])
+    jntNameList = [
+        '{}tail_base'.format(moduleName),
+        '{}tail_##'.format(moduleName),
+        '{}tail_tip'.format(moduleName),
+    ]
+    renameBodyPartJntGuides('tail', jntNameList, chain=True)
+    childs = cmds.listRelatives(tailGrp)
+    if len(childs) > 1:
+        cmds.select(childs[1])
+        utils.renameSelection('{}tailSettings'.format(moduleName))
+    cmds.parent(cmds.listRelatives(tailGrp), w=1)
+    cmds.delete(tailGrp)
+    cmds.select(cl=1)
+
+## fingers
+## toes

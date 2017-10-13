@@ -145,9 +145,20 @@ def loadRigScript(assetName=None, prompt=False, build=False):
     rigScriptTxt = f.read()
     f.close()
     cmds.ScriptEditor()
-    mel.eval('buildNewExecuterTab -1  "{}_rig"  "python" 1'.format(assetName))
+    gCommandExecuterTabs = mel.eval('$v = $gCommandExecuterTabs')
+    tabLabels = cmds.tabLayout(gCommandExecuterTabs, q=1, tl=1)
+    tabIDs = cmds.tabLayout(gCommandExecuterTabs, q=1, ca=1)
+    create = True
+    for i, each in enumerate(tabLabels):
+        if '{}_rig'.format(assetName) == each:
+            create = False
+            cmds.tabLayout(gCommandExecuterTabs, e=1, sti=i+1)
+    if create:
+        mel.eval('buildNewExecuterTab -1  "{}_rig"  "python" 1'.format(assetName))
     executer = mel.eval('$a=$gCommandExecuter;')[-1]
     cmds.cmdScrollFieldExecuter(executer, e=1, t=rigScriptTxt, exc=build, sla=1)
+    numOfTabs = cmds.tabLayout(gCommandExecuterTabs, q=1, nch=1)
+    cmds.tabLayout(gCommandExecuterTabs, e=1, selectTabIndex=numOfTabs)
 
 
 def loadGeo(assetName=None, group=None, prompt=False, abc=True):

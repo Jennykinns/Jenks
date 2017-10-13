@@ -169,8 +169,11 @@ def swapSide(mObj, side='C', startNum=1):
         r (string) - The new string
     """
     lN, sN = apiFn.getPath(mObj, returnString=True)
-    nameSegment = sN[1:]
-    newName = '{}{}'.format(side, nameSegment)
+    if sN.startswith(('L_', 'R_', 'C_')):
+        nameSegment = sN[2:]
+    else:
+        nameSegment = sN
+    newName = '{}_{}'.format(side, nameSegment)
     r = rename(mObj, newName, startNum, skipSuff=True)
     return r
 
@@ -224,6 +227,13 @@ def swapSideSelection(side='C'):
     for i, mObj in enumerate(sel, 1):
         swapSide(mObj, side, startNum=i)
     return True
+
+def addSuffixToSelection():
+    sel = apiFn.getSelectionAsMObjs()
+    for i, mObj in enumerate(sel, 1):
+        lN, sN = apiFn.getPath(mObj, returnString=True)
+        # suffix = getSuffixForObjType(lN)
+        r = rename(mObj, sN, startNum=i, skipSuff=False)
 
 
 def addJntToSkinJnt(jnt, rig):

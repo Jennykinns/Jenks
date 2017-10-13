@@ -60,7 +60,7 @@ class myTool(QtWidgets.QDialog):
         # self.ui.prefix_Ledit.textChanged.connect(self.updatePrefixLedit)
         # self.ui.prefix_Btn.released.connect(self.updatePrefixBtn)
         # self.ui.suffix_Ledit.textChanged.connect(self.updateSuffixLedit)
-        # self.ui.suffix_Btn.released.connect(self.updateSuffixBtn)
+        self.ui.suffix_Btn.released.connect(self.addSuffix)
 
         ## Preset Prefix Buttons
         # self.ui.prefixL_Btn.released.connect(self.updatePreLBtn)
@@ -99,6 +99,9 @@ class myTool(QtWidgets.QDialog):
     def findReplaceSelection(self, *args):
         ## do findReplace
         utils.findReplaceSelection(self.findVal, self.replaceVal)
+
+    def addSuffix(self, *args):
+        utils.addSuffixToSelection()
 
     def nameStripL(self, *args):
         ## do L strip

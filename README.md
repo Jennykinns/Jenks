@@ -109,6 +109,28 @@ To finish, publish your rig through the pipeline menu. Maya file will be located
 
 At anytime you can go back and edit your guide scene and rebuild the rig.
 
+## Bugs
+
+Bugs should be submitted through github [Link](https://github.com/Jennykinns/Jenks/issues). When subitting a bug be as specific as you can, check the script editor and include any errors or warnings that are related to my scripts.
+
+Use the following as a guide to submitting:
+
+```
+[TITLE] Short and to the point.
+
+**Expected Behavior:**
+What you expected to happen.
+
+**Actual Behavior:**
+What actually happened.
+
+**How To Reproduce:**
+The steps in order to reproduce this issue.
+
+**Extra Information:**
+Errors, warnings or other details worthy of including.
+```
+
 ## Updating
 
 This repo will most likely be updated frequently - to make sure your rigs stay up to date, you may have to rebuild them mutiliple times, this won't be much of an issue if you make sure to save the skinning and control shapes. I'll do my best to not break any animations with updates, but no promises. Worst case scenario you can always just not update and stick to a rig with slightly fewer features.

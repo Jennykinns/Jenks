@@ -1,0 +1,84 @@
+///UH menu system Maya 2016///
+///
+///
+///
+//
+if (`menu -exists UHMainMenu`)
+deleteUI -menu UHMainMenu;
+global string $gMainWindow;
+setParent $gMainWindow;
+menu -label "UH" -tearOff true UHMainMenu;
+setParent -menu UHMainMenu;
+///
+///
+menuItem -subMenu true -tearOff true -label "modelling" ModelingMenu;
+menuItem -label "MakeCircularMeshBorder" -c "python(\"import MakeCircularMeshBorder\");python(\"MakeCircularMeshBorder.MakeCircularMeshBorder()._start()\")";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "texturing" TextureMenu;
+menuItem -label "clean UV transfer" -command "zbw_cleanTransferUV";
+menuItem -label "djPaintFX_UVs" -c "python(\"import djPFXUVs\");python(\"djPFXUVs.layoutUI()\")";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "rigging" riggingMenu;
+menuItem -label "kk controlers" -command "source kk_controllers.mel";
+menuItem -label "mz_ctrlCreator" -c "python(\"import mz_ctrlCreator\");python(\"reload(mz_ctrlCreator)()\")";
+menuItem -label "create joints from a selected curve" -command "wp_jointsOnCurves()";
+menuItem -label "jammOrientJoint" -c "python(\"import jammOrientJoint as oj\");python(\"oj.orientJointsWindow()\")";
+menuItem -label "convertRotationOrder" -c "python(\"import ml_convertRotationOrder\");python(\"ml_convertRotationOrder.ui()\")";
+menuItem -label "subdivide joints" -command "source beJointSplit.mel";
+menuItem -label "create curve info on selected curve" -command "arclen -ch 1";
+menuItem -label "RIVET Select two edges on poly or select one point on NURBS" -command "rivet";
+menuItem -label "djResetBindPose" -command "source djResetBindPose.mel";
+menuItem -label "matrix_collision_rig" -c "python(\"import matrix_collision_rig\");python(\"matrix_collision_rig.show ()\")";
+menuItem -label "retargetBlendShapes" -c "python(\"import rjRetargetBlendshape\");python(\"rjRetargetBlendshape.show()\")";
+setParent -menu ..;
+//
+menuItem -subMenu true -tearOff true -label "skinning" SkinningMenu;
+menuItem -label "MAXSkinWeightTool" -command "source MAXSkinWeightTool";
+menuItem -label "DoraSkinWeightImpExp" -command "DoraSkinWeightImpExp";
+
+menuItem -label "cometMenu" -command "source cometMenu.mel";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "dynamics" dynamics;
+menuItem -label "ParticleSetup" -command "source ParticleSetup";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "animation" AnimationMenu;
+menuItem -label "tweenMachine" -command "tweenMachine";
+menuItem -label "craOffsetKeys" -command "craOffsetKeys";
+menuItem -label "previscameratools-v2" -command "source previscameratools";
+menuItem -label "aTools" -c "python(\"from aTools.animTools.animBar import animBarUI\");python(\"animBarUI.show('toggle')\")";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "Arnold" ArnoldSetupMenu;
+menuItem -label "addLightGroupOnSelectedObjects_ShapeNode" -command "arnoldLightGroup;";
+menuItem -subMenu true -tearOff true -label "Arnold quality" ArnoldQuality;
+menuItem -label "Arnold low_direct light only" -command "source presetArnoldLowDirectLighting";
+menuItem -label "Arnold mid" -command "source presetArnoldMid";
+menuItem -label "Arnold high" -command "source presetArnoldHigh";
+setParent -menu ..;
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "pipeLineAndAttrbutes" pipeLineAndAttrbutesMenu;
+menuItem -label "rebuildRenderSettings" -command "source rebuildRenderSettings.mel";
+menuItem -label "rbCheckProject" -command "source rbCheckProject_v02.mel";
+menuItem -label "move attributes up or down" -c "python(\"import sk_attrShift as skattr\");python(\"skattr.sk_attrShiftUI() \")";
+menuItem -label "copy attributes to other objects" -command "attributeMan";
+menuItem -label "ezMel2Python" -c "python(\"import ezMel2Python\");python(\"ezMel2Python.ezMel2Python()\")";
+menuItem -label "KK_Rename_objects" -command "KK_Rename";
+menuItem -label "show_Env_variables" -command "craMayaEnvs";
+menuItem -label "kill_Turtle" -command "source killTurtle.mel";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "UH_pipelineSetups" UH_pipelineSetups;
+menuItem -label "uh_rig_framework" -command "uhRigPipeLine";
+menuItem -label "uh_anim_framework" -command "uhAnimPipeLine";
+menuItem -label "uh_render_framework" -command "uhRenderPipeLine";
+setParent -menu ..;
+///
+menuItem -subMenu true -tearOff true -label "UH_renderFarm" UH_renderFarm;
+menuItem -label "UH_renderFarmTools" -c "python(\"import UHRFTools_3\");python(\"UHRFTools_3.main() \")";
+setParent -menu ..;
+///

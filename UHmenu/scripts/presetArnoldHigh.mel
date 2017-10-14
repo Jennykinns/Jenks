@@ -1,0 +1,31 @@
+//Arnold low direct lighting//
+//memmory//
+setAttr "defaultArnoldRenderOptions.textureMaxMemoryMB" 4096;
+//AOV//
+setAttr "defaultArnoldDriver.mergeAOVs" 1;
+setAttr "defaultArnoldDisplayDriver.mergeAOVs" 1;
+//fileInfo//
+setAttr "defaultArnoldDriver.autocrop" 0;
+setAttr "defaultArnoldDriver.halfPrecision" 1;
+setAttr "defaultArnoldRenderOptions.progressive_rendering" 0;
+//samples//
+setAttr "defaultArnoldRenderOptions.AASamples" 6;
+setAttr "defaultArnoldRenderOptions.GIDiffuseSamples" 1;
+setAttr "defaultArnoldRenderOptions.GIGlossySamples" 1;
+setAttr "defaultArnoldRenderOptions.GIRefractionSamples" 1;
+setAttr "defaultArnoldRenderOptions.GISssSamples" 1;
+setAttr "defaultArnoldRenderOptions.GIVolumeSamples" 0;
+//ray depth//
+setAttr "defaultArnoldRenderOptions.GITotalDepth" 40;
+setAttr "defaultArnoldRenderOptions.GIDiffuseDepth" 30;
+setAttr "defaultArnoldRenderOptions.GIGlossyDepth" 1;
+setAttr "defaultArnoldRenderOptions.GIReflectionDepth" 2;
+setAttr "defaultArnoldRenderOptions.GIRefractionDepth" 6;
+setAttr "defaultArnoldRenderOptions.GIVolumeDepth" 1;
+//overrides//
+setAttr "defaultArnoldRenderOptions.ignoreSubdivision" 0;
+setAttr "defaultArnoldRenderOptions.ignoreDisplacement" 0;
+setAttr "defaultArnoldRenderOptions.ignoreMotionBlur" 0;
+setAttr "defaultArnoldRenderOptions.ignoreDof" 0;
+//other//
+setAttr "defaultArnoldRenderOptions.motion_blur_enable" 1;

@@ -1,0 +1,15 @@
+global proc uhRigPipeLine()
+{
+//create new scene//
+SaveSceneAs;
+//checkMainFileMenu;
+//CloudImportExportCreateUI;
+//gameFbxExporterCreateMenu;
+//GamePipelineCreateUI;
+NewScene;
+performNewScene 0;
+file -f -new;
+//
+file -import -type "mayaAscii"  -ignoreVersion -mergeNamespacesOnClash false -rpr "UHRigFrameWork_v01" -options "v=0;"  -pr "C:/Docs/maya/projects/default/scenes/UHRigFrameWork_v01.ma";
+//
+}

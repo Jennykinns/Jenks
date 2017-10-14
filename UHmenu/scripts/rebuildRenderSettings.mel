@@ -1,0 +1,2 @@
+deleteUI unifiedRenderGlobalsWindow;
+buildNewSceneUI;

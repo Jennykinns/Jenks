@@ -1,0 +1,43 @@
+global proc uhRenderPipeLine()
+{
+//create new scene//
+SaveSceneAs;
+//checkMainFileMenu;
+//CloudImportExportCreateUI;
+//gameFbxExporterCreateMenu;
+//GamePipelineCreateUI;
+NewScene;
+performNewScene 0;
+file -f -new;
+//
+//create basic groups//
+group -empty -name "cameras_grp";
+group -empty -name "models_grp";
+group -empty -name "characters_grp" -parent models_grp;
+group -empty -name "sets_grp" -parent models_grp;
+group -empty -name "dynamics_grp";
+group -empty -name "lightsEnv_grp";
+//
+spaceLocator -p 0 0 0 -name moreInfo;
+annotate -tx "select and view this locator in the attribute editor" moreInfo;
+
+
+//notes setup//
+select -r moreInfo ;
+string $mynode[] = `ls -sl`;
+if ( !`attributeQuery -node $mynode -exists "notes"` )
+{
+addAttr -sn "nts" -ln "notes" -dt "string" $mynode;
+} 
+setAttr -type "string" ($mynode[0] + ".notes") "UH RENDER STRUCTURE \r\n \r\nMake a group with the name of your character and put inside the characters_grp.  Alembic cache reference alembic you character into that new group.  Add your exported shaders to your models and set up your render passes  If you have any dynamics they should all be imported in as cached references.\r\n \r\nName you file eg, dawnDeadRnder_sc001Sh003Tk002\r\n \r\nIn normal English this file reads as Dawn of the Dead render scene 1 shot 1 take 2. \r\n \r\nNaming conventions \r\n For lights they can be named things like key.lit or fill_lit, the camera needs a name like sh3sc4tk3_rc   rc being short for renderCamera\r\n \r\nYou can delete the moreInfo locator and the annotation1 node";
+select -cl  ;
+select -r moreInfoShape ;
+string $mynode[] = `ls -sl`;
+if ( !`attributeQuery -node $mynode -exists "notes"` )
+{
+addAttr -sn "nts" -ln "notes" -dt "string" $mynode;
+} 
+setAttr -type "string" ($mynode[0] + ".notes") "UH RENDER STRUCTURE \r\n \r\nMake a group with the name of your character and put inside the characters_grp.  Alembic cache reference alembic you character into that new group.  Add your exported shaders to your models and set up your render passes  If you have any dynamics they should all be imported in as cached references.\r\n \r\nName you file eg, dawnDeadRnder_sc001Sh003Tk002\r\n \r\nIn normal English this file reads as Dawn of the Dead render scene 1 shot 1 take 2. \r\n \r\nNaming conventions \r\n For lights they can be named things like key.lit or fill_lit, the camera needs a name like sh3sc4tk3_rc   rc being short for renderCamera\r\n \r\nYou can delete the moreInfo locator and the annotation1 node";
+select -cl  ;
+
+}

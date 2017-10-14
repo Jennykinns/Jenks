@@ -1,0 +1,42 @@
+global proc uhAnimPipeLine()
+{
+//create new scene//
+SaveSceneAs;
+//checkMainFileMenu;
+//CloudImportExportCreateUI;
+//gameFbxExporterCreateMenu;
+//GamePipelineCreateUI;
+NewScene;
+performNewScene 0;
+file -f -new;
+//
+//create basic groups//
+group -empty -name "cameras_grp";
+group -empty -name "models_grp";
+group -empty -name "characters_grp" -parent models_grp;
+group -empty -name "sets_grp" -parent models_grp;
+group -empty -name "dynamics_grp";
+group -empty -name "lightsEnv_grp";
+//
+spaceLocator -p 0 0 0 -name moreInfo;
+annotate -tx "select and view this locator in the attribute editor" moreInfo;
+
+
+//notes setup//
+select -r moreInfo ;
+string $mynode[] = `ls -sl`;
+if ( !`attributeQuery -node $mynode -exists "notes"` )
+{
+addAttr -sn "nts" -ln "notes" -dt "string" $mynode;
+} 
+setAttr -type "string" ($mynode[0] + ".notes") "UH ANIM STRUCTURE \r\n \r\nReference in the animation rig and put it in model characters_grp.  The rest is pretty clear.\r\n \r\nWhen you are ready to send over to rendering alembic cache the character meshes out with frame relative sample on, UV write on and World space on.  Ideally all animation should start on frame 1000. If you have any dynamics they should all be imported in as cached out.\r\n \r\nName you file eg, dawnDeadAnim_sc001Sh003Tk002\r\n \r\nIn normal English this file reads as Dawn of the Dead anim scene 1 shot 1 take 2\r\n \r\nNaming conventions\r\n geometry show be called something like window_geo \r\n \r\nYou can delete the moreInfo locator and the annotation1 node";
+select -cl  ;
+select -r moreInfoShape ;
+string $mynode[] = `ls -sl`;
+if ( !`attributeQuery -node $mynode -exists "notes"` )
+{
+addAttr -sn "nts" -ln "notes" -dt "string" $mynode;
+} 
+setAttr -type "string" ($mynode[0] + ".notes") "UH ANIM STRUCTURE \r\n \r\nReference in the animation rig and put it in model characters_grp.  The rest is pretty clear.\r\n \r\nWhen you are ready to send over to rendering alembic cache the character meshes out with frame relative sample on, UV write on and World space on.  Ideally all animation should start on frame 1000. If you have any dynamics they should all be imported in as cached out.\r\n \r\nName you file eg, dawnDeadAnim_sc001Sh003Tk002\r\n \r\nIn normal English this file reads as Dawn of the Dead anim scene 1 shot 1 take 2\r\n \r\nNaming conventions\r\n geometry show be called something like window_geo \r\n \r\nYou can delete the moreInfo locator and the annotation1 node";
+select -cl  ;
+}

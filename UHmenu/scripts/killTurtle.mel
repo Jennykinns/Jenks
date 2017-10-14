@@ -1,0 +1,11 @@
+//Delete Turtle
+lockNode -l off TurtleDefaultBakeLayer; 
+lockNode -lock off TurtleRenderOptions;
+lockNode -lock off TurtleUIOptions;
+lockNode -lock off TurtleBakeLayerManager;
+delete TurtleDefaultBakeLayer;
+delete TurtleRenderOptions;
+delete TurtleUIOptions;
+delete TurtleBakeLayerManager;
+deleteUI "TURTLE";
+

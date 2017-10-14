@@ -1,0 +1,198 @@
+///Jenks menu system Maya 2016\\\
+
+//--- Jenks Directory Location ---\\
+$mayaDir=`getenv "MAYA_APP_DIR"`;
+$jenksLoc = $mayaDir + "/scripts/Jenks";
+$scriptsLoc = $jenksLoc + "/scripts";
+$iconsLoc = $jenksLoc + "/icons";
+
+//--- Jenks menu system ---\\
+
+if (`menu -exists jenksMenu`)
+deleteUI -menu jenksMenu;
+global string $gMainWindow;
+setParent $gMainWindow;
+
+menu -label "Jenks" -mn "J" -tearOff true jenksMenu;
+setParent -menu jenksMenu;
+    menuItem -l "Scripts by Matt Jenkins" -en false -d true;
+    menuItem -label "Matriarch Control Manager" -i "HIKcreateControlRig.png" -c "python(\"from Jenks.scripts.curveCreator import crvCreator\");python(\"reload(crvCreator)\")";
+    menuItem -label "Magical Renamer" -i "menuIconNames.png" -c "python(\"from Jenks.scripts.magicalRenamer import renamer\");python(\"reload(renamer)\")";
+    menuItem -label "Joint Duplicator" -i "moveVertexWeights.png" -c "python(\"from Jenks.scripts.jointDuplicator import jointDuplicator\");python(\"reload(jointDuplicator)\")";
+    menuItem -label "IK Spline Creator" -i "fitBSpline.png" -c "python(\"from Jenks.scripts.ikSplineCreator import ikSplineCreator\");python(\"reload(ikSplineCreator)\")";
+    menuItem -label "Curve To Python" -i "pickCurveObj.png" -c "python(\"from Jenks.scripts.curveCreator import newCurve\");python(\"reload(newCurve)\")";
+
+    menuItem -subMenu true -label "Random Scripts of Scriptiness" -i "SP_FileIcon.png" -tearOff true;
+        menuItem -label "Set Arnold Subdivs" -i "subdivStandardMode.png" -c "python(\"from Jenks.scripts.miscScripts import arnoldSubdiv\");python(\"arnoldSubdiv.setSubdiv(1,2)\")";
+        menuItem -label "Connect To Multiple Attributes" -i "out_dagNode.png" -c "python(\"from Jenks.scripts.miscScripts import connectToMultipleAttr\");python(\"reload(connectToMultipleAttr)\")";
+        menuItem -label "Add Global Control Attributes" -i "QR_add.png" -c "python(\"from Jenks.scripts.miscScripts import addGlobalCtrlAttrs\");";
+        menuItem -label "Shader Swapper" -i "layeredShader.svg" -c "python(\"from Jenks.scripts.miscScripts import shaderSwapper\");python(\"reload(shaderSwapper)\")";
+        menuItem -label "Move Attributes" -i "doubleVertArrow.png" -c "python(\"from Jenks.scripts.miscScripts import moveAttr\");python(\"reload(moveAttr)\")";
+    setParent -menu jenksMenu;
+
+    menuItem -l "Other Useful Scripts" -en false -d true;
+    menuItem -label "NG Skinning Tools" -c "python(\"from ngSkinTools.ui.mainwindow import MainWindow\");python(\"MainWindow.open()\")";
+    string $colourOverrideIco = $iconsLoc+"/ColourWireframe.png";
+    menuItem -label "Display Colour Override" -i $colourOverrideIco -c "python(\"from Jenks.scripts.otherUsefulScripts.display_color_override import DisplayColorOverrideUi\");python(\"DisplayColorOverrideUi.display()\")";
+    string $renameIco = $iconsLoc+"/text.png";
+    menuItem -label "Rename/Replace" -i $renameIco -c "python(\"from Jenks.scripts.otherUsefulScripts import ccRenameReplace as RenameReplace\");python(\"reload(RenameReplace)\")";
+    string $edgeIco = $iconsLoc+"/selectEdges.png";
+    menuItem -label "MB Select Every N Edge" -i $edgeIco -c "source \"Jenks/scripts/otherUsefulScripts/MBSelectEveryNEdge.mel\";";
+
+// --------------------------------------------------------------------------
+
+    menuItem -l "Other Menus" -en false -d true;
+
+// --------------------------------------------------------------------------
+// --UHmenu------------------------------------------------------------------
+
+    menuItem -subMenu true -label "UH Menu" -tearOff true;
+        menuItem -subMenu true -tearOff true -label "modelling" ModelingMenu;
+            menuItem -label "MakeCircularMeshBorder" -c "python(\"from Jenks.UHmenu.scripts import MakeCircularMeshBorder\");python(\"MakeCircularMeshBorder.MakeCircularMeshBorder()._start()\")";
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "texturing" TextureMenu;
+            menuItem -label "clean UV transfer" -command "zbw_cleanTransferUV";
+            menuItem -label "djPaintFX_UVs" -c "python(\"from Jenks.UHmenu.scripts import djPFXUVs\");python(\"djPFXUVs.layoutUI()\")";
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "rigging" riggingMenu;
+            menuItem -label "kk controlers" -command "source \"Jenks/UHmenu/scripts/kk_controllers.mel\";";
+            menuItem -label "mz_ctrlCreator" -c "python(\"from Jenks.UHmenu.scripts import mz_ctrlCreator\");python(\"reload(mz_ctrlCreator)()\")";
+            menuItem -label "create joints from a selected curve" -command "wp_jointsOnCurves()";
+            menuItem -label "jammOrientJoint" -c "python(\"from Jenks.UHmenu.scripts import jammOrientJoint as oj\");python(\"oj.orientJointsWindow()\")";
+            menuItem -label "convertRotationOrder" -c "python(\"from Jenks.UHmenu.scripts import ml_convertRotationOrder\");python(\"ml_convertRotationOrder.ui()\")";
+            menuItem -label "subdivide joints" -command "source \"Jenks/UHmenu/scripts/beJointSplit.mel\"";
+            menuItem -label "create curve info on selected curve" -command "arclen -ch 1";
+            menuItem -label "RIVET Select two edges on poly or select one point on NURBS" -command "rivet";
+            menuItem -label "djResetBindPose" -command "source \"Jenks/UHmenu/scripts/djResetBindPose.mel\";";
+            menuItem -label "matrix_collision_rig" -c "python(\"from Jenks.UHmenu.scripts import matrix_collision_rig\");python(\"matrix_collision_rig.show ()\")";
+            ////menuItem -label "retargetBlendShapes" -c "python(\"from Jenks.UHmenu.scripts import rjRetargetBlendshape\");python(\"rjRetargetBlendshape.show()\")";
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "skinning" SkinningMenu;
+            menuItem -label "MAXSkinWeightTool" -command "source \"Jenks/UHmenu/scripts/MAXSkinWeightTool\";";
+            menuItem -label "DoraSkinWeightImpExp" -command "DoraSkinWeightImpExp";
+            ////menuItem -label "cometMenu" -command "source \"Jenks/UHmenu/scripts/comet/cometMenu.mel\";";
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "dynamics" dynamics;
+            menuItem -label "ParticleSetup" -command "source \"Jenks/UHmenu/scripts/ParticleSetup\"";
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "animation" AnimationMenu;
+            ////menuItem -label "tweenMachine" -command "tweenMachine";
+            menuItem -label "craOffsetKeys" -command "craOffsetKeys";
+            menuItem -label "previscameratools-v2" -command "source \"Jenks/UHmenu/scripts/previscameratools\";";
+            ////menuItem -label "aTools" -c "python(\"from aTools.animTools.animBar import animBarUI\");python(\"animBarUI.show('toggle')\")";
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "Arnold" ArnoldSetupMenu;
+            menuItem -label "addLightGroupOnSelectedObjects_ShapeNode" -command "arnoldLightGroup;";
+            menuItem -subMenu true -tearOff true -label "Arnold quality" ArnoldQuality;
+                menuItem -label "Arnold low_direct light only" -command "source \"Jenks/UHmenu/scripts/presetArnoldLowDirectLighting\";";
+                menuItem -label "Arnold mid" -command "source \"Jenks/UHmenu/scripts/presetArnoldMid\";";
+                menuItem -label "Arnold high" -command "source \"Jenks/UHmenu/scripts/presetArnoldHigh\";";
+            setParent -menu ..;
+        setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "pipeLineAndAttrbutes" pipeLineAndAttrbutesMenu;
+            menuItem -label "rebuildRenderSettings" -command "source \"Jenks/UHmenu/scripts/rebuildRenderSettings.mel\";";
+            menuItem -label "rbCheckProject" -command "source \"Jenks/UHmenu/scripts/rbCheckProject_v02.mel\";";
+            ////menuItem -label "move attributes up or down" -c "python(\"from Jenks.UHmenu.scripts import sk_attrShift as skattr\");python(\"skattr.sk_attrShiftUI() \")";
+            ////menuItem -label "copy attributes to other objects" -command "attributeMan";
+            ////menuItem -label "ezMel2Python" -c "python(\"from Jenks.UHmenu.scripts import ezMel2Python\");python(\"ezMel2Python.ezMel2Python()\")";
+            ////menuItem -label "KK_Rename_objects" -command "KK_Rename";
+            menuItem -label "show_Env_variables" -command "craMayaEnvs";
+            menuItem -label "kill_Turtle" -command "source \"Jenks/UHmenu/scripts/killTurtle.mel\";";
+        setParent -menu ..;
+
+        // menuItem -subMenu true -tearOff true -label "UH_pipelineSetups" UH_pipelineSetups;
+            // menuItem -label "uh_rig_framework" -command "source \"Jenks/UHmenu/scripts/uhRigPipeLine\";";
+            // menuItem -label "uh_anim_framework" -command "source \"Jenks/UHmenu/scripts/uhAnimPipeLine\";";
+            // menuItem -label "uh_render_framework" -command "source \"Jenks/UHmenu/scripts/uhRenderPipeLine\";";
+        // setParent -menu ..;
+
+        menuItem -subMenu true -tearOff true -label "UH_renderFarm" UH_renderFarm;
+            menuItem -label "UH_renderFarmTools" -c "python(\"from Jenks.UHmenu.scripts import UHRFTools_3\");python(\"UHRFTools_3.main() \")";
+        setParent -menu ..;
+
+    setParent -menu ..;
+
+// --------------------------------------------------------------------------
+// --Comet-------------------------------------------------------------------
+
+    menuItem -subMenu true -l "Comet" -tearOff true;
+
+        menuItem -l "Tools" -sm true -to true ;
+            menuItem -l ("cometRename...") -c ("source \"Jenks/UHmenu/scripts/comet/cometRename.mel\"; cometRename(); ") -ann ("Rename selected nodes.") -image "cometRename.bmp" ;
+        setParent -menu ".." ;
+
+        menuItem -l "Modeling" -sm true -to true ;
+            menuItem -l ("cometMirrorMesh...") -c ("source \"Jenks/UHmenu/scripts/comet/cometMirrorMesh.mel\"; cometMirrorMesh(); ") -ann ("Performs useful poly utilities, such as mirroring selection, mirroring geometry, reverting and storing points.") -image "cometMirrorMesh.bmp" ;
+        setParent -menu ".." ;
+
+        menuItem -l "Shapes" -sm true -to true ;
+            menuItem -l ("null") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"null\"); ") -ann ("Makes a group.") ;
+            menuItem -l ("locator") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"locator\"); ") -ann ("Makes a locator.") ;
+            menuItem -l ("plus") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"plus\"); ") -ann ("Makes a plus.") ;
+            menuItem -divider true ;
+            menuItem -l ("circleX") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"circleX\"); ") -ann ("Makes a circleX.") ;
+            menuItem -l ("circleY") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"circleY\"); ") -ann ("Makes a circleY.") ;
+            menuItem -l ("circleZ") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"circleZ\"); ") -ann ("Makes a circleZ.") ;
+            menuItem -l ("square") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"square\"); ") -ann ("Makes a square.") ;
+            menuItem -l ("cube") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"cube\"); ") -ann ("Makes a cube.") ;
+            menuItem -l ("sphere") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"sphere\"); ") -ann ("Makes a sphere.") ;
+            menuItem -l ("arrow") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"arrow\"); ") -ann ("Makes an arrow.") ;
+            menuItem -l ("cross") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"cross\"); ") -ann ("Makes a cross.") ;
+            menuItem -l ("orient") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"orient\"); ") -ann ("Makes an orient.") ;
+            menuItem -l ("bulb") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"bulb\"); ") -ann ("Makes a bulb.") ;
+            menuItem -divider true ;
+            menuItem -l ("joint") -c ("source \"Jenks/UHmenu/scripts/comet/wireShape.mel\"; wireShape(\"joint\"); ") -ann ("Makes a joint.") ;
+        setParent -menu ".." ;
+
+        menuItem -l "Display" -sm true -to true ;
+            menuItem -l ("Show Selection Handle") -c ("toggle -state on -selectHandle ; ") -ann ("Shows the selection handle for all selected objects") ;
+            menuItem -l ("Hide Selection Handle") -c ("toggle -state off -selectHandle ; ") -ann ("Hides the selection handle for all selected objects") ;
+            menuItem -divider true ;
+            menuItem -l ("Show Local Axis") -c ("toggle -state on -localAxis ; ") -ann ("Shows localAxis for all selected objects") ;
+            menuItem -l ("Hide Local Axis") -c ("toggle -state off -localAxis ; ") -ann ("Hides localAxis for all selected objects") ;
+            menuItem -divider true ;
+            menuItem -l ("Toggle Affected") -c ("source \"Jenks/UHmenu/scripts/comet/toggleAffected.mel\" ; toggleAffected ;") -ann ("Toggles pink affect highlighting for current viewport.") -image "toggleAffected.bmp" ;
+            menuItem -l ("Toggle Isolate Select") -c ("source \"Jenks/UHmenu/scripts/comet/toggleIsolateSelect.mel\" ; toggleIsolateSelect ;") -ann ("Isolates or un-isolates whatever is selected for current viewport.") -image "toggleIsolateSelect.bmp" ;
+            menuItem -l ("Toggle Wireframe On Shaded") -c ("source \"Jenks/UHmenu/scripts/comet/toggleWireframeOnShaded.mel\" ; toggleWireframeOnShaded ;") -ann ("Toggles display of wireframe on shaded mode for current viewport.") -image "toggleWireframeOnShaded.bmp" ;
+            menuItem -l ("Toggle X-Ray") -c ("source \"Jenks/UHmenu/scripts/comet/toggleXRay.mel\" ; toggleXRay ;") -ann ("Toggles display of X-Ray mode for current viewport.") -image "toggleXRay.bmp" ;
+        setParent -menu ".." ;
+
+
+        menuItem -l "Constraints" -sm true -to true ;
+            menuItem -l ("Offset Point and Orient") -c ("source \"Jenks/UHmenu/scripts/comet/offsetConstraint.mel\"; offsetConstraintPO(); ") -ann ("Point & Orient Constrains slave to master(s).") -image "offsetConstraintPO.bmp" ;
+            menuItem -l ("Offset Point") -c ("source \"Jenks/UHmenu/scripts/comet/offsetConstraint.mel\"; offsetConstraintP(); ") -ann ("Point Constrains slave to master(s).") -image "offsetConstraintP.bmp" ;
+            menuItem -l ("Offset Orient") -c ("source \"Jenks/UHmenu/scripts/comet/offsetConstraint.mel\"; offsetConstraintO(); ") -ann ("Orient Constrains slave to master(s).") -image "offsetConstraintO.bmp" ;
+            menuItem -divider true ;
+            menuItem -l ("Snap") -c ("source \"Jenks/UHmenu/scripts/comet/snaps.mel\"; snap(\"\",\"\"); ") -ann ("Snaps slave object to master.") -image "snap.bmp" ;
+            menuItem -l ("Anim Snap") -c ("source \"Jenks/UHmenu/scripts/comet/snaps.mel\"; animSnap(\"\",\"\"); ") -ann ("Snaps slave object to master even if it has keys.") -image "animSnap.bmp" ;
+        setParent -menu ".." ;
+
+        menuItem -l "Joints/Hierarchy" -sm true -to true ;
+            menuItem -l ("cometJointOrient...") -c ("source \"Jenks/UHmenu/scripts/comet/cometJointOrient.mel\"; cometJointOrient(); ") -ann ("Set joints rotation axis easily.") -image "cometJointOrient.bmp" ;
+            menuItem -l ("Select All Joints") -c ("select -r `ls -type \"joint\" \"*\"`; ") -ann ("Selects all joints in the scene.") ;
+            menuItem -divider true ;
+            menuItem -l ("zeroOut") -c ("source \"Jenks/UHmenu/scripts/comet/zeroOut.mel\"; zeroOut(\"\"); ") -ann ("Zero's out selected nodes by grouping.") -image "zeroOut.bmp" ;
+            menuItem -divider true ;
+            menuItem -l ("cometSkinWeight...") -c ("source \"Jenks/UHmenu/scripts/comet/cometSkinWeight.mel\"; cometSkinWeight(); ") -ann ("Easily set/edit skin weights on components, without having to use the component editor.  Allows multiple wildcard filters for joints list, etc...") -image "cometSkinWeight.bmp" ;
+            menuItem -l ("cometTransferWeights...") -c ("source \"Jenks/UHmenu/scripts/comet/cometTransferWeights.mel\"; cometTransferWeights(); ") -ann ("Quickly transfer weights from one or more joints to another joint for selected points of a skinCluster deformed object.") -image "cometTransferWeights.bmp" ;
+            menuItem -l ("cometSaveWeights...") -c ("source \"Jenks/UHmenu/scripts/comet/cometSaveWeights.mel\"; cometSaveWeights(); ") -ann ("Save and Reload skinCluster weights.") -image "cometSaveWeights.bmp" ;
+        setParent -menu ".." ;
+
+        menuItem -l "Attributes" -sm true -to true ;
+            menuItem -l ("cometAttrEditor...") -c ("source \"Jenks/UHmenu/scripts/comet/cometAttrEditor.mel\"; cometAttrEditor(); ") -ann ("Adjust attributes up/down.") -image "cometAttrEditor.bmp" ;
+        setParent -menu ".." ;
+
+        menuItem -l "Animation" -sm true -to true ;
+            menuItem -l ("autoTangent...") -c ("source \"Jenks/UHmenu/scripts/comet/autoTangent.mel\"; autoTangent(); ") -ann ("Auto set tangents so they are smooth, but with no overshoot.") -image "autoTangent.bmp" ;
+        setParent -menu ".." ;
+
+    setParent -menu ..;
+
+// --------------------------------------------------------------------------

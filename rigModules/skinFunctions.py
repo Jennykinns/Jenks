@@ -98,7 +98,7 @@ def saveSkin(geo, assetName=None, prompt=False):
     skinData = getSkinValues(geo)
     if skinData:
         skinFile = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
-        status = fileFn.saveJson(skinData, fileOverride=[skinFile])
+        status = fileFn.saveJson(skinData, fileOverride=skinFile)
         return status
     else:
         return False

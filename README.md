@@ -4,8 +4,6 @@ Scripts made by Matt Jenkins - and some not made by me that were just left in my
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Installing
 
 Download the zip or clone the repo into maya/scripts. Your folder structure should look something like:

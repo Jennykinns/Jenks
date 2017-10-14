@@ -6,7 +6,8 @@ from PySide2 import QtCore, QtGui, QtWidgets
 import maya.cmds as cmds
 import maya.OpenMayaUI as omUi
 
-import renamerUI as customUI
+import magicalRenamerUI as customUI
+import magicalRenamerSmallUI as smallUI
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
 
@@ -24,28 +25,36 @@ def main():
     except:
         pass
     myWindow = myTool(parent=maya_main_window())
+    print('Loaded')
     myWindow.show()
 
 class myTool(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent, radVal=None, renVal='', sideVal='C', findVal=None, replVal=None):
         reload(customUI)
-        print('Loaded')
         super(myTool, self).__init__(parent)
         self.setWindowFlags(QtCore.Qt.Tool)
         self.ui = customUI.Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.radVal = None
-        self.renameVal = None
-        self.findVal = None
-        self.replaceVal = None
-        # self.prefixVal = None
-        # self.suffixVal = None
+        self.radVal = radVal
+        self.renameVal = renVal
+        self.sideVal = sideVal
+        self.findVal = findVal
+        self.replaceVal = replVal
 
-        ## Radio Buttons - All, Selected, Hierachy
-        self.ui.all_Rad.clicked.connect(partial(self.updateRad,'all'))
+        self.ui.rename_Ledit.setText(self.renameVal)
+        self.ui.side_Cbox.setCurrentText(self.sideVal)
+        self.ui.find_Ledit.setText(self.findVal)
+        self.ui.replace_Ledit.setText(self.replaceVal)
+        if self.radVal == 'heirachy':
+            self.ui.heirachy_Rad.click()
+
+        ## Radio Buttons - Selected, Hierachy
+        # self.ui.all_Rad.clicked.connect(partial(self.updateRad,'all'))
         self.ui.selected_Rad.clicked.connect(partial(self.updateRad,'selected'))
         self.ui.heirachy_Rad.clicked.connect(partial(self.updateRad,'heirachy'))
+        ## Side ComboBox
+        self.ui.side_Cbox.currentIndexChanged.connect(self.updateSideCbox)
         ## Rename
         self.ui.rename_Ledit.textChanged.connect(self.updateRenameLedit)
         self.ui.rename_Btn.released.connect(self.renameSelection)
@@ -55,32 +64,18 @@ class myTool(QtWidgets.QDialog):
         self.ui.find_Ledit.textChanged.connect(self.updateFindLedit)
         self.ui.replace_Ledit.textChanged.connect(self.updateReplaceLedit)
         self.ui.replace_Btn.released.connect(self.findReplaceSelection)
-
         ## Prefix & Suffix
-        # self.ui.prefix_Ledit.textChanged.connect(self.updatePrefixLedit)
-        # self.ui.prefix_Btn.released.connect(self.updatePrefixBtn)
-        # self.ui.suffix_Ledit.textChanged.connect(self.updateSuffixLedit)
+        self.ui.prefix_Btn.released.connect(self.addPrefix)
         self.ui.suffix_Btn.released.connect(self.addSuffix)
-
-        ## Preset Prefix Buttons
-        # self.ui.prefixL_Btn.released.connect(self.updatePreLBtn)
-        # self.ui.prefixR_Btn.released.connect(self.updatePreRBtn)
-
         ## Strip Buttons
         self.ui.stripL_Btn.released.connect(self.nameStripL)
         self.ui.stripR_Btn.released.connect(self.nameStripR)
 
-        ## Left Right Replace Buttons
-        self.ui.L2R_Btn.released.connect(self.nameLeftToRight)
-        self.ui.R2L_Btn.released.connect(self.nameRightToLeft)
+        ## Mini Button
+        self.ui.mini_Btn.released.connect(self.minify)
 
     def updateRad(self, val, *args):
-        if val == 'all':
-            self.radVal = 0
-        elif val == 'selected':
-            self.radVal = 1
-        else:
-            self.radVal = 2
+        self.radVal = val
 
     def updateRenameLedit(self, *args):
         self.renameVal = self.ui.rename_Ledit.text()
@@ -91,37 +86,121 @@ class myTool(QtWidgets.QDialog):
     def updateReplaceLedit(self, *args):
         self.replaceVal = self.ui.replace_Ledit.text()
 
+    def updateSideCbox(self, *args):
+        self.sideVal = self.ui.side_Cbox.currentText()
+
+
+    def doSelection(self):
+        oldSel = cmds.ls(sl=1)
+        cmds.select(cl=1)
+        if self.radVal == 'heirachy':
+            for each in oldSel:
+                allChilds = cmds.listRelatives(each, ad=1, f=1)
+                shapeChilds = cmds.listRelatives(each, ad=1, f=1, type='shape')
+                allChilds.reverse()
+                cmds.select(each, add=1)
+                cmds.select(allChilds, add=1)
+                cmds.select(shapeChilds, d=1)
+
 
     def renameSelection(self, *args):
-        ## do rename
-        utils.renameSelection(self.renameVal)
+        ## do renameself.doSelection()
+        self.doSelection()
+        utils.renameSelection(self.renameVal, self.sideVal)
 
     def findReplaceSelection(self, *args):
         ## do findReplace
+        self.doSelection()
         utils.findReplaceSelection(self.findVal, self.replaceVal)
 
     def addSuffix(self, *args):
+        self.doSelection()
         utils.addSuffixToSelection()
 
+    def addPrefix(self, *args):
+        self.doSelection()
+        utils.swapSideSelection(self.sideVal)
+
     def nameStripL(self, *args):
+        self.doSelection()
         ## do L strip
         utils.stripNameSelection()
 
     def nameStripR(self, *args):
+        self.doSelection()
         ## do R strip
         utils.stripNameSelection(stripFromRight=True)
-
-    def nameLeftToRight(self, *args):
-        ## do L -> R
-        utils.swapSideSelection('R')
-
-    def nameRightToLeft(self, *args):
-        ## do R -> L
-        utils.swapSideSelection('L')
 
     def clearFields(self,*args):
         self.ui.rename_Ledit.clear()
         self.ui.find_Ledit.clear()
         self.ui.replace_Ledit.clear()
-        self.ui.suffix_Ledit.clear()
-        self.ui.prefix_Ledit.clear()
+
+    def minify(self, *args):
+        pos = self.pos()
+        self.close()
+        myWindow = smallMyTool(maya_main_window(), self.radVal, self.renameVal,
+                               self.sideVal, self.findVal, self.replaceVal)
+        myWindow.move(pos)
+        myWindow.show()
+
+
+class smallMyTool(QtWidgets.QDialog):
+    def __init__(self, parent, radVal=None, renVal='', sideVal='C', findVal=None, replVal=None):
+        reload(smallUI)
+        super(smallMyTool, self).__init__(parent)
+        self.setWindowFlags(QtCore.Qt.Tool)
+        self.ui = smallUI.Ui_MainWindow()
+        self.ui.setupUi(self)
+
+        self.radVal = radVal
+        self.renameVal = renVal
+        self.sideVal = sideVal
+        self.findVal = findVal
+        self.replaceVal = replVal
+
+        self.ui.rename_Ledit.setText(self.renameVal)
+        self.ui.side_Cbox.setCurrentText(self.sideVal)
+
+        ## Side ComboBox
+        self.ui.side_Cbox.currentIndexChanged.connect(self.updateSideCbox)
+        ## Rename
+        self.ui.rename_Ledit.textChanged.connect(self.updateRenameLedit)
+        self.ui.rename_Btn.released.connect(self.renameSelection)
+
+        ## magnify
+        self.ui.mini_Btn.released.connect(self.magnify)
+
+
+    def updateRenameLedit(self, *args):
+        self.renameVal = self.ui.rename_Ledit.text()
+
+    def updateSideCbox(self, *args):
+        self.sideVal = self.ui.side_Cbox.currentText()
+
+
+    def doSelection(self):
+        oldSel = cmds.ls(sl=1)
+        cmds.select(cl=1)
+        if self.radVal == 'heirachy':
+            for each in oldSel:
+                allChilds = cmds.listRelatives(each, ad=1, f=1)
+                shapeChilds = cmds.listRelatives(each, ad=1, f=1, type='shape')
+                allChilds.reverse()
+                cmds.select(each, add=1)
+                cmds.select(allChilds, add=1)
+                cmds.select(shapeChilds, d=1)
+
+
+    def renameSelection(self, *args):
+        ## do renameself.doSelection()
+        self.doSelection()
+        utils.renameSelection(self.renameVal, self.sideVal)
+
+    def magnify(self, *args):
+        pos = self.pos()
+        self.close()
+        myWindow = myTool(maya_main_window(), self.radVal, self.renameVal,
+                          self.sideVal, self.findVal, self.replaceVal)
+        myWindow.move(pos)
+        myWindow.show()

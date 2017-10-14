@@ -88,7 +88,7 @@ def hashToNumber(name, suffix, startNum=1):
         i = 0
         while cmds.objExists(newName):
             i += 1
-            newName = '{}{}{}'.format(newName, i, suffix)
+            newName = '{}{}{}'.format(name, i, suffix)
     return newName
 
 def getSuffixForObjType(obj):
@@ -102,7 +102,7 @@ def getSuffixForObjType(obj):
         suffix = ''
     return suffix
 
-def rename(mObj, newName, startNum=1, skipSuff=False):
+def rename(mObj, newName, side=None, startNum=1, skipSuff=False):
     """ Renames object with suffix to avoid conflicts.
         [Args]:
         mObj (mObj) - The mObj for the node to rename
@@ -111,12 +111,23 @@ def rename(mObj, newName, startNum=1, skipSuff=False):
         [Returns]:
         r (string) - renamed object name
     """
+    if side:
+        newName = '{}_{}'.format(side, newName)
     lN, sN = apiFn.getPath(mObj, returnString=True)
-    cmds.rename(lN, 'TMPNAME_OOGIEOOGIE_POOP')
+    try:
+        cmds.rename(lN, 'TMPNAME_OOGIEOOGIE_POOP')
+    except:
+        return False
     lN, sN = apiFn.getPath(mObj, returnString=True)
     suffix = getSuffixForObjType(lN)
     if newName.endswith(suffix) or skipSuff:
-        suffix = ''
+        nameNoDigits = newName
+        while nameNoDigits[-1].isdigit():
+            nameNoDigits = nameNoDigits[:-1]
+        if '_{}'.format(newName.rsplit('_', 1)[-1]) in suffixDictionary.suffix.values():
+            newName = newName.rsplit('_', 1)[0]
+        else:
+            suffix = ''
     newName = hashToNumber(newName, suffix, startNum)
     r = cmds.rename(lN, newName)
     return r
@@ -134,7 +145,7 @@ def findReplace(mObj, find, replace, startNum=1):
     """
     lN, sN = apiFn.getPath(mObj, returnString=True)
     newName = re.sub(find, replace, sN)
-    r = rename(mObj, newName, startNum)
+    r = rename(mObj, newName, startNum=startNum, skipSuff=True)
     return r
 
 def stripName(mObj, stripFromRight=False, startNum=1):
@@ -156,7 +167,7 @@ def stripName(mObj, stripFromRight=False, startNum=1):
     else:
         newName = nameSegment[1:]
     newName = '{}_{}'.format(side, newName)
-    r = rename(mObj, newName, startNum)
+    r = rename(mObj, newName, startNum=startNum)
     return r
 
 def swapSide(mObj, side='C', startNum=1):
@@ -174,11 +185,14 @@ def swapSide(mObj, side='C', startNum=1):
     else:
         nameSegment = sN
     newName = '{}_{}'.format(side, nameSegment)
-    r = rename(mObj, newName, startNum, skipSuff=True)
+    # while newName.endswith(('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')):
+    while newName[-1].isdigit():
+        newName = newName[:-1]
+    r = rename(mObj, newName, startNum=startNum, skipSuff=True)
     return r
 
 
-def renameSelection(newName):
+def renameSelection(newName, side):
     """ Renames the selected objects.
         [Args]:
         newName (string) - The new name for the objects
@@ -187,7 +201,7 @@ def renameSelection(newName):
     """
     sel = apiFn.getSelectionAsMObjs()
     for i, mObj in enumerate(sel, 1):
-        rename(mObj, newName, i)
+        rename(mObj, newName, side, i)
     return True
 
 def findReplaceSelection(find, replace):

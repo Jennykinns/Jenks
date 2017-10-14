@@ -139,7 +139,7 @@ If you clone the repo it will automatically update otherwise you'll have to manu
 
 ## Contributing
 
-For those of you that actually understand python feel free to branch/fork (I'll be honest I don't know the difference xD) and add your own functionality or tweak things - just give me a heads up first.
+For those of you that actually understand python feel free to fork and add your own functionality or tweak things - just give me a heads up first.
 
 ## Authors
 

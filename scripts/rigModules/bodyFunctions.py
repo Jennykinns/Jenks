@@ -41,6 +41,13 @@ class armModule:
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         armMechGrp = utils.newNode('group', name='{}armMech'.format(extraName),
                                    side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
+        if not parent:
+            parentCtrl = ctrlFn.ctrl(name='{}armParent'.format(extraName), side=self.side,
+                                     parent=armCtrlsGrp.name, guide=jnts[0], skipNum=True)
+            parentCtrl.modifyShape(shape='sphere', color=col['col1'])
+            parent = parentCtrl.ctrlEnd
+        else:
+            parentCtrl = None
         if options['IK']:
             armMechSkelGrp = utils.newNode('group', name='{}armMechSkel'.format(extraName),
                                            side=self.side, skipNum=True, parent=armMechGrp.name)
@@ -90,10 +97,10 @@ class armModule:
             self.handIKCtrl.lockAttr(attr=['s'])
             self.handIKCtrl.constrain(armIK.grp)
             self.handIKCtrl.constrain(handIK.grp)
-            # self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
-            #                                 *TORSO*,
-            #                                 self.clavIKCtrl.name],
-            #                                niceNames=['World', 'Chest', 'Clavicle'], dv=0)
+            self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
+                                            parent],
+                                           # niceNames=['World', 'Chest', 'Clavicle'],
+                                           dv=0)
             ##-- PoleVector
             pvGuide = '{}armPV{}'.format(self.moduleName, suffix['locator'])
             cmds.delete(cmds.aimConstraint(ikJnts[2], pvGuide))
@@ -117,10 +124,10 @@ class armModule:
             clavIKCtrlPiv = cmds.xform(parent, q=1, t=1, ws=1)
             cmds.xform(self.clavIKCtrl.ctrl.name, piv=clavIKCtrlPiv, ws=1)
             self.clavIKCtrl.lockAttr(attr=['t', 's'])
-            self.clavIKCtrl.addAttr(name='autoClav', nn='Automatic Clavicle Switch',
-                                    defaultVal=1, minVal=0, maxVal=1)
             ## autoClav
-            if options['autoClav']:
+            if options['autoClav'] and not parentCtrl:
+                self.clavIKCtrl.addAttr(name='autoClav', nn='Automatic Clavicle Switch',
+                                        defaultVal=1, minVal=0, maxVal=1)
                 autoClavMechGrp = utils.newNode('group', name='{}autoClavMech'.format(extraName),
                                                 side=self.side, parent=armMechGrp.name,
                                                 skipNum=True)
@@ -176,18 +183,6 @@ class armModule:
                 autoClavClavIK = ikFn.ik(sj=newClavJnts[0], ej=newClavJnts[-1], side=self.side,
                                          name='{}autoClavClavicleIK'.format(extraName))
                 autoClavClavIK.createIK(parent=autoClavMechGrp.name)
-                ## create clav ctrl
-                # self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
-                #                               guide=newClavJnts[-1], skipNum=True,
-                #                               deleteGuide=False, parent=ikCtrlGrp.name,
-                #                               scaleOffset=self.rig.scaleOffset, rig=self.rig)
-                # self.clavIKCtrl.modifyShape(shape='pin', color=col['col2'], mirror=True,
-                #                             scale=(2, 2, 2))
-                # clavIKCtrlPiv = cmds.xform(newClavJnts[0], q=1, t=1, ws=1)
-                # cmds.xform(self.clavIKCtrl.ctrl.name, piv=clavIKCtrlPiv, ws=1)
-                # self.clavIKCtrl.lockAttr(attr=['t', 's'])
-                # self.clavIKCtrl.addAttr(name='autoClav', nn='Automatic Clavicle Switch',
-                #                         defaultVal=1, minVal=0, maxVal=1)
                 ## parent constrain clavIK
                 self.clavIKCtrl.constrain(autoClavClavIK.grp)
                 ## create autoclav jnts (spine and elbow)

@@ -7,13 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>172</height>
+    <height>150</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
     <height>150</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>154</height>
    </size>
   </property>
   <property name="contextMenuPolicy">
@@ -66,7 +72,13 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>25</height>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>20</height>
            </size>
           </property>
           <property name="placeholderText">
@@ -79,7 +91,13 @@
           <property name="minimumSize">
            <size>
             <width>300</width>
-            <height>25</height>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>20</height>
            </size>
           </property>
           <property name="placeholderText">
@@ -92,7 +110,7 @@
           <property name="maximumSize">
            <size>
             <width>45</width>
-            <height>16777215</height>
+            <height>20</height>
            </size>
           </property>
           <item>
@@ -143,7 +161,13 @@
           <property name="minimumSize">
            <size>
             <width>300</width>
-            <height>25</height>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>20</height>
            </size>
           </property>
           <property name="placeholderText">
@@ -163,7 +187,7 @@
           <property name="maximumSize">
            <size>
             <width>75</width>
-            <height>16777215</height>
+            <height>20</height>
            </size>
           </property>
           <property name="text">

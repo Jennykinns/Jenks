@@ -13,7 +13,7 @@ setParent $gMainWindow;
 
 menu -label "Jenks Pipeline" -mn "JP" -tearOff true jenksPipeMenu;
 setParent -menu jenksPipeMenu;
-    menuItem -label "Magical Renamer" -c "python(\"from Jenks.scripts.magicalRenamer import magicalRenamer\"); python(\"reload(magicalRenamer)\"); python(\"magicalRenamer.main()\");";
+    menuItem -label "Magical Renamer: Reloaded" -c "python(\"from Jenks.scripts.magicalRenamer import magicalRenamer\"); python(\"reload(magicalRenamer)\"); python(\"magicalRenamer.main()\");";
     menuItem -d true;
     menuItem -label "Set Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.setAssetName()\");";
     menuItem -label "Get Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.getAssetName(dialog=True)\");";
@@ -43,6 +43,7 @@ setParent -menu jenksPipeMenu;
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveGuides()\");";
     menuItem -label "Load Rig Guides" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGuides(new=True)\");";
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGuides(latest=False)\");";
+    menuItem -label "Name Guides" -c "python(\"from Jenks.scripts.rigModules import bodyFunctions as bodyFn\"); python(\"reload(bodyFn)\"); python(\"bodyFn.renameAllBodyPartGuides()\");";
     menuItem -label "Save Rig Skin" -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.saveAllSkin()\");";
     menuItem -label "Load Rig Skin" -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.loadAllSkin()\");";
     menuItem -label "Save Rig Controls" -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.saveCtrls()\");";

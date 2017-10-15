@@ -2,6 +2,8 @@ import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
+import xml.etree.cElementTree
+
 def getAllSkinJnts(rigNode):
     jnts = cmds.listConnections('{}.rigSkinJnts'.format(rigNode), d=1, s=0)
     return jnts
@@ -22,22 +24,6 @@ def selectSkinJnts():
     cmds.select(jnts)
     return True
 
-def getSkinValues(obj, tol=0.001):
-    vtxList, skinCls = getSkinInfo(obj)
-    if not vtxList or not skinCls:
-        return False
-    skinInfluences = {}
-    for each in skinCls:
-        influences = {}
-        influences['joints'] = cmds.skinCluster(each, q=1, inf=1)
-        influences['weights'] = {}
-        for vtx in vtxList:
-            influenceVals = cmds.skinPercent(each, vtx, ib=tol, q=1, value=1)
-            infulenceNames = cmds.skinPercent(each, vtx, ib=tol, q=1, transform=None)
-            influences['weights'][vtx] = zip(infulenceNames, influenceVals)
-        skinInfluences[each] = influences
-    return skinInfluences
-
 def getSkinInfo(obj):
     ## skin cluster(s)
     shapes = cmds.listRelatives(obj, s=1)
@@ -48,69 +34,35 @@ def getSkinInfo(obj):
         cls = cmds.listConnections(each, type='skinCluster')
         if cls:
             skinCls.extend(cls)
-    ## vertices
-    vtxList = []
-    for x in cmds.getAttr('{}.vrts'.format(obj), multiIndices=1):
-        vtxList.append('{}.vtx[{}]'.format(obj, x))
-    return vtxList, skinCls
+    return skinCls
 
 def loadSkin(geo, assetName=None, prompt=False, override=False):
-    if prompt:
-        assetName = assetNamePrompt()
-    if not assetName:
-        assetName = getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
+    assetName = fileFn.assetNameSetup(assetName, prompt)
     path = fileFn.getAssetDir()
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', name=geo)
     if not fileName:
         return False
-    skinData = fileFn.loadJson(fileOverride=fileName)
-    print 'Loading Skin Data: {}'.format(fileName)
-    # do stuff with skin data
-    vtxList, skinCls = getSkinInfo(geo)
-    if skinCls:
-        if override:
-            cmds.skinCluster(skinCls, e=1, unbind=1)
-        else:
-            return False
-    for clusterName in skinData.keys():
-        for jnt in skinData[clusterName]['joints']:
-            if not cmds.objExists(jnt):
-                cmds.warning('{} from {} cluster not found.'.format(jnt, clusterName))
-                return False
-        cmds.skinCluster(geo, skinData[clusterName]['joints'])
-        for vtx in skinData[clusterName]['weights']:
-            cmds.skinPercent(clusterName, vtx, tv=skinData[clusterName]['weights'][vtx])
-            cmds.select(cl=1)
+    skinCls = getSkinInfo(geo)
+    if not skinCls:
+        skinInfo = {}
+        xmlRoot = xml.etree.cElementTree.parse(fileName).getroot()
+        skinInfo['joints'] = [each.get('source') for each in xmlRoot.findall('weights')]
+        skinCls = cmds.skinCluster(geo, skinInfo['joints'])[0]
+        cmds.select(cl=1)
+    cmds.deformerWeights(fileName, path='', deformer=skinCls, im=1, wp=5, wt=0.00001)
+    cmds.skinCluster(skinCls, e=1, fnw=1)
     return True
 
 def saveSkin(geo, assetName=None, prompt=False):
-    if prompt:
-        assetName = fileFn.assetNamePrompt()
-    if not assetName:
-        assetName = fileFn.getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
+    assetName = fileFn.assetNameSetup(assetName, prompt)
     path = fileFn.getAssetDir()
-    skinData = getSkinValues(geo)
-    if skinData:
-        skinFile = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
-        status = fileFn.saveJson(skinData, fileOverride=skinFile)
-        return status
-    else:
-        return False
+    fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
+    skinCls = getSkinInfo(geo)
+    cmds.deformerWeights(fileName, path='', deformer=skinCls, ex=1, wp=5, wt=0.00001)
+    return True
 
 def saveAllSkin(assetName=None, prompt=False):
-    if prompt:
-        assetName = fileFn.assetNamePrompt()
-    if not assetName:
-        assetName = fileFn.getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
+    assetName = fileFn.assetNameSetup(assetName, prompt)
     geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
     if geo:
         for each in geo:
@@ -120,13 +72,7 @@ def saveAllSkin(assetName=None, prompt=False):
         return False
 
 def loadAllSkin(assetName=None, prompt=False):
-    if prompt:
-        assetName = fileFn.assetNamePrompt()
-    if not assetName:
-        assetName = fileFn.getAssetName()
-    if not assetName:
-        print 'Asset Name not specified.'
-        return False
+    assetName = fileFn.assetNameSetup(assetName, prompt)
     print 'Starting Skinning From Saved Files.'
     geo = cmds.ls(type='transform')
     if geo:

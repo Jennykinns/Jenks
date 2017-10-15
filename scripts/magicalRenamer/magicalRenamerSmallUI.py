@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/Jenks/maya/scripts/Jenks/scripts/magicalRenamer/magicalRenamerSmallUI.ui'
 #
-# Created: Sat Oct 14 18:31:22 2017
+# Created: Sun Oct 15 16:14:00 2017
 #      by: pyside2-uic  running on PySide2 2.0.0~alpha0
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,8 +33,8 @@ class Ui_MainWindow(object):
         self.mainGrid_Lay.setVerticalSpacing(0)
         self.mainGrid_Lay.setObjectName("mainGrid_Lay")
         self.side_Cbox = QtWidgets.QComboBox(self.main_Grp)
-        self.side_Cbox.setMinimumSize(QtCore.QSize(0, 24))
-        self.side_Cbox.setMaximumSize(QtCore.QSize(45, 24))
+        self.side_Cbox.setMinimumSize(QtCore.QSize(0, 20))
+        self.side_Cbox.setMaximumSize(QtCore.QSize(45, 20))
         self.side_Cbox.setObjectName("side_Cbox")
         self.side_Cbox.addItem("")
         self.side_Cbox.addItem("")
@@ -51,13 +51,13 @@ class Ui_MainWindow(object):
         self.mini_Btn.setObjectName("mini_Btn")
         self.mainGrid_Lay.addWidget(self.mini_Btn, 0, 0, 1, 1)
         self.rename_Ledit = QtWidgets.QLineEdit(self.main_Grp)
-        self.rename_Ledit.setMinimumSize(QtCore.QSize(0, 25))
-        self.rename_Ledit.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.rename_Ledit.setMinimumSize(QtCore.QSize(0, 20))
+        self.rename_Ledit.setMaximumSize(QtCore.QSize(16777215, 20))
         self.rename_Ledit.setObjectName("rename_Ledit")
         self.mainGrid_Lay.addWidget(self.rename_Ledit, 0, 2, 1, 2)
         self.rename_Btn = QtWidgets.QPushButton(self.main_Grp)
-        self.rename_Btn.setMinimumSize(QtCore.QSize(0, 25))
-        self.rename_Btn.setMaximumSize(QtCore.QSize(75, 25))
+        self.rename_Btn.setMinimumSize(QtCore.QSize(0, 20))
+        self.rename_Btn.setMaximumSize(QtCore.QSize(75, 20))
         self.rename_Btn.setDefault(False)
         self.rename_Btn.setObjectName("rename_Btn")
         self.mainGrid_Lay.addWidget(self.rename_Btn, 0, 4, 1, 1)
@@ -71,7 +71,7 @@ class Ui_MainWindow(object):
         MainWindow.setTabOrder(self.rename_Ledit, self.rename_Btn)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "Jenks\' Magical Renamer", None, -1))
+        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "Jenks\' Magical Renamer: Reloaded", None, -1))
         self.side_Cbox.setItemText(0, QtWidgets.QApplication.translate("MainWindow", "C", None, -1))
         self.side_Cbox.setItemText(1, QtWidgets.QApplication.translate("MainWindow", "L", None, -1))
         self.side_Cbox.setItemText(2, QtWidgets.QApplication.translate("MainWindow", "R", None, -1))

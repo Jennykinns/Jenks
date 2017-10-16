@@ -41,6 +41,13 @@ class armModule:
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         armMechGrp = utils.newNode('group', name='{}armMech'.format(extraName),
                                    side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
+        if not parent:
+            parentCtrl = ctrlFn.ctrl(name='{}armParent'.format(extraName), side=self.side,
+                                     parent=armCtrlsGrp.name, guide=jnts[0], skipNum=True)
+            parentCtrl.modifyShape(shape='sphere', color=col['col1'])
+            parent = parentCtrl.ctrlEnd
+        else:
+            parentCtrl = None
         if options['IK']:
             armMechSkelGrp = utils.newNode('group', name='{}armMechSkel'.format(extraName),
                                            side=self.side, skipNum=True, parent=armMechGrp.name)
@@ -90,10 +97,10 @@ class armModule:
             self.handIKCtrl.lockAttr(attr=['s'])
             self.handIKCtrl.constrain(armIK.grp)
             self.handIKCtrl.constrain(handIK.grp)
-            # self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
-            #                                 *TORSO*,
-            #                                 self.clavIKCtrl.name],
-            #                                niceNames=['World', 'Chest', 'Clavicle'], dv=0)
+            self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
+                                            parent],
+                                           # niceNames=['World', 'Chest', 'Clavicle'],
+                                           dv=0)
             ##-- PoleVector
             pvGuide = '{}armPV{}'.format(self.moduleName, suffix['locator'])
             cmds.delete(cmds.aimConstraint(ikJnts[2], pvGuide))
@@ -107,10 +114,20 @@ class armModule:
             self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
             self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.handIKCtrl.ctrlEnd],
                                            niceNames=['World', 'Hand'], dv=0)
+            ## clav
+            self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
+                                          guide=jnts[0], skipNum=True,
+                                          deleteGuide=False, parent=ikCtrlGrp.name,
+                                          scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            self.clavIKCtrl.modifyShape(shape='pin', color=col['col2'], mirror=True,
+                                        scale=(2, 2, 2))
+            clavIKCtrlPiv = cmds.xform(parent, q=1, t=1, ws=1)
+            cmds.xform(self.clavIKCtrl.ctrl.name, piv=clavIKCtrlPiv, ws=1)
+            self.clavIKCtrl.lockAttr(attr=['t', 's'])
             ## autoClav
-            if options['autoClav']:
-                self.settingCtrl.addAttr(name='autoClav', nn='Automatic Clavicle Switch',
-                                          defaultVal=1, minVal=0, maxVal=1)
+            if options['autoClav'] and not parentCtrl:
+                self.clavIKCtrl.addAttr(name='autoClav', nn='Automatic Clavicle Switch',
+                                        defaultVal=1, minVal=0, maxVal=1)
                 autoClavMechGrp = utils.newNode('group', name='{}autoClavMech'.format(extraName),
                                                 side=self.side, parent=armMechGrp.name,
                                                 skipNum=True)
@@ -166,16 +183,6 @@ class armModule:
                 autoClavClavIK = ikFn.ik(sj=newClavJnts[0], ej=newClavJnts[-1], side=self.side,
                                          name='{}autoClavClavicleIK'.format(extraName))
                 autoClavClavIK.createIK(parent=autoClavMechGrp.name)
-                ## create clav ctrl
-                self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
-                                              guide=newClavJnts[-1], skipNum=True,
-                                              deleteGuide=False, parent=ikCtrlGrp.name,
-                                              scaleOffset=self.rig.scaleOffset, rig=self.rig)
-                self.clavIKCtrl.modifyShape(shape='pin', color=col['col2'], mirror=True,
-                                            scale=(2, 2, 2))
-                clavIKCtrlPiv = cmds.xform(newClavJnts[0], q=1, t=1, ws=1)
-                cmds.xform(self.clavIKCtrl.ctrl.name, piv=clavIKCtrlPiv, ws=1)
-                self.clavIKCtrl.lockAttr(attr=['t', 's'])
                 ## parent constrain clavIK
                 self.clavIKCtrl.constrain(autoClavClavIK.grp)
                 ## create autoclav jnts (spine and elbow)
@@ -206,10 +213,16 @@ class armModule:
                                                              mo=1)[0]
                 revNd = utils.newNode('reverse', name='{}autoClavSw'.format(extraName),
                                       side=self.side)
-                revNd.connect('inputX', self.settingCtrl.ctrl.autoClav, mode='to')
-                cmds.connectAttr(self.settingCtrl.ctrl.autoClav,
+                revNd.connect('inputX', self.clavIKCtrl.ctrl.autoClav, mode='to')
+                cmds.connectAttr(self.clavIKCtrl.ctrl.autoClav,
                                  '{}.{}W1'.format(autoClavSwCtrlConstr, aCMechJnts[-1]))
                 revNd.connect('outputX', '{}.{}W0'.format(autoClavSwCtrlConstr, parent))
+
+            else:
+                clavIK = ikFn.ik(sj=ikJnts[0], ej=ikJnts[1], side=self.side,
+                                 name='{}clavicleIK'.format(extraName))
+                clavIK.createIK(parent=armMechGrp.name)
+                self.clavIKCtrl.constrain(clavIK.grp)
 
         ## fk
         if options['FK']:
@@ -964,13 +977,23 @@ class tailModule:
                 tailCtrls.append(ctrl)
 
 
+def getAllChildren(obj):
+    jnts = []
+    a = cmds.listRelatives(obj, type='joint')
+    if a:
+        for each in a:
+            jnts.append(each)
+            jnts.extend(getAllChildren(each))
+    return jnts
+
 def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
     if extraName.endswith('_'):
         extraName = extraName[:-1]
     moduleName = utils.setupBodyPartName(extraName, side)
     partGrp = '{}{}{}'.format(moduleName, typ, suffix['group'])
-    partGuidesJnts = cmds.listRelatives(partGrp, type='joint', ad=1)
-    partGuidesJnts.reverse()
+    partGuidesJnts = getAllChildren(partGrp)
+    # partGuidesJnts = cmds.listRelatives(partGrp, type='joint', ad=1)
+    # partGuidesJnts.reverse()
     if not chain:
         oldNewNames = zip(partGuidesJnts, jntNames)
     else:
@@ -1007,32 +1030,32 @@ def renameLegGuides(side='C', extraName=''):
         '{}knee'.format(extraName),
         '{}ankle'.format(extraName),
         '{}footBall'.format(extraName),
-        '{}toePinky_metacarpel'.format(extraName),
-        '{}toePinky_base'.format(extraName),
-        '{}toePinky_lowMid'.format(extraName),
-        '{}toePinky_highMid'.format(extraName),
-        '{}toePinky_tip'.format(extraName),
-        '{}toeRing_metacarpel'.format(extraName),
-        '{}toeRing_base'.format(extraName),
-        '{}toeRing_lowMid'.format(extraName),
-        '{}toeRing_highMid'.format(extraName),
-        '{}toeRing_tip'.format(extraName),
-        '{}toeMiddle_metacarpel'.format(extraName),
-        '{}toeMiddle_base'.format(extraName),
-        '{}toeMiddle_lowMid'.format(extraName),
-        '{}toeMiddle_highMid'.format(extraName),
-        '{}toeMiddle_tip'.format(extraName),
-        '{}toeIndex_metacarpel'.format(extraName),
-        '{}toeIndex_base'.format(extraName),
-        '{}toeIndex_lowMid'.format(extraName),
-        '{}toeIndex_highMid'.format(extraName),
-        '{}toeIndex_tip'.format(extraName),
+        '{}footToes'.format(extraName),
         '{}toeBig_metacarpel'.format(extraName),
         '{}toeBig_base'.format(extraName),
         '{}toeBig_lowMid'.format(extraName),
         '{}toeBig_highMid'.format(extraName),
         '{}toeBig_tip'.format(extraName),
-        '{}footToes'.format(extraName),
+        '{}toeIndex_metacarpel'.format(extraName),
+        '{}toeIndex_base'.format(extraName),
+        '{}toeIndex_lowMid'.format(extraName),
+        '{}toeIndex_highMid'.format(extraName),
+        '{}toeIndex_tip'.format(extraName),
+        '{}toeMiddle_metacarpel'.format(extraName),
+        '{}toeMiddle_base'.format(extraName),
+        '{}toeMiddle_lowMid'.format(extraName),
+        '{}toeMiddle_highMid'.format(extraName),
+        '{}toeMiddle_tip'.format(extraName),
+        '{}toeRing_metacarpel'.format(extraName),
+        '{}toeRing_base'.format(extraName),
+        '{}toeRing_lowMid'.format(extraName),
+        '{}toeRing_highMid'.format(extraName),
+        '{}toeRing_tip'.format(extraName),
+        '{}toePinky_metacarpel'.format(extraName),
+        '{}toePinky_base'.format(extraName),
+        '{}toePinky_lowMid'.format(extraName),
+        '{}toePinky_highMid'.format(extraName),
+        '{}toePinky_tip'.format(extraName),
     ]
     locList = [
         '{}legPV'.format(extraName),
@@ -1072,31 +1095,31 @@ def renameArmGuides(side='C', extraName=''):
         '{}shoulder'.format(extraName),
         '{}elbow'.format(extraName),
         '{}wrist'.format(extraName),
-        '{}fngrPinky_metacarpel'.format(extraName),
-        '{}fngrPinky_base'.format(extraName),
-        '{}fngrPinky_lowMid'.format(extraName),
-        '{}fngrPinky_highMid'.format(extraName),
-        '{}fngrPinky_tip'.format(extraName),
-        '{}fngrRing_metacarpel'.format(extraName),
-        '{}fngrRing_base'.format(extraName),
-        '{}fngrRing_lowMid'.format(extraName),
-        '{}fngrRing_highMid'.format(extraName),
-        '{}fngrRing_tip'.format(extraName),
-        '{}fngrMiddle_metacarpel'.format(extraName),
-        '{}fngrMiddle_base'.format(extraName),
-        '{}fngrMiddle_lowMid'.format(extraName),
-        '{}fngrMiddle_highMid'.format(extraName),
-        '{}fngrMiddle_tip'.format(extraName),
+        '{}handEnd'.format(extraName),
+        '{}fngrThumb_metacarpel'.format(extraName),
+        '{}fngrThumb_base'.format(extraName),
+        '{}fngrThumb_lowMid'.format(extraName),
+        '{}fngrThumb_tip'.format(extraName),
         '{}fngrIndex_metacarpel'.format(extraName),
         '{}fngrIndex_base'.format(extraName),
         '{}fngrIndex_lowMid'.format(extraName),
         '{}fngrIndex_highMid'.format(extraName),
         '{}fngrIndex_tip'.format(extraName),
-        '{}fngrThumb_metacarpel'.format(extraName),
-        '{}fngrThumb_base'.format(extraName),
-        '{}fngrThumb_lowMid'.format(extraName),
-        '{}fngrThumb_tip'.format(extraName),
-        '{}handEnd'.format(extraName),
+        '{}fngrMiddle_metacarpel'.format(extraName),
+        '{}fngrMiddle_base'.format(extraName),
+        '{}fngrMiddle_lowMid'.format(extraName),
+        '{}fngrMiddle_highMid'.format(extraName),
+        '{}fngrMiddle_tip'.format(extraName),
+        '{}fngrRing_metacarpel'.format(extraName),
+        '{}fngrRing_base'.format(extraName),
+        '{}fngrRing_lowMid'.format(extraName),
+        '{}fngrRing_highMid'.format(extraName),
+        '{}fngrRing_tip'.format(extraName),
+        '{}fngrPinky_metacarpel'.format(extraName),
+        '{}fngrPinky_base'.format(extraName),
+        '{}fngrPinky_lowMid'.format(extraName),
+        '{}fngrPinky_highMid'.format(extraName),
+        '{}fngrPinky_tip'.format(extraName),
     ]
     locList = [
         '{}armPV'.format(extraName),

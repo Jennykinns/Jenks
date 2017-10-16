@@ -42,7 +42,14 @@ Open your asset geometry and publish through the pipeline menu
 
 Open a fresh new scene and create your guide joints and locators (I'll also add an example scene of this)
 
-Make sure everything in the guide scene is named properly. IT WON'T WORK OTHERWISE!
+Make sure everything in the guide scene is named properly IT WON'T WORK OTHERWISE! - Group each body part and name the group then run the 'Name Guides' from the pipeline menu.
+
+```
+{side}_{bodypart}_GRP or
+{side}_{extraname}_{bodypart}_GRP
+
+e.g. L_arm_GRP
+```
 
 Save your guide scene through the pipeline menu
 

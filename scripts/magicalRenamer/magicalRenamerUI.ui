@@ -26,7 +26,7 @@
    <enum>Qt::CustomContextMenu</enum>
   </property>
   <property name="windowTitle">
-   <string>Jenks' Magical Renamer</string>
+   <string>Jenks' Magical Renamer: Reloaded</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="verticalSpacing">

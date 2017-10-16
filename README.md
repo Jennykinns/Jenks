@@ -34,7 +34,7 @@ eval $command;
 
 ## Running the Auto-Rigger
 
-First of all you need to setup your maya project in a certain way. At some point I'll add a template that can just be copied and slightly tweaked.
+First of all you need to setup your maya project in a certain way. [LINK TO EXAMPLE](https://drive.google.com/open?id=0B5PToUGA1O81Qk1NTE9YWkZkZk0)
 
 Then add a new asset from the Jenks Pipeline menu.
 

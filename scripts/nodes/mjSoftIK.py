@@ -19,51 +19,44 @@ class mjSoftIK(ompx.MPxNode):
 
     def compute(self, pPlug, pDataBlock):
         if pPlug == mjSoftIK.outIKTrans:
-            outIKTransX = pDataBlock.outputValue(mjSoftIK.outIKTransX)
-            outIKTransY = pDataBlock.outputValue(mjSoftIK.outIKTransY)
-            outIKTransZ = pDataBlock.outputValue(mjSoftIK.outIKTransZ)
-            chainDist = pDataBlock.inputValue(mjSoftIK.chainLength).asDouble()
-            softDist = pDataBlock.inputValue(mjSoftIK.softAttr).asDouble()
-            hardDist = chainDist - softDist
+            toggle = pDataBlock.inputValue(mjSoftIK.toggle).asBool()
 
             startMatrix = pDataBlock.inputValue(mjSoftIK.baseLocMat).asMatrix()
             ctrlMatrix = pDataBlock.inputValue(mjSoftIK.ctrlLocMat).asMatrix()
 
             startP = om.MPoint(startMatrix(3, 0), startMatrix(3, 1), startMatrix(3, 2))
             endP = om.MPoint(ctrlMatrix(3, 0), ctrlMatrix(3, 1), ctrlMatrix(3, 2))
-            ctrlDist = startP.distanceTo(endP)
+            outIKTransX = pDataBlock.outputValue(mjSoftIK.outIKTransX)
+            outIKTransY = pDataBlock.outputValue(mjSoftIK.outIKTransY)
+            outIKTransZ = pDataBlock.outputValue(mjSoftIK.outIKTransZ)
 
-            if ctrlDist >= hardDist and not softDist == 0:
-                ikDist = softDist*(1-math.exp((-(ctrlDist-hardDist))/softDist))+hardDist
+            if toggle:
+                chainDist = pDataBlock.inputValue(mjSoftIK.chainLength).asDouble()
+                softDist = pDataBlock.inputValue(mjSoftIK.softAttr).asDouble()
+                hardDist = chainDist - softDist
+
+                ctrlDist = startP.distanceTo(endP)
+
+                if ctrlDist >= hardDist and not softDist == 0:
+                    ikDist = softDist*(1-math.exp((-(ctrlDist-hardDist))/softDist))+hardDist
+                else:
+                    ikDist = ctrlDist
+
+                startVector = om.MVector(startP)
+                endVector = om.MVector(endP)
+
+                normalVector = (startVector - endVector).normal()
+                ikVector = startVector + normalVector * -ikDist
+
             else:
-                ikDist = ctrlDist
+                ikVector = om.MVector(endP)
 
-            startVector = om.MVector(startP)
-            endVector = om.MVector(endP)
-
-            normalVector = (startVector - endVector).normal()
-            ikVector = startVector + normalVector * -ikDist
-
-            # outIKTrans.setDouble(ikDist)
             outIKTransX.setDouble(ikVector.x)
             outIKTransY.setDouble(ikVector.y)
             outIKTransZ.setDouble(ikVector.z)
             outIKTransX.setClean()
             outIKTransY.setClean()
             outIKTransZ.setClean()
-
-            # chainD = cmds.getAttr('joint2.tx')+cmds.getAttr('joint3.tx')
-            # ctrlD = cmds.getAttr('ctrlD.input1')
-            # softD = 0.1
-            # hardD = chainD - softD
-
-            # if ctrlD >= hardD:
-            #     ikDist = softD*(1-math.exp((-(ctrlD-hardD))/softD))+hardD
-            # else:
-            #     ikDist = ctrlD
-
-            # print ikDist
-            # cmds.setAttr('ikPos.tx', ikDist)
 
 
 def nodeCreator():
@@ -79,15 +72,20 @@ def nodeInitializer():
     mjSoftIK.ctrlLocMat = mAttr.create('ctrlMatrix', 'cm', om.MFnMatrixAttribute.kDouble)
     mjSoftIK.addAttribute(mjSoftIK.ctrlLocMat)
 
-    mjSoftIK.softAttr = nAttr.create('softDistance', 'sd', om.MFnNumericData.kDouble)
+    mjSoftIK.softAttr = nAttr.create('softDistance', 'sd', om.MFnNumericData.kDouble, 0.2)
     mjSoftIK.addAttribute(mjSoftIK.softAttr)
     mjSoftIK.chainLength = nAttr.create('chainLength', 'cl', om.MFnNumericData.kDouble)
     mjSoftIK.addAttribute(mjSoftIK.chainLength)
 
-    mjSoftIK.outIKTransX = uAttr.create('outIKTranslateX', 'otX', om.MFnUnitAttribute.kDistance)
-    mjSoftIK.outIKTransY = uAttr.create('outIKTranslateY', 'otY', om.MFnUnitAttribute.kDistance)
-    mjSoftIK.outIKTransZ = uAttr.create('outIKTranslateZ', 'otZ', om.MFnUnitAttribute.kDistance)
-    mjSoftIK.outIKTrans = nAttr.create('outIKTranslate', 'ot', mjSoftIK.outIKTransX,
+    mjSoftIK.toggle = nAttr.create('softIkToggle', 'tog', om.MFnNumericData.kInt, 1)
+    nAttr.setMin(0)
+    nAttr.setMax(1)
+    mjSoftIK.addAttribute(mjSoftIK.toggle)
+
+    mjSoftIK.outIKTransX = uAttr.create('outIkTranslateX', 'otX', om.MFnUnitAttribute.kDistance)
+    mjSoftIK.outIKTransY = uAttr.create('outIkTranslateY', 'otY', om.MFnUnitAttribute.kDistance)
+    mjSoftIK.outIKTransZ = uAttr.create('outIkTranslateZ', 'otZ', om.MFnUnitAttribute.kDistance)
+    mjSoftIK.outIKTrans = nAttr.create('outIkTranslate', 'ot', mjSoftIK.outIKTransX,
                                        mjSoftIK.outIKTransY, mjSoftIK.outIKTransZ)
     mjSoftIK.addAttribute(mjSoftIK.outIKTrans)
 
@@ -95,6 +93,7 @@ def nodeInitializer():
     mjSoftIK.attributeAffects(mjSoftIK.ctrlLocMat, mjSoftIK.outIKTrans)
     mjSoftIK.attributeAffects(mjSoftIK.softAttr, mjSoftIK.outIKTrans)
     mjSoftIK.attributeAffects(mjSoftIK.chainLength, mjSoftIK.outIKTrans)
+    mjSoftIK.attributeAffects(mjSoftIK.toggle, mjSoftIK.outIKTrans)
 
 
 def initializePlugin(obj):

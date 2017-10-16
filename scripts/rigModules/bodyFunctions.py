@@ -95,7 +95,20 @@ class armModule:
                                               scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.handIKCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
             self.handIKCtrl.lockAttr(attr=['s'])
-            self.handIKCtrl.constrain(armIK.grp)
+            if options['softIK']:
+                softIk = utils.newNode('mjSoftIK', name='{}armIK'.format(extraName),
+                                       side=self.side)
+                jntLoc = utils.newNode('locator', name='{}armJntBase'.format(extraName),
+                                       side=self.side, skipNum=True,
+                                       parent=cmds.listRelatives(jnts[1], p=1))
+                jntLoc.matchTransforms(jnts[1])
+                softIk.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
+                softIk.connect('cm', '{}.wm'.format(self.handIKCtrl.ctrlEnd), 'to')
+                cmds.setAttr('{}.cl'.format(softIk.name), abs(cmds.getAttr('{}.tx'.format(jnts[2]))
+                             + cmds.getAttr('{}.tx'.format(jnts[3]))))
+                softIk.connect('ot', '{}.t'.format(armIK.grp))
+            else:
+                self.handIKCtrl.constrain(armIK.grp)
             self.handIKCtrl.constrain(handIK.grp)
             self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
                                             parent],
@@ -542,6 +555,28 @@ class legModule:
             sidePivPos.connect('firstTerm', self.footIKCtrl.ctrl.sidePiv, mode='to')
             sidePivPos.connect('colorIfTrueR', self.footIKCtrl.ctrl.sidePiv, mode='to')
             sidePivPos.connect('outColorR', '{}.rz'.format(outerPivGrp.name), mode='from')
+            if options['softIK']:
+                softIk = utils.newNode('mjSoftIK', name='{}legIK'.format(extraName),
+                                       side=self.side)
+                jntLoc = utils.newNode('locator', name='{}legJntBase'.format(extraName),
+                                       side=self.side, skipNum=True,
+                                       parent=cmds.listRelatives(jnts[0], p=1))
+                jntLoc.matchTransforms(jnts[0])
+                ctrlLoc = utils.newNode('locator', name='{}legIKCtrl'.format(extraName),
+                                        side=self.side, skipNum=True,
+                                        parent=self.footIKCtrl.ctrlEnd)
+                ctrlLoc.matchTransforms(jnts[2])
+                softIk.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
+                softIk.connect('cm', '{}.wm'.format(ctrlLoc.name), 'to')
+                cmds.setAttr('{}.cl'.format(softIk.name), abs(cmds.getAttr('{}.tx'.format(jnts[1]))
+                             + cmds.getAttr('{}.tx'.format(jnts[2]))))
+                a = utils.newNode('group', name='{}legSoftIK'.format(extraName), side=self.side,
+                                  parent=footMechGrp.name)
+                a.matchTransforms(legIK.grp)
+                softIk.connect('ot', '{}.t'.format(a.name))
+                cmds.parentConstraint(a.name, innerPivGrp.name, mo=1)
+            # else:
+            #     pass
             ##- controls
             self.footHeelIKCtrl = ctrlFn.ctrl(name='{}footHeelIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[0], skipNum=True,

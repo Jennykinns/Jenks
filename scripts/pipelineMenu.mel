@@ -51,6 +51,8 @@ setParent -menu jenksPipeMenu;
     menuItem -label "Load Rig Controls" -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.loadCtrls()\");";
     menuItem -d true;
     menuItem -label "Setup LookDev Scene" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.setupLookDevScene()\");";
+    menuItem -label "Create New Shader" -c "python(\"from Jenks.scripts.rigModules import pipelineFn\"); python(\"reload(pipelineFn)\"); python(\"pipelineFn.createNewShader()\");";
+    menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import pipelineFn\"); python(\"reload(pipelineFn)\"); python(\"pipelineFn.createNewShader(bump=True, sss=True)\");";
     menuItem -label "Save WIP LookDev" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveWipLookDev(autoName=True)\");";
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveWipLookDev()\");";
     menuItem -label "Load WIP LookDev" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadWipLookDev(latest=True)\");";

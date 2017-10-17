@@ -39,6 +39,9 @@ class mjSoftIK(ompx.MPxNode):
 
                 if ctrlDist >= hardDist and not softDist == 0:
                     ikDist = softDist*(1-math.exp((-(ctrlDist-hardDist))/softDist))+hardDist
+                    if round(ikDist, 4) == round(chainDist, 4):
+                        a = ctrlDist - hardDist
+
                 else:
                     ikDist = ctrlDist
 

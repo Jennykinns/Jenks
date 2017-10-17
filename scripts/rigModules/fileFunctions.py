@@ -60,6 +60,13 @@ def newNameSpace(assetName):
         ns = '{}{}'.format(assetName, str(i).zfill(2))
     return ns
 
+def loadPlugin(NODENAME, FILETYPE):
+    cmds.unloadPlugin('{}{}'.format(NODENAME, FILETYPE))
+    cmds.flushUndo()
+    pluginPath = '{}/Jenks/scripts/nodes/'.format(getScriptDir())
+    cmds.loadPlugin(r'{}/{}{}'.format(pluginPath, NODENAME, FILETYPE))
+    mel.eval("refreshEditorTemplates; refreshAE;")
+
 
 def getScriptDir():
     ## MIGHT NEED CHANGING - not sure if the path list will be

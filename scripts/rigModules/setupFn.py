@@ -2,6 +2,7 @@ import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
+from Jenks.scripts.rigModules import fileFunctions as fileFn
 
 
 def createRigNode(rigNode):
@@ -11,6 +12,7 @@ def createRigNode(rigNode):
 class rig:
     def __init__(self, name, scaleOffset=1, debug=False):
         cmds.file(force=1, new=1)
+        fileFn.loadPlugin('mjSoftIK', '.py')
         self.scaleOffset = scaleOffset
         self.grp = utils.newNode('group', name='RIG_', skipNum=True, side='')
         self.worldLoc = utils.newNode('locator', name='world',

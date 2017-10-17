@@ -3,6 +3,7 @@ import maya.cmds as cmds
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ikFunctions as ikFn
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
+from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules import miscFunctions as miscFn
 from Jenks.scripts.rigModules import apiFuncitons as apiFn
 from Jenks.scripts.rigModules.suffixDictionary import suffix
@@ -96,6 +97,7 @@ class armModule:
             self.handIKCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
             self.handIKCtrl.lockAttr(attr=['s'])
             if options['softIK']:
+                # fileFn.loadPlugin('mjSoftIK', '.py')
                 softIk = utils.newNode('mjSoftIK', name='{}armIK'.format(extraName),
                                        side=self.side)
                 jntLoc = utils.newNode('locator', name='{}armJntBase'.format(extraName),
@@ -294,9 +296,6 @@ class armModule:
                 cmds.connectAttr(self.handIKCtrl.ctrl.stretchySwitch, armIK.stretchToggleAttr)
             if options['FK']:
                 print '## add proper stretch to arm fk'
-        ## softIK
-        if options['softIK']:
-            print '## do arm soft IK'
         ## ribbon
         if options['ribbon']:
             print '## do arm ribbon'
@@ -635,6 +634,7 @@ class legModule:
             if cmds.objExists('{}footGuides{}'.format(self.moduleName, suffix['group'])):
                 cmds.delete('{}footGuides{}'.format(self.moduleName, suffix['group']))
             if options['softIK']:
+                # fileFn.loadPlugin('mjSoftIK', '.py')
                 softIk = utils.newNode('mjSoftIK', name='{}legIK'.format(extraName),
                                        side=self.side)
                 jntLoc = utils.newNode('locator', name='{}legJntBase'.format(extraName),
@@ -715,9 +715,6 @@ class legModule:
                                  legIK.stretchToggleAttr)
             if options['FK']:
                 print '## add proper stretch to leg fk'
-
-        if options['softIK']:
-            print '## do leg softIK stuff'
 
         if options['ribbon']:
             print '## do leg ribbon stuff'

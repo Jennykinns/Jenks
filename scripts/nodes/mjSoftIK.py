@@ -16,7 +16,6 @@ class mjSoftIK(ompx.MPxNode):
     def __init__(self):
         ompx.MPxNode.__init__(self)
 
-
     def compute(self, pPlug, pDataBlock):
         if pPlug == mjSoftIK.outIKTrans:
             toggle = pDataBlock.inputValue(mjSoftIK.toggle).asBool()
@@ -39,9 +38,6 @@ class mjSoftIK(ompx.MPxNode):
 
                 if ctrlDist >= hardDist and not softDist == 0:
                     ikDist = softDist*(1-math.exp((-(ctrlDist-hardDist))/softDist))+hardDist
-                    if round(ikDist, 4) == round(chainDist, 4):
-                        a = ctrlDist - hardDist
-
                 else:
                     ikDist = ctrlDist
 

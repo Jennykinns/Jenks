@@ -20,8 +20,12 @@ class ik:
                                                       side=self.side))
         self.eff = cmds.rename(ik[1], utils.setupName(self.name, obj='ikEffector',
                                                       side=self.side))
-        self.grp = cmds.group(self.hdl, name=utils.setupName(self.name, obj='group',
-                                                             side=self.side))
+        hdlGrp = utils.newNode('group', name=self.name, side=self.side)
+        hdlGrp.matchTransforms(self.hdl)
+        cmds.parent(self.hdl, hdlGrp.name)
+        self.grp = hdlGrp.name
+        # self.grp = cmds.group(self.hdl, name=utils.setupName(self.name, obj='group',
+        #                                                      side=self.side))
         if parent:
             cmds.parent(self.grp, parent)
         grpCP = cmds.xform(self.hdl, q=1, t=1, ws=1)

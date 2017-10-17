@@ -107,6 +107,13 @@ class armModule:
                 cmds.setAttr('{}.cl'.format(softIk.name), abs(cmds.getAttr('{}.tx'.format(jnts[2]))
                              + cmds.getAttr('{}.tx'.format(jnts[3]))))
                 softIk.connect('ot', '{}.t'.format(armIK.grp))
+                self.handIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
+                                        enumOptions=['___'])
+                self.handIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
+                                        enumOptions=['Off', 'On'])
+                cmds.connectAttr(self.handIKCtrl.ctrl.softIKTog, '{}.tog'.format(softIk.name))
+                self.handIKCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
+                cmds.connectAttr(self.handIKCtrl.ctrl.softIKDist, '{}.sd'.format(softIk.name))
             else:
                 self.handIKCtrl.constrain(armIK.grp)
             self.handIKCtrl.constrain(handIK.grp)
@@ -280,6 +287,8 @@ class armModule:
             if options['IK']:
                 armIK.addStretch(customStretchNode=customNodes,
                                  globalScaleAttr='{}.sy'.format(self.rig.globalCtrl.ctrl.name))
+                self.handIKCtrl.addAttr('stretchSep', nn='___   Stretch',
+                                        typ='enum', enumOptions=['___'])
                 self.handIKCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
                                          minVal=0, maxVal=1, defaultVal=1)
                 cmds.connectAttr(self.handIKCtrl.ctrl.stretchySwitch, armIK.stretchToggleAttr)
@@ -555,28 +564,6 @@ class legModule:
             sidePivPos.connect('firstTerm', self.footIKCtrl.ctrl.sidePiv, mode='to')
             sidePivPos.connect('colorIfTrueR', self.footIKCtrl.ctrl.sidePiv, mode='to')
             sidePivPos.connect('outColorR', '{}.rz'.format(outerPivGrp.name), mode='from')
-            if options['softIK']:
-                softIk = utils.newNode('mjSoftIK', name='{}legIK'.format(extraName),
-                                       side=self.side)
-                jntLoc = utils.newNode('locator', name='{}legJntBase'.format(extraName),
-                                       side=self.side, skipNum=True,
-                                       parent=cmds.listRelatives(jnts[0], p=1))
-                jntLoc.matchTransforms(jnts[0])
-                ctrlLoc = utils.newNode('locator', name='{}legIKCtrl'.format(extraName),
-                                        side=self.side, skipNum=True,
-                                        parent=self.footIKCtrl.ctrlEnd)
-                ctrlLoc.matchTransforms(jnts[2])
-                softIk.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
-                softIk.connect('cm', '{}.wm'.format(ctrlLoc.name), 'to')
-                cmds.setAttr('{}.cl'.format(softIk.name), abs(cmds.getAttr('{}.tx'.format(jnts[1]))
-                             + cmds.getAttr('{}.tx'.format(jnts[2]))))
-                a = utils.newNode('group', name='{}legSoftIK'.format(extraName), side=self.side,
-                                  parent=footMechGrp.name)
-                a.matchTransforms(legIK.grp)
-                softIk.connect('ot', '{}.t'.format(a.name))
-                cmds.parentConstraint(a.name, innerPivGrp.name, mo=1)
-            # else:
-            #     pass
             ##- controls
             self.footHeelIKCtrl = ctrlFn.ctrl(name='{}footHeelIK'.format(extraName),
                                               side=self.side, guide=rfJntGuides[0], skipNum=True,
@@ -647,6 +634,33 @@ class legModule:
             cmds.parentConstraint(rfJnts[3], legIK.grp, mo=1)
             if cmds.objExists('{}footGuides{}'.format(self.moduleName, suffix['group'])):
                 cmds.delete('{}footGuides{}'.format(self.moduleName, suffix['group']))
+            if options['softIK']:
+                softIk = utils.newNode('mjSoftIK', name='{}legIK'.format(extraName),
+                                       side=self.side)
+                jntLoc = utils.newNode('locator', name='{}legJntBase'.format(extraName),
+                                       side=self.side, skipNum=True,
+                                       parent=cmds.listRelatives(jnts[0], p=1))
+                jntLoc.matchTransforms(jnts[0])
+                ctrlLoc = utils.newNode('locator', name='{}legIKCtrl'.format(extraName),
+                                        side=self.side, skipNum=True,
+                                        parent=self.footIKCtrl.ctrlEnd)
+                ctrlLoc.matchTransforms(jnts[2])
+                softIk.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
+                softIk.connect('cm', '{}.wm'.format(ctrlLoc.name), 'to')
+                cmds.setAttr('{}.cl'.format(softIk.name), abs(cmds.getAttr('{}.tx'.format(jnts[1]))
+                             + cmds.getAttr('{}.tx'.format(jnts[2]))))
+                a = utils.newNode('group', name='{}legSoftIK'.format(extraName), side=self.side,
+                                  parent=footMechGrp.name)
+                a.matchTransforms(legIK.grp)
+                softIk.connect('ot', '{}.t'.format(a.name))
+                cmds.parentConstraint(a.name, innerPivGrp.name, mo=1)
+                self.footIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
+                                        enumOptions=['___'])
+                self.footIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
+                                        enumOptions=['Off', 'On'])
+                cmds.connectAttr(self.footIKCtrl.ctrl.softIKTog, '{}.tog'.format(softIk.name))
+                self.footIKCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
+                cmds.connectAttr(self.footIKCtrl.ctrl.softIKDist, '{}.sd'.format(softIk.name))
 
         if options['FK']:
             ## controls
@@ -693,6 +707,8 @@ class legModule:
             if options['IK']:
                 legIK.addStretch(customStretchNode=customNodes,
                                  globalScaleAttr=self.rig.scaleAttr)
+                self.footIKCtrl.addAttr('stretchSep', nn='___   Stretch',
+                                        typ='enum', enumOptions=['___'])
                 self.footIKCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
                                        minVal=0, maxVal=1, defaultVal=1)
                 cmds.connectAttr(self.footIKCtrl.ctrl.stretchySwitch,

@@ -28,4 +28,5 @@ suffix = {
     'hairSystem' : '_HS',
     'nucleus' : '_NUC',
     'blend' : '_BLND',
+    'mjSoftIK' : '_SIK',
 }

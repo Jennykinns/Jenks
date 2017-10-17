@@ -28,6 +28,18 @@ def main():
     print('Loaded')
     myWindow.show()
 
+def getSelection(radVal):
+    oldSel = cmds.ls(sl=1)
+    if radVal == 'heirachy':
+        cmds.select(cl=1)
+        for each in oldSel:
+            allChilds = cmds.listRelatives(each, ad=1, f=1)
+            shapeChilds = cmds.listRelatives(each, ad=1, f=1, type='shape')
+            allChilds.reverse()
+            cmds.select(each, add=1)
+            cmds.select(allChilds, add=1)
+            cmds.select(shapeChilds, d=1)
+
 class myTool(QtWidgets.QDialog):
     def __init__(self, parent, radVal=None, renVal='', sideVal='C', findVal=None, replVal=None):
         reload(customUI)
@@ -91,16 +103,7 @@ class myTool(QtWidgets.QDialog):
 
 
     def doSelection(self):
-        oldSel = cmds.ls(sl=1)
-        cmds.select(cl=1)
-        if self.radVal == 'heirachy':
-            for each in oldSel:
-                allChilds = cmds.listRelatives(each, ad=1, f=1)
-                shapeChilds = cmds.listRelatives(each, ad=1, f=1, type='shape')
-                allChilds.reverse()
-                cmds.select(each, add=1)
-                cmds.select(allChilds, add=1)
-                cmds.select(shapeChilds, d=1)
+        getSelection(self.radVal)
 
 
     def renameSelection(self, *args):
@@ -180,17 +183,7 @@ class smallMyTool(QtWidgets.QDialog):
 
 
     def doSelection(self):
-        oldSel = cmds.ls(sl=1)
-        cmds.select(cl=1)
-        if self.radVal == 'heirachy':
-            for each in oldSel:
-                allChilds = cmds.listRelatives(each, ad=1, f=1)
-                shapeChilds = cmds.listRelatives(each, ad=1, f=1, type='shape')
-                allChilds.reverse()
-                cmds.select(each, add=1)
-                cmds.select(allChilds, add=1)
-                cmds.select(shapeChilds, d=1)
-
+        getSelection(self.radVal)
 
     def renameSelection(self, *args):
         ## do renameself.doSelection()

@@ -416,11 +416,11 @@ def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=
         if removeRefs:
             removeReferences()
         if selectionOnly:
-            pass
+            cmds.file(fileName, exportSelected=True, type='mayaAscii')
         else:
             cmds.file(rename=fileName)
             cmds.file(save=True, type='mayaAscii')
-            print 'Saved File: {}'.format(fileName)
+        print 'Saved File: {}'.format(fileName)
 
 def assetNamePrompt():
     result = cmds.promptDialog(title='Asset Name',

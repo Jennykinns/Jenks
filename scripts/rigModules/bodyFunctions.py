@@ -653,7 +653,7 @@ class legModule:
                                   parent=footMechGrp.name)
                 a.matchTransforms(legIK.grp)
                 softIk.connect('ot', '{}.t'.format(a.name))
-                cmds.parentConstraint(a.name, innerPivGrp.name, mo=1)
+                cmds.pointConstraint(a.name, innerPivGrp.name, mo=1)
                 self.footIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
                                         enumOptions=['___'])
                 self.footIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',

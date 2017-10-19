@@ -1,0 +1,8 @@
+To build:
+
+First delete the contents of build.
+Then run:
+
+cmake -G "Unix Makefiles" -DMAYA_VERSION=2017 ../
+
+--build . --config Release

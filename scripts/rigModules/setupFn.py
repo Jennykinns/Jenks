@@ -12,7 +12,9 @@ def createRigNode(rigNode):
 class rig:
     def __init__(self, name, scaleOffset=1, debug=False):
         cmds.file(force=1, new=1)
-        fileFn.loadPlugin('mjSoftIK', '.py')
+        fileFn.loadPlugin('mjSoftIK', python=True)
+        fileFn.loadPlugin('mjStretchArray')
+        fileFn.loadPlugin('mjRivet')
         self.scaleOffset = scaleOffset
         self.grp = utils.newNode('group', name='RIG_', skipNum=True, side='')
         self.worldLoc = utils.newNode('locator', name='world',

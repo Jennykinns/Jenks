@@ -60,11 +60,23 @@ def newNameSpace(assetName):
         ns = '{}{}'.format(assetName, str(i).zfill(2))
     return ns
 
-def loadPlugin(NODENAME, FILETYPE):
-    cmds.unloadPlugin('{}{}'.format(NODENAME, FILETYPE))
+def loadPlugin(nodeName, python=False):
+    if python:
+        fileType = '.py'
+    else:
+        if sys.platform == "linux" or sys.platform == "linux2":
+           # linux
+           fileType = '.so'
+        elif sys.platform == "darwin":
+           # MAC OS X
+           fileType = '.bundle'
+        elif sys.platform == "win32" or sys.platform == "win64":
+           # Windows
+           fileType = '.mll'
+    cmds.unloadPlugin('{}{}'.format(nodeName, fileType))
     cmds.flushUndo()
-    pluginPath = '{}/Jenks/scripts/nodes/'.format(getScriptDir())
-    cmds.loadPlugin(r'{}/{}{}'.format(pluginPath, NODENAME, FILETYPE))
+    pluginPath = '{}/Jenks/scripts/nodes'.format(getScriptDir())
+    cmds.loadPlugin(r'{}/{}{}'.format(pluginPath, nodeName, fileType))
     mel.eval("refreshEditorTemplates; refreshAE;")
 
 

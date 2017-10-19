@@ -6,12 +6,13 @@ class ik:
     """
     Create and manipulate Ik handles.
     """
-    def __init__(self, sj, ej, name='IK', side='C'):
+    def __init__(self, sj, ej, name='IK', side='C', rig=None):
         ## initial variables
         self.sj = sj
         self.ej = ej
         self.name = name
         self.side = side
+        self.rig = rig
 
     def createIK(self, solver='ikRPsolver', parent=None):
         ## ik creation
@@ -93,10 +94,37 @@ class ik:
                 op=2
             else:
                 op=0
-            ## check for plugin enabled
-            ## create node
-            ## connect node
-        else:
+            loadedPlugins = cmds.pluginInfo(query=1, listPlugins=1)
+            if 'mjStretchArray' not in loadedPlugins:
+                customStretchNode = False
+            else:
+                stretchNd = utils.newNode('mjStretchArray', name='{}Stretch'.format(self.name),
+                                          side=self.side)
+                jntsWithStretch = utils.getChildrenBetweenObjs(self.sj, self.ej)[1:]
+                if self.rig:
+                    stretchNd.connect('gs', self.rig.scaleAttr, 'to')
+                jntLengths = []
+                for i, each in enumerate(jntsWithStretch):
+                    eachTx = cmds.getAttr('{}.tx'.format(each))
+                    jntLengths.append(eachTx)
+                    cmds.setAttr('{}.ojd[{}]'.format(stretchNd.name, i), eachTx)
+                    stretchNd.connect('od[{}]'.format(i), '{}.tx'.format(each), 'from')
+                origD = abs(sum(jntLengths))
+                print origD
+                cmds.setAttr('{}.origD'.format(stretchNd.name), origD)
+                startLoc = utils.newNode('locator', name='{}Start'.format(self.name),
+                                         side=self.side,
+                                         parent=cmds.listRelatives(self.sj, p=1))
+                startLoc.matchTransforms(self.sj)
+                endLoc = utils.newNode('locator', name='{}End'.format(self.name),
+                                       side=self.side,
+                                       parent=self.grp)
+                endLoc.matchTransforms(self.ej)
+                stretchNd.connect('sm', '{}.wm'.format(startLoc.name), 'to')
+                stretchNd.connect('em', '{}.wm'.format(endLoc.name), 'to')
+                print "### ADD A TOGGLE ATTR TO THE mjStretchArray NODE!"
+                self.stretchToggleAttr = '{}.gs'.format(stretchNd.name)
+        if not customStretchNode:
             if operation == 'greater':
                 op = 2
             elif operation == 'lesser':

@@ -29,6 +29,8 @@ suffix = {
     'nucleus' : '_NUC',
     'blend' : '_BLND',
     'mjSoftIK' : '_SIK',
+    'mjStretchArray' : '_STRCH',
+    'mjRivet' : '_RIV',
     'aiStandardSurface' : '_SHD',
     'shadingEngine' : '_SG',
     'aiColorCorrect' : '_CC',

@@ -223,7 +223,7 @@ class ctrl:
     def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None, rig=None,
                  deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1):
         self.side = side
-        self.gimbal = False
+        self.gimbal = gimbal
         self.scaleOffset = scaleOffset
         if not guide:
             deleteGuide = True
@@ -232,13 +232,27 @@ class ctrl:
 
         self.guide = False if deleteGuide else guide
         self.ctrl = utils.newNode('control', name=name, side=self.side, skipNum=skipNum)
+        if self.gimbal:
+            self.gimbalCtrl = utils.newNode('gimbalCtrl', name=name, side=self.side,
+                                            skipNum=skipNum, parent=self.ctrl.name)
+            scriptsPath = fileFn.getScriptDir()
+            path = '{}/Jenks/scripts/controlShapes'.format(scriptsPath)
+            loadShapeData(self.gimbalCtrl.name, 'sphere', path)
+            self.gimbalCtrl.lockAttr(['t', 's'])
+            self.ctrl.addAttr(name='gimbal', nn='Gimbal Visibility', typ='enum',
+                enumOptions=['Hide', 'Show'])
+            for each in cmds.listRelatives(self.gimbalCtrl.name, s=1):
+                self.ctrl.connect('gimbal', '{}.v'.format(each), 'from')
+            constGrpPar = self.gimbalCtrl.name
+        else:
+            constGrpPar = self.ctrl.name
         if offsetGrpNum > 0:
             self.createCtrlOffsetGrps(offsetGrpNum, name, guide, skipNum)
             self.ctrl.parent(self.offsetGrps[-1].name, relative=True)
             self.constGrp = utils.newNode('group', name=name, suffixOverride='controlConst',
                                           side=side, skipNum=skipNum)
             utils.setOutlinerColor(self.constGrp.name, color=(0.6, 0.6, 0.58))
-            self.constGrp.parent(parent=self.ctrl.name, relative=True)
+            self.constGrp.parent(parent=constGrpPar, relative=True)
             self.ctrlRoot = self.rootGrp.name
             self.ctrlEnd = self.constGrp.name
         else:
@@ -288,6 +302,8 @@ class ctrl:
                        scaleOffset=scale)
         if color or color is None:
             utils.setShapeColor(self.ctrl.name, color=color)
+            if self.gimbal:
+                utils.setShapeColor(self.gimbalCtrl.name, color=color)
         else:
             print '## get existing colour and apply (for if the shape changes)'
 

@@ -579,7 +579,7 @@ class newNode:
             self.name = cmds.spaceLocator(n=nodeName)[0]
         elif node == 'group':
             self.name = cmds.group(n=nodeName, em=1)
-        elif node == 'control':
+        elif node == 'control' or node == 'gimbalCtrl':
             self.name = cmds.circle(n=nodeName, ch=0)[0]
         elif node == 'follicle':
             fol = cmds.createNode(node, ss=1)
@@ -589,6 +589,9 @@ class newNode:
             hs = cmds.createNode(node, ss=1)
             hsTransform = cmds.listRelatives(hs, p=1)
             self.name = cmds.rename(hsTransform, nodeName)
+        elif node == 'cluster':
+            clu, cluHdl = cmds.cluster(n=nodeName)
+            self.name = cluHdl
         else:
             self.name = cmds.createNode(node, n=nodeName, ss=1)
         if parent:

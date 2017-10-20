@@ -4,6 +4,7 @@ suffix = {
     'joint' : '_JNT',
     'locator' : '_LOC',
     'control' : '_CTRL',
+    'gimbalCtrl' : '_GIMB',
     'controlRootGrp' : '_ROOT',
     'controlOffset' : '_OFFS',
     'controlConst' : '_CONST',
@@ -42,4 +43,5 @@ suffix = {
     'aiCurvature' : '_AICRV',
     'displacementShader' : '_DISP',
     'bump2d' : '_BUMP',
+    'cluster' : '_CLU',
 }

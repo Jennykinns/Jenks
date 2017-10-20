@@ -31,6 +31,7 @@ MStatus mjStretchArray::compute(const MPlug& plug, MDataBlock& data) {
 			cerr << "ERROR getting data" << endl;
 		}
 		else {
+			jointDistanceIndices.clear()
 			MArrayDataHandle outDistanceArrayHdl = data.outputArrayValue(aOutDistance, &returnStatus);
 			MArrayDataBuilder outDistanceBuilder = outDistanceArrayHdl.builder();
 			MMatrix startMatrix = data.inputValue(aStartMatrix, &returnStatus).asMatrix();

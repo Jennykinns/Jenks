@@ -42,6 +42,7 @@ class armModule:
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         armMechGrp = utils.newNode('group', name='{}armMech'.format(extraName),
                                    side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
+        cmds.setAttr('{}.it'.format(armMechGrp.name), 0)
         if not parent:
             parentCtrl = ctrlFn.ctrl(name='{}armParent'.format(extraName), side=self.side,
                                      parent=armCtrlsGrp.name, guide=jnts[0], skipNum=True)
@@ -139,16 +140,21 @@ class armModule:
             pvCrv = cmds.curve(d=1,
                                p=[cmds.xform(self.pvCtrl.ctrl.name, q=1, ws=1, t=1),
                                cmds.xform(ikJnts[2], q=1, ws=1, t=1)])
+            cmds.setAttr('{}.it'.format(pvCrv), 0)
+            cmds.parent(pvCrv, self.pvCtrl.offsetGrps[0].name, r=1)
             pvCrv = cmds.rename(pvCrv, '{}armPVLine{}'.format(self.moduleName,
                                 suffix['nurbsCrv']))
+            cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
+            cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
+            cmds.select(cl=1)
+            cmds.select('{}.cv[1]'.format(pvCrv))
             pvJntCluHdl = utils.newNode('cluster', name='{}armPVJnt'.format(extraName),
                                       side=self.side, parent=jnts[2])
-            pvJntClu = cmds.listConnections('{}.wm'.format(pvJntCluHdl.name))[0]
-            pvJntCluSet = cmds.listConnections(pvJntClu, type='objectSet')[0]
-            cmds.sets('{}.cv[0]'.format(pvCrv), add=pvJntCluSet)
-            # pvCtrlCluHdl = utils.newNode('cluster', name='{}armPVCtrl'.format(extraName),
-            #                           side=self.side, parent=self.pvCtrl.ctrlEnd)
-            # pvCtrlClu = cmds.listConnections('{}.wm'.format(pvCtrlCluHdl.name))[0]
+            cmds.select('{}.cv[0]'.format(pvCrv))
+            pvCtrlCluHdl = utils.newNode('cluster', name='{}armPVCtrl'.format(extraName),
+                                      side=self.side, parent=self.pvCtrl.ctrlEnd)
+            utils.setColor(pvJntCluHdl.name, color=None)
+            utils.setColor(pvCtrlCluHdl.name, color=None)
 
             ## clav
             self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
@@ -370,6 +376,7 @@ class spineModule:
 
         spineMechGrp = utils.newNode('group', name='{}spineMech'.format(self.extraName),
                                      side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
+        cmds.setAttr('{}.it'.format(spineMechGrp.name), 0)
         ## orient joints
         if autoOrient:
             orientJoints.doOrientJoint(jointsToOrient=spineJnts, aimAxis=(1, 0, 0),
@@ -459,6 +466,7 @@ class legModule:
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         legMechGrp = utils.newNode('group', name='{}legMech'.format(extraName),
                                    side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
+        cmds.setAttr('{}.it'.format(legMechGrp.name), 0)
         if options['IK']:
             legMechSkelGrp = utils.newNode('group', name='{}legMechSkel'.format(extraName),
                                            side=self.side, skipNum=True, parent=legMechGrp.name)
@@ -509,6 +517,24 @@ class legModule:
             self.pvCtrl.constrain(legIK.hdl, typ='poleVector')
             self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.footIKCtrl.ctrlEnd],
                                        niceNames=['World', 'Foot'], dv=0)
+            pvCrv = cmds.curve(d=1,
+                               p=[cmds.xform(self.pvCtrl.ctrl.name, q=1, ws=1, t=1),
+                               cmds.xform(ikJnts[1], q=1, ws=1, t=1)])
+            cmds.setAttr('{}.it'.format(pvCrv), 0)
+            cmds.parent(pvCrv, self.pvCtrl.offsetGrps[0].name, r=1)
+            pvCrv = cmds.rename(pvCrv, '{}legPVLine{}'.format(self.moduleName,
+                                suffix['nurbsCrv']))
+            cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
+            cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
+            cmds.select(cl=1)
+            cmds.select('{}.cv[1]'.format(pvCrv))
+            pvJntCluHdl = utils.newNode('cluster', name='{}legPVJnt'.format(extraName),
+                                      side=self.side, parent=jnts[1])
+            cmds.select('{}.cv[0]'.format(pvCrv))
+            pvCtrlCluHdl = utils.newNode('cluster', name='{}legPVCtrl'.format(extraName),
+                                      side=self.side, parent=self.pvCtrl.ctrlEnd)
+            utils.setColor(pvJntCluHdl.name, color=None)
+            utils.setColor(pvCtrlCluHdl.name, color=None)
             ## foot mechanics
             footMechGrp = utils.newNode('group', name='{}footMech'.format(extraName),
                                         side=self.side, parent=legMechGrp.name)
@@ -783,6 +809,7 @@ class headModule:
             ## IK mechanics
             headMechGrp = utils.newNode('group', name='{}headMech'.format(extraName),
                                         side=self.side, parent=self.rig.mechGrp.name, skipNum=True)
+            cmds.setAttr('{}.it'.format(headMechGrp.name), 0)
             headIKsGrp = utils.newNode('group', name='{}headIKs'.format(extraName),
                                        side=self.side, parent=headMechGrp.name, skipNum=True)
             neckIK = ikFn.ik(jnts[0], jnts[1], name='{}neckIK'.format(extraName), side=self.side)

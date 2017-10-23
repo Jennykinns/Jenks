@@ -73,11 +73,18 @@ def loadPlugin(nodeName, python=False):
         elif sys.platform == "win32" or sys.platform == "win64":
            # Windows
            fileType = '.mll'
-    cmds.unloadPlugin('{}{}'.format(nodeName, fileType))
-    cmds.flushUndo()
+    loadedPlugins = cmds.pluginInfo(q=1, listPlugins=1)
+    if nodeName in loadedPlugins:
+        cmds.unloadPlugin('{}{}'.format(nodeName, fileType))
+        cmds.flushUndo()
     pluginPath = '{}/Jenks/scripts/nodes'.format(getScriptDir())
     cmds.loadPlugin(r'{}/{}{}'.format(pluginPath, nodeName, fileType))
     mel.eval("refreshEditorTemplates; refreshAE;")
+
+def loadAllPlugins():
+    loadPlugin('mjStretchArray')
+    loadPlugin('mjRivet')
+    loadPlugin('mjSoftIK', True)
 
 
 def getScriptDir():

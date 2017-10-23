@@ -15,6 +15,8 @@ menu -label "Jenks Pipeline" -mn "JP" -tearOff true jenksPipeMenu;
 setParent -menu jenksPipeMenu;
     menuItem -label "Magical Renamer: Reloaded" -c "python(\"from Jenks.scripts.magicalRenamer import magicalRenamer\"); python(\"reload(magicalRenamer)\"); python(\"magicalRenamer.main()\");";
     menuItem -d true;
+    menuItem -label "Load Custom Node Plugins" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadAllPlugins()\");";
+    menuItem -d true;
     menuItem -label "Set Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.setAssetName()\");";
     menuItem -label "Get Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.getAssetName(dialog=True)\");";
     menuItem -label "Create New Asset" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.createNewPipelineAsset(prompt=True)\");";

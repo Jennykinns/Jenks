@@ -131,7 +131,7 @@ class armModule:
                                       guide=pvGuide,
                                       skipNum=True, deleteGuide=True, parent=ikCtrlGrp.name,
                                       scaleOffset=self.rig.scaleOffset, rig=self.rig)
-            self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
+            self.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
             self.pvCtrl.lockAttr(['r', 's'])
             self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
@@ -511,7 +511,7 @@ class legModule:
                                       guide=pvGuide, skipNum=True, deleteGuide=True,
                                       parent=ikCtrlGrp.name, scaleOffset=self.rig.scaleOffset,
                                       rig=self.rig)
-            self.pvCtrl.modifyShape(shape='crossPyramid', color=col['col1'], rotation=(0, 180, 0),
+            self.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
                                     scale=(0.4, 0.4, 0.4))
             self.pvCtrl.lockAttr(['r', 's'])
             self.pvCtrl.constrain(legIK.hdl, typ='poleVector')

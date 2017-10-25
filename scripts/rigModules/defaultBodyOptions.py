@@ -2,7 +2,7 @@ arm = {
     'IK' : True,
     'FK' : True,
     'stretchy' : True,
-    'softIK' : True,
+    'softIK' : False,
     'ribbon' : False,
     'autoClav' : True,
 }
@@ -11,7 +11,7 @@ leg = {
     'IK' : True,
     'FK' : True,
     'stretchy' : True,
-    'softIK' : True,
+    'softIK' : False,
     'ribbon' : False,
 }
 

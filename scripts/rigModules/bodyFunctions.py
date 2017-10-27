@@ -318,7 +318,8 @@ class armModule:
                 print '## add proper stretch to arm fk'
         ## ribbon
         if options['ribbon']:
-            print '## do arm ribbon'
+            miscFn.bendyJoints(jnts[1], jnts[2], 'arm', self, 'Upper')
+            miscFn.bendyJoints(jnts[2], jnts[3], 'arm', self, 'Lower')
 
         ## arm parent stuff
         if parent:
@@ -757,7 +758,8 @@ class legModule:
                 print '## add proper stretch to leg fk'
 
         if options['ribbon']:
-            print '## do leg ribbon stuff'
+            miscFn.bendyJoints(jnts[0], jnts[1], 'leg', self, 'Upper')
+            miscFn.bendyJoints(jnts[1], jnts[2], 'leg', self, 'Lower')
 
         ## leg parent stuff
         if parent:
@@ -1066,21 +1068,14 @@ class tailModule:
                 tailCtrls.append(ctrl)
 
 
-def getAllChildren(obj):
-    jnts = []
-    a = cmds.listRelatives(obj, type='joint')
-    if a:
-        for each in a:
-            jnts.append(each)
-            jnts.extend(getAllChildren(each))
-    return jnts
+
 
 def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
     if extraName.endswith('_'):
         extraName = extraName[:-1]
     moduleName = utils.setupBodyPartName(extraName, side)
     partGrp = '{}{}{}'.format(moduleName, typ, suffix['group'])
-    partGuidesJnts = getAllChildren(partGrp)
+    partGuidesJnts = utils.getAllChildren(partGrp)
     # partGuidesJnts = cmds.listRelatives(partGrp, type='joint', ad=1)
     # partGuidesJnts.reverse()
     if not chain:

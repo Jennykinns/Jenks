@@ -550,6 +550,15 @@ def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None
                                               suffixDictionary.suffix['nurbsCrv']))
     return crv
 
+def getAllChildren(obj):
+    jnts = []
+    a = cmds.listRelatives(obj, type='joint')
+    if a:
+        for each in a:
+            jnts.append(each)
+            jnts.extend(getAllChildren(each))
+    return jnts
+
 
 class newNode:
     """ Used for creating new nodes.
@@ -591,7 +600,7 @@ class newNode:
             self.name = cmds.rename(hsTransform, nodeName)
         elif node == 'cluster':
             clu, cluHdl = cmds.cluster(n=nodeName)
-            self.name = cluHdl
+            self.name = cmds.rename(cluHdl, '{}H'.format(nodeName))
         else:
             self.name = cmds.createNode(node, n=nodeName, ss=1)
         if parent:

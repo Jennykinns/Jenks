@@ -57,6 +57,65 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
                            cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0, v=0)
     return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
 
+def bendyJoints(sj, ej, moduleType, module, bendyName):
+    moduleName = utils.setupBodyPartName(module.extraName, module.side)
+    extraName = '{}_'.format(module.extraName) if module.extraName else ''
+    bendyName = '{}{}'.format(moduleType, bendyName)
+    col = utils.getColors(module.side)
+
+    mechGrp = utils.newNode('group', name='{}{}BendyMech'.format(extraName, bendyName),
+                            side=module.side, skipNum=True,
+                            parent='{}{}Mech{}'.format(moduleName, moduleType, suffix['group']))
+
+    distance = cmds.getAttr('{}.tx'.format(ej))
+    nPlane = cmds.nurbsPlane(p=(distance/2, 0, 0), lr=0.1, w=distance, axis=[0, 1, 0], u=3, d=3)
+    nPlane = cmds.rename(nPlane[0], '{}{}Bendy{}'.format(moduleName, bendyName,
+                                                      suffix['nurbsSurface']))
+    cmds.parent(nPlane, mechGrp.name)
+    utils.matchTransforms(nPlane, sj)
+    ## ctrl
+    bendyCtrl = ctrlFn.ctrl(name='{}Bendy'.format(bendyName), side=module.side,
+                            skipNum=True, rig=module.rig, scaleOffset=module.rig.scaleOffset,
+                            parent='{}{}Ctrls{}'.format(moduleName, moduleType, suffix['group']))
+    bendyCtrl.modifyShape(color=col['col3'], shape='starFour',
+                          scale=(0.3, 0.3, 0.3))
+    cmds.pointConstraint(sj, ej, bendyCtrl.offsetGrps[0].name)
+    cmds.orientConstraint(sj, bendyCtrl.offsetGrps[0].name)
+    ## clusters
+    cmds.select('{}.cv[0:1][0:3]'.format(nPlane))
+    baseClu = utils.newNode('cluster', name='{}{}BendyBase'.format(extraName, bendyName),
+                            side=module.side, parent=mechGrp.name)
+    cmds.parentConstraint(sj, baseClu.name, mo=1)
+    cmds.select('{}.cv[2:3][0:3]'.format(nPlane))
+    midClu = utils.newNode('cluster', name='{}{}BendyMid'.format(extraName, bendyName),
+                           side=module.side, parent=mechGrp.name)
+    bendyCtrl.constrain(midClu.name)
+    bendyCtrl.constrain(midClu.name, typ='scale')
+    cmds.select('{}.cv[4:5][0:3]'.format(nPlane))
+    endClu = utils.newNode('cluster', name='{}{}BendyEnd'.format(extraName, bendyName),
+                           side=module.side, parent=baseClu.name)
+    cmds.pointConstraint(ej, endClu.name, mo=1)
+    ## rivets
+    rivjntPar = sj
+    for i in [0.1, 0.3, 0.5, 0.7, 0.9]:
+        rivJnt = utils.newNode('joint', name='{}{}BendyRiv'.format(extraName, bendyName),
+                               side=module.side, parent=rivjntPar)
+        utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)
+        cmds.setAttr('{}.jointOrient'.format(rivJnt.name), 0, 0, 0)
+        rivjntPar = rivJnt.name
+        rivLoc = utils.newNode('locator', name='{}{}BendyRiv'.format(extraName, bendyName),
+                               side=module.side, parent=mechGrp.name)
+        cmds.parentConstraint(rivLoc.name, rivJnt.name)
+        rivNd = utils.newNode('mjRivet', name='{}{}BendyRiv'.format(extraName, bendyName),
+                              side=module.side)
+        rivNd.connect('is', '{}.ws'.format(nPlane), 'to')
+        rivNd.connect('ot', '{}.t'.format(rivLoc.name), 'from')
+        rivNd.connect('or', '{}.r'.format(rivLoc.name), 'from')
+        cmds.setAttr('{}.pv'.format(rivNd.name), 0.5)
+        cmds.setAttr('{}.pu'.format(rivNd.name), i)
+
+
+
 def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLayers=2,
                           parent=None, dyn=False):
     moduleName = utils.setupBodyPartName(extraName, side)

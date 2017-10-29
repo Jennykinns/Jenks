@@ -57,37 +57,105 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
                            cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0, v=0)
     return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
 
+
+def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=None,
+                 endCtrl=False, basePar=None):
+    if not basePar:
+        basePar = sj
+    moduleName = utils.setupBodyPartName(module.extraName, module.side)
+    bendyName = '{}{}'.format(moduleType, bendyName)
+    col = utils.getColors(module.side)
+
+    distance = cmds.getAttr('{}.tx'.format(ej))
+    nPlane = cmds.nurbsPlane(p=(distance/2, 0, 0), lr=0.1, w=distance, axis=[0, 1, 0], u=3, d=3)
+    nPlane = cmds.rename(nPlane[0], '{}{}Bendy{}'.format(moduleName, bendyName,
+                                                         suffix['nurbsSurface']))
+    cmds.parent(nPlane, par)
+    utils.matchTransforms(nPlane, sj)
+    ## ctrl
+    bendyCtrl = ctrlFn.ctrl(name='{}{}Bendy'.format(extraName, bendyName), side=module.side,
+                            offsetGrpNum=2, skipNum=True, rig=module.rig,
+                            scaleOffset=module.rig.scaleOffset,
+                            parent='{}{}Ctrls{}'.format(moduleName, moduleType,
+                                                        suffix['group']))
+    bendyCtrl.modifyShape(color=col['col3'], shape='starFour', scale=(0.3, 0.3, 0.3))
+    cmds.pointConstraint(sj, ej, bendyCtrl.offsetGrps[0].name)
+    cmds.orientConstraint(sj, bendyCtrl.offsetGrps[0].name, sk='x')
+    orientConstr = cmds.orientConstraint(basePar, ej, bendyCtrl.offsetGrps[1].name,
+                                         sk=['y', 'z'], mo=1)
+    cmds.setAttr('{}.interpType'.format(orientConstr[0]), 2)
+    ## clusters
+    cmds.select('{}.cv[0:1][0:3]'.format(nPlane))
+    baseClu = utils.newNode('cluster', name='{}{}BendyBase'.format(extraName, bendyName),
+                            side=module.side, parent=par)
+    cmds.select('{}.cv[2:3][0:3]'.format(nPlane))
+    midClu = utils.newNode('cluster', name='{}{}BendyMid'.format(extraName, bendyName),
+                           side=module.side, parent=par)
+    bendyCtrl.constrain(midClu.name)
+    bendyCtrl.constrain(midClu.name, typ='scale')
+    endCluGrpTrans = utils.newNode('group', name='{}{}BendyEndCluTrans'.format(extraName,
+                                                                               bendyName),
+                                   side=module.side, parent=par)
+    utils.matchTransforms(endCluGrpTrans.name, ej)
+    endCluGrpOrientYZ = utils.newNode('group', name='{}{}BendyEndCluOrient'.format(extraName,
+                                                                                   bendyName),
+                                      side=module.side, parent=endCluGrpTrans.name)
+    utils.matchTransforms(endCluGrpOrientYZ.name, endCluGrpTrans.name)
+    endCluGrpOrientX = utils.newNode('group', name='{}{}BendyEndCluOrientX'.format(extraName,
+                                                                                   bendyName),
+                                    side=module.side, parent=endCluGrpOrientYZ.name)
+    utils.matchTransforms(endCluGrpOrientX.name, endCluGrpOrientYZ.name)
+    cmds.select('{}.cv[4:5][0:3]'.format(nPlane))
+    endClu = utils.newNode('cluster', name='{}{}BendyEnd'.format(extraName, bendyName),
+                           side=module.side, parent=endCluGrpOrientX.name)
+    cmds.parentConstraint(basePar, baseClu.name, mo=1)
+    cmds.scaleConstraint(basePar, baseClu.name, mo=1)
+    if not endCtrl:
+        cmds.pointConstraint(ej, endCluGrpTrans.name, mo=1)
+        cmds.orientConstraint(ej, endCluGrpOrientX.name, mo=1, sk=['y', 'z'])
+        cmds.orientConstraint(sj, endCluGrpOrientYZ.name, mo=1, sk='x')
+        bendyEndCtrl = False
+    else:
+        bendyEndCtrl = ctrlFn.ctrl(name='{}{}BendyEnd'.format(extraName, bendyName),
+                                   side=module.side, skipNum=True, rig=module.rig,
+                                   scaleOffset=module.rig.scaleOffset,
+                                   parent='{}{}Ctrls{}'.format(moduleName, moduleType,
+                                                               suffix['group']))
+        bendyEndCtrl.modifyShape(color=col['col3'], shape='starFour', scale=(0.3, 0.3, 0.3))
+        cmds.parentConstraint(ej, bendyEndCtrl.offsetGrps[0].name)
+        bendyEndCtrl.constrain(endCluGrpTrans.name)
+        bendyEndCtrl.constrain(endCluGrpTrans.name, typ='scale')
+    ## rivets
+    rivJntPar = sj
+    for i in [0.1, 0.3, 0.5, 0.7, 0.9]:
+        rivJnt = utils.newNode('joint', name='{}{}BendyRiv'.format(extraName, bendyName),
+                               side=module.side, parent=rivJntPar)
+        utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)
+        cmds.setAttr('{}.jointOrient'.format(rivJnt.name), 0, 0, 0)
+        rivJntPar = rivJnt.name
+        rivLoc = utils.newNode('locator', name='{}{}BendyRiv'.format(extraName, bendyName),
+                               side=module.side, parent=par)
+        cmds.parentConstraint(rivLoc.name, rivJnt.name)
+        rivNd = utils.newNode('mjRivet', name='{}{}BendyRiv'.format(extraName, bendyName),
+                              side=module.side)
+        rivNd.connect('is', '{}.ws'.format(nPlane), 'to')
+        rivNd.connect('ot', '{}.t'.format(rivLoc.name), 'from')
+        rivNd.connect('or', '{}.r'.format(rivLoc.name), 'from')
+        cmds.setAttr('{}.pv'.format(rivNd.name), 0.5)
+        cmds.setAttr('{}.pu'.format(rivNd.name), i)
+    return bendyEndCtrl
+
+
 def bendyJoints(sj, mj, ej, moduleType, module):
     moduleName = utils.setupBodyPartName(module.extraName, module.side)
     extraName = '{}_'.format(module.extraName) if module.extraName else ''
-    bendyName = '{}{}'.format(moduleType, bendyName)
-    col = utils.getColors(module.side)
     mechGrp = utils.newNode('group', name='{}BendyMech'.format(extraName),
                             side=module.side, skipNum=True,
                             parent='{}{}Mech{}'.format(moduleName, moduleType, suffix['group']))
-    bendyCtrlList = []
-    for jnts, bendyName in [((sj, mj), 'Upper'), ((mj, ej), 'Lower')]:
-        distance = cmds.getAttr('{}.tx'.format(jnt[1]))
-        nPlane = cmds.nurbsPlane(p=(distance/2, 0, 0), lr=0.1, w=distance, axis[0, 1, 0], u=3, d=3)
-        nPlane = cmds.rename(nPlane[0], '{}{}Bendy{}'.format(moduleName, bendyName,
-                                                             suffix['nurbsSurface']))
-        cmds.parent(nPlane, mechGrp.name)
-        utils.matchTransforms(nPlane,jnts[0])
-        ## ctrl
-        bendyCtrl = ctrlFn.ctrl(name='{}Bendy'.format(bendyName), side=module.side, offsetGrpNum=2,
-                                skipNum=True, rig=module.rig, scaleOffset=module.rig.scaleOffset,
-                                parent='{}{}Ctrls{}'.format(moduleName, moduleType,
-                                                            suffix['group']))
-        bendyCtrlList.append(bendyCtrl)
-        bendyCtrl.modifyShape(color=col['col3'], shape='starFour', scale=(0.3, 0.3, 0.3))
-        cmds.pointConstraint(jnts[0], jnts[1], bendyCtrl.offsetGrps[0].name)
-        cmds.orientConstraint(jnts[0], bendyCtrl.offsetGrps[0].name, sk='x')
-        orientConstr = cmds.orientConstraint(jnts[0], jnts[1], bendyCtrl.offsetGrps[1].name,
-                                             sk=['y', 'z'], mo=1)
-        cmds.setAttr('{}.interpType'.format(orientConstr[0]), 2)
-        ## clusters
-        cmds.select('{}.cv[2:3][0:3]'.forat(nPlane))
-        baseClu = utils.newNode('cluster')
+    midBendCtrl = ribbonJoints(sj, mj, 'Upper', module, extraName=extraName,
+                 moduleType=moduleType, par=mechGrp.name, endCtrl=True)
+    ribbonJoints(mj, ej, 'Lower', module, extraName=extraName,
+                 moduleType=moduleType, par=mechGrp.name, basePar=midBendCtrl.ctrlEnd)
 
     # distance = cmds.getAttr('{}.tx'.format(ej))
     # nPlane = cmds.nurbsPlane(p=(distance/2, 0, 0), lr=0.1, w=distance, axis=[0, 1, 0], u=3, d=3)

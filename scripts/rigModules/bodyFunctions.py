@@ -318,8 +318,9 @@ class armModule:
                 print '## add proper stretch to arm fk'
         ## ribbon
         if options['ribbon']:
-            miscFn.bendyJoints(jnts[1], jnts[2], 'arm', self, 'Upper')
-            miscFn.bendyJoints(jnts[2], jnts[3], 'arm', self, 'Lower')
+            miscFn.bendyJoints(jnts[1], jnts[2], jnts[3], 'arm', self)
+            # miscFn.bendyJoints(jnts[1], jnts[2], 'arm', self, 'Upper')
+            # miscFn.bendyJoints(jnts[2], jnts[3], 'arm', self, 'Lower')
 
         ## arm parent stuff
         if parent:
@@ -758,16 +759,18 @@ class legModule:
                 print '## add proper stretch to leg fk'
 
         if options['ribbon']:
-            miscFn.bendyJoints(jnts[0], jnts[1], 'leg', self, 'Upper')
-            miscFn.bendyJoints(jnts[1], jnts[2], 'leg', self, 'Lower')
+            miscFn.bendyJoints(jnts[0], jnts[1], jnts[2], 'leg', self)
+            # miscFn.bendyJoints(jnts[0], jnts[1], 'leg', self, 'Upper')
+            # miscFn.bendyJoints(jnts[1], jnts[2], 'leg', self, 'Lower')
 
         ## leg parent stuff
         if parent:
             legParentLoc = utils.newNode('locator', name='{}legParent'.format(extraName),
                                          side=self.side, skipNum=True, parent=parent)
             legParentLoc.matchTransforms(jnts[0])
-            cmds.parentConstraint(legParentLoc.name, ikJnts[0], mo=1)
-            cmds.parentConstraint(legParentLoc.name, fkJnts[0], mo=1)
+            # cmds.parentConstraint(legParentLoc.name, ikJnts[0], mo=1)
+            # cmds.parentConstraint(legParentLoc.name, fkJnts[0], mo=1)
+            cmds.parentConstraint(legParentLoc.name, legMechSkelGrp.name, mo=1)
 
 
 class headModule:

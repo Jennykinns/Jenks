@@ -101,6 +101,10 @@ def getAssetDir():
     path = cmds.workspace(q=1, rd=1)
     return '{}assets/'.format(path)
 
+def getShotDir():
+    path = cmds.workspace(q=1, rd=1)
+    return '{}shots/'.format(path)
+
 def newScene():
     if cmds.file(q=1, modified=1):
         t = 'Opening New Scene'
@@ -383,6 +387,38 @@ def createNewPipelineAsset(assetName=None, prompt=False):
                     os.mkdir('{}/{}/{}/{}'.format(newAssetDir, k, k2, k3))
         print 'Created asset directories: {}'.format(newAssetDir)
 
+def createNewPipelineShot(shotName=None, prompt=False):
+    shotName = assetNameSetup(shotName, prompt, textPrompt=True, typ='shot')
+    if not shotName:
+        return False
+    setShotName(shotName)
+    shotDir = getShotDir()
+    newShotDir = '{}{}'.format(shotDir, shotName)
+    if os.path.isdir(newShotDir):
+        print 'Shot directory already exists.'
+        return False
+    else:
+        os.mkdir(newShotDir)
+        folderList = {
+            'anim' : {'Published' : None, 'WIP' : None},
+            'lighting' : {'Published' : None, 'WIP' : None},
+            'nuke' : None,
+            'plates' : {'misc' : None, 'prep' : None, 'raw' : None,
+                        'retime' : None, 'roto' : None, 'undistort' : None},
+            'renders' : None
+        }
+        for k, v in folderList.iteritems():
+            os.mkdir('{}/{}'.format(newShotDir, k))
+            if v is None:
+                continue
+            for k2, v2 in v.iteritems():
+                os.mkdir('{}/{}/{}'.format(newShotDir, k, k2))
+                if v2 is None:
+                    continue
+                for k3, v3 in v2.iteritems():
+                    os.mkdir('{}/{}/{}/{}'.format(newAssetDir, k, k2, k3))
+        print 'Created shot directories: {}'.format(newShotDir)
+
 
 
 def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True):
@@ -441,13 +477,14 @@ def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=
             cmds.file(save=True, type='mayaAscii')
         print 'Saved File: {}'.format(fileName)
 
-def treeAssetNamePrompt():
-    if cmds.window('assetNamePrompt', exists=True):
-        cmds.deleteUI('assetNamePrompt', window=True)
-    window = cmds.window('assetNamePrompt', title='Set Asset Name', width=100)
+def treeAssetNamePrompt(typ='asset'):
+    if cmds.window('{}NamePrompt'.format(typ), exists=True):
+        cmds.deleteUI('{}NamePrompt'.format(typ), window=True)
+    window = cmds.window('{}NamePrompt'.format(typ), title='Set {} Name'.format(typ.capitalize()),
+                         width=100)
     form = cmds.formLayout()
-    treeLister = cmds.treeLister(rc='fileFn.treeAssetNamePrompt()')
-    btnCommand = 'fileFn.createNewPipelineAsset(prompt=True) \nfileFn.treeAssetNamePrompt()'
+    treeLister = cmds.treeLister(rc='fileFn.treeAssetNamePrompt("{}")'.format(typ))
+    btnCommand = 'fileFn.createNewPipeline{}(prompt=True) \nfileFn.treeAssetNamePrompt("{}")'.format(typ.capitalize(), typ)
     btn = cmds.button(label='Create New', command=btnCommand)
     cmds.formLayout(form, e=1, af=((treeLister, 'top', 0),
                                    (treeLister, 'left', 0),
@@ -457,19 +494,25 @@ def treeAssetNamePrompt():
                                    (btn, 'left', 10)))
     cmds.showWindow(window)
 
-    assetDirectory = getAssetDir()
-    ls = [f for f in os.listdir(assetDirectory) if os.path.isdir('{}/{}'.format(assetDirectory, f))]
+    if typ == 'shot':
+        directory = getShotDir()
+        icon = 'sphere.png'
+    elif typ == 'asset':
+        directory = getAssetDir()
+        icon = 'alignOnMin.png'
+    # assetDirectory = getAssetDir()
+    ls = [f for f in os.listdir(directory) if os.path.isdir('{}/{}'.format(directory, f))]
     if 'rigScripts' in ls:
         ls.remove('rigScripts')
 
     for each in ls:
         # command = 'fileFn.assetNamePromptCommand("{}", "{}")'.format(each, window)
-        command = 'fileFn.setAssetName("{}") \ncmds.window("{}", e=1, vis=False)'.format(each, window)
-        cmds.treeLister(treeLister, e=1, add=[(each, 'alignOnMin.png', command)])
+        command = 'fileFn.set{}Name("{}") \ncmds.window("{}", e=1, vis=False)'.format(typ.capitalize(), each, window)
+        cmds.treeLister(treeLister, e=1, add=[(each, icon, command)])
 
-def textAssetNamePrompt():
-    result = cmds.promptDialog(title='Asset Name',
-                               message='Asset Name:',
+def textAssetNamePrompt(title='Asset'):
+    result = cmds.promptDialog(title='{} Name'.format(title),
+                               message='{} Name:'.format(title),
                                button=['OK', 'Cancel'],
                                defaultButton='OK',
                                cancelButton='Cancel',
@@ -493,16 +536,28 @@ def getAssetName(dialog=False):
         cmds.confirmDialog(m='Current Asset: {}'.format(name), button=['Ok'])
     return name
 
-def assetNameSetup(assetName, prompt, textPrompt=False):
-    if prompt or not assetName:
+def setShotName(shotName=None):
+    if not shotName:
+        treeAssetNamePrompt(typ='shot')
+    if shotName:
+        mel.eval('putenv "shotName" {}'.format(shotName))
+
+def getShotName(dialog=False):
+    name = mel.eval('getenv "shotName"')
+    if dialog:
+        cmds.confirmDialog(m='Current Shot: {}'.format(name), button=['Ok'])
+    return name
+
+def assetNameSetup(assetName, prompt, textPrompt=False, typ='asset'):
+    if prompt:
         if textPrompt:
-            assetName = textAssetNamePrompt()
+            assetName = textAssetNamePrompt(typ.capitalize())
         else:
-            treeAssetNamePrompt()
+            treeAssetNamePrompt(typ)
     if not assetName:
         assetName = getAssetName()
-    # if not assetName:
-    #     assetName = treeAssetNamePrompt()
+    if not assetName:
+        assetName = treeAssetNamePrompt()
     if not assetName:
         print 'Asset Name not specified.'
     return assetName

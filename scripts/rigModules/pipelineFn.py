@@ -2,7 +2,7 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
 def createNewShader(bump=False, sss=False, disp=True):
-    name = fileFn.assetNamePrompt()
+    name = fileFn.textAssetNamePrompt()
     shad = utils.newNode('aiStandardSurface', name=name, side='ai', skipNum=True)
     sg = utils.newNode('shadingEngine', name=name, side='ai', skipNum=True)
     sg.connect('surfaceShader', '{}.outColor'.format(shad.name), 'to')

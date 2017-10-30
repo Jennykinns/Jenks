@@ -354,7 +354,7 @@ def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json
 
 
 def createNewPipelineAsset(assetName=None, prompt=False):
-    assetName = assetNameSetup(assetName, prompt)
+    assetName = assetNameSetup(assetName, prompt, textPrompt=True)
     if not assetName:
         return False
     setAssetName(assetName)
@@ -441,7 +441,33 @@ def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=
             cmds.file(save=True, type='mayaAscii')
         print 'Saved File: {}'.format(fileName)
 
-def assetNamePrompt():
+def treeAssetNamePrompt():
+    if cmds.window('assetNamePrompt', exists=True):
+        cmds.deleteUI('assetNamePrompt', window=True)
+    window = cmds.window('assetNamePrompt', title='Set Asset Name', width=100)
+    form = cmds.formLayout()
+    treeLister = cmds.treeLister(rc='fileFn.treeAssetNamePrompt()')
+    btnCommand = 'fileFn.createNewPipelineAsset(prompt=True) \nfileFn.treeAssetNamePrompt()'
+    btn = cmds.button(label='Create New', command=btnCommand)
+    cmds.formLayout(form, e=1, af=((treeLister, 'top', 0),
+                                   (treeLister, 'left', 0),
+                                   (treeLister, 'bottom', 30),
+                                   (treeLister, 'right', 0),
+                                   (btn, 'bottom', 10),
+                                   (btn, 'left', 10)))
+    cmds.showWindow(window)
+
+    assetDirectory = getAssetDir()
+    ls = [f for f in os.listdir(assetDirectory) if os.path.isdir('{}/{}'.format(assetDirectory, f))]
+    if 'rigScripts' in ls:
+        ls.remove('rigScripts')
+
+    for each in ls:
+        # command = 'fileFn.assetNamePromptCommand("{}", "{}")'.format(each, window)
+        command = 'fileFn.setAssetName("{}") \ncmds.window("{}", e=1, vis=False)'.format(each, window)
+        cmds.treeLister(treeLister, e=1, add=[(each, 'alignOnMin.png', command)])
+
+def textAssetNamePrompt():
     result = cmds.promptDialog(title='Asset Name',
                                message='Asset Name:',
                                button=['OK', 'Cancel'],
@@ -454,13 +480,12 @@ def assetNamePrompt():
         assetName = None
     return assetName
 
-
 def setAssetName(assetName=None):
     if not assetName:
-        assetName = assetNamePrompt()
+        # assetName = assetNamePrompt()
+        treeAssetNamePrompt()
     if assetName:
         mel.eval('putenv "assetName" {}'.format(assetName))
-
 
 def getAssetName(dialog=False):
     name = mel.eval('getenv "assetName"')
@@ -468,13 +493,16 @@ def getAssetName(dialog=False):
         cmds.confirmDialog(m='Current Asset: {}'.format(name), button=['Ok'])
     return name
 
-def assetNameSetup(assetName, prompt):
-    if prompt:
-        assetName = assetNamePrompt()
+def assetNameSetup(assetName, prompt, textPrompt=False):
+    if prompt or not assetName:
+        if textPrompt:
+            assetName = textAssetNamePrompt()
+        else:
+            treeAssetNamePrompt()
     if not assetName:
         assetName = getAssetName()
-    if not assetName:
-        assetName = assetNamePrompt()
+    # if not assetName:
+    #     assetName = treeAssetNamePrompt()
     if not assetName:
         print 'Asset Name not specified.'
     return assetName

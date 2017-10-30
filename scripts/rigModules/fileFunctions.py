@@ -25,6 +25,9 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
     elif location == 'model/WIP':
         suffix = 'ma'
         name = assetName
+    elif location == 'anim/Published':
+        suffix = 'abc'
+        name = assetName
     else:
         suffix = 'ma'
         name = assetName
@@ -125,7 +128,7 @@ def abcExport(fileName, selection=True, frameRange=(1, 1)):
         a = cmds.ls(dag=1, v=1)
         b = cmds.ls(lights=1, cameras=1)
         sel = list(set(a)-set(b))
-    args = '-f {0} -fr {1[0]} {1[1]} -ro -sn -uv -ws -wv -ef'.format(fileName, frameRange, sel)
+    args = '-f {0} -fr {1[0]} {1[1]} -ro -uv -ws -wv -ef'.format(fileName, frameRange, sel)
     for each in sel:
         args = '{} -rt {}'.format(args, each)
     cmds.AbcExport(j=args)
@@ -299,6 +302,88 @@ def referenceLookDev(assetName=None, prompt=False):
     print 'Referenced LookDev: {}'.format(fileName)
     return True
 
+def saveWipAnimation(shotName=None, autoName=False, prompt=False):
+    saveMayaFile(shotName, typ='anim/WIP', prompt=prompt, autoName=autoName,
+                 removeRefs=False, shot=True)
+    return True
+
+def loadWipAnimation(shotName=None, latest=False, prompt=False):
+    loadMayaFile(shotName, typ='anim/WIP', prompt=prompt, latest=latest, new=True, shot=True)
+    return True
+
+def publishAnimation(shotName=None, autoName=True, prompt=False):
+    rigs = cmds.ls('*:_RIG__GRP')
+    cmds.select(cl=True)
+    for each in rigs:
+        rigChilds = cmds.listRelatives(each, c=1, s=0)
+        for child in rigChilds:
+            if ':C_geometry_GRP' in child:
+                cmds.select(child, add=1)
+                continue
+    shotName = assetNameSetup(shotName, prompt, typ='shot')
+    if not shotName:
+        return False
+    path = getShotDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Animation',
+                                    fileMode=0, fileFilter=fileFilter,
+                                    dir='{}{}/anim/Published'.format(path, shotName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(shotName, path, 'anim/Published', new=True)
+    # playBackSlider = mel.eval('$tmpVar=$gPlayBackSlider')
+    # frameRange = cmds.timeControl(playBackSlider, q=1, ra=1)
+    frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
+    abcExport(fileName, selection=True, frameRange=frameRange)
+    print 'Published Animation: {}'.format(fileName)
+
+def mergeAnimationAlembic(shotName=None, latest=True, prompt=False):
+    shotName = assetNameSetup(shotName, prompt, typ='shot')
+    if not shotName:
+        return False
+    path = getShotDir()
+    if latest:
+        fileName = getLatestVersion(shotName, path, 'anim/Published')
+    else:
+        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+        fileName = cmds.fileDialog2(dialogStyle=2,
+                                    caption='Merge Published Animation',
+                                    fileMode=1,
+                                    fileFilter=fileFilter,
+                                    dir='{}{}/anim/Published'.format(path, shotName))
+        fileName = fileName[0] if fileName else False
+    mel.eval('AbcImport -mode import -connect "/" "{}"'.format(fileName))
+
+def saveWipLighting(shotName=None, autoName=False, prompt=False):
+    saveMayaFile(shotName, typ='lighting/WIP', prompt=prompt, autoName=autoName,
+                 removeRefs=False, shot=True)
+    return True
+
+def loadWipLighting(shotName=None, latest=False, prompt=False):
+    loadMayaFile(shotName, typ='lighting/WIP', prompt=prompt, latest=latest, new=True, shot=True)
+    return True
+
+def publishLighting(shotName=None, autoName=True, prompt=False):
+    saveMayaFile(shotName, typ='lighting/Published', prompt=prompt, autoName=autoName,
+                 removeRefs=False, shot=True)
+    return True
+
+def setupSceneForRender(shotName=None, latest=True, prompt=False):
+    newScene()
+    shotName = assetNameSetup(shotName, prompt, typ='shot')
+    if not shotName:
+        return False
+    path = getShotDir()
+    fileName = getLatestVersion(shotName, path, 'lighting/Published')
+    cmds.file(fileName, r=1, ns=newNameSpace(shotName))
+    print 'Referenced Lighting: {}'.format(fileName)
+    print '## DO OTHER STUFF FOR SETTING UP THE RENDER - aov\'s, render settings, etc.'
+
+
 def removeReferences():
     sel = cmds.ls()
     for each in sel:
@@ -421,17 +506,17 @@ def createNewPipelineShot(shotName=None, prompt=False):
 
 
 
-def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True):
-    assetName = assetNameSetup(assetName, prompt)
+def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True, shot=False):
+    assetName = assetNameSetup(assetName, prompt, typ='asset' if not shot else 'shot')
     if not assetName:
         return False
-    assetDir = getAssetDir()
-    subDir = '{}{}/{}/'.format(assetDir, assetName, typ)
+    directory = getAssetDir() if not shot else getShotDir()
+    subDir = '{}{}/{}/'.format(directory, assetName, typ)
     if not os.path.isdir(subDir):
         print '{} asset does not exist.'.format(assetName)
         return False
     if latest:
-        fileName = getLatestVersion(assetName, assetDir, typ)
+        fileName = getLatestVersion(assetName, directory, typ)
     else:
         fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
         fileName = cmds.fileDialog2(dialogStyle=2,
@@ -451,14 +536,14 @@ def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True):
     return False
 
 def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=False,
-                 selectionOnly=False):
-    assetName = assetNameSetup(assetName, prompt)
+                 selectionOnly=False, shot=False):
+    assetName = assetNameSetup(assetName, prompt, typ='asset' if not shot else 'shot')
     if not assetName:
         return False
-    assetDir = getAssetDir()
-    subDir = '{}{}/{}/'.format(assetDir, assetName, typ)
+    directory = getAssetDir() if not shot else getShotDir()
+    subDir = '{}{}/{}/'.format(directory, assetName, typ)
     if autoName:
-        fileName = getLatestVersion(assetName, assetDir, typ, new=1)
+        fileName = getLatestVersion(assetName, directory, typ, new=1)
     else:
         fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
         fileName = cmds.fileDialog2(dialogStyle=2,
@@ -481,7 +566,7 @@ def treeAssetNamePrompt(typ='asset'):
     if cmds.window('{}NamePrompt'.format(typ), exists=True):
         cmds.deleteUI('{}NamePrompt'.format(typ), window=True)
     window = cmds.window('{}NamePrompt'.format(typ), title='Set {} Name'.format(typ.capitalize()),
-                         width=100)
+                         width=200)
     form = cmds.formLayout()
     treeLister = cmds.treeLister(rc='fileFn.treeAssetNamePrompt("{}")'.format(typ))
     btnCommand = 'fileFn.createNewPipeline{}(prompt=True) \nfileFn.treeAssetNamePrompt("{}")'.format(typ.capitalize(), typ)
@@ -500,7 +585,8 @@ def treeAssetNamePrompt(typ='asset'):
     elif typ == 'asset':
         directory = getAssetDir()
         icon = 'alignOnMin.png'
-    # assetDirectory = getAssetDir()
+    if not os.path.isdir(directory):
+        return False
     ls = [f for f in os.listdir(directory) if os.path.isdir('{}/{}'.format(directory, f))]
     if 'rigScripts' in ls:
         ls.remove('rigScripts')
@@ -555,9 +641,12 @@ def assetNameSetup(assetName, prompt, textPrompt=False, typ='asset'):
         else:
             treeAssetNamePrompt(typ)
     if not assetName:
-        assetName = getAssetName()
+        if typ == 'asset':
+            assetName = getAssetName()
+        elif typ == 'shot':
+            assetName = getShotName()
     if not assetName:
-        assetName = treeAssetNamePrompt()
+        assetName = treeAssetNamePrompt(typ)
     if not assetName:
         print 'Asset Name not specified.'
     return assetName

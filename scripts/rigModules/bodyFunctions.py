@@ -319,8 +319,15 @@ class armModule:
         ## ribbon
         if options['ribbon']:
             miscFn.bendyJoints(jnts[1], jnts[2], jnts[3], 'arm', self)
-            # miscFn.bendyJoints(jnts[1], jnts[2], 'arm', self, 'Upper')
-            # miscFn.bendyJoints(jnts[2], jnts[3], 'arm', self, 'Lower')
+        else:
+            ## add forearm twist
+            twistJnt = utils.newNode('joint', name='{}forearmTwist'.format(extraName),
+                                     side=self.side)
+            twistJnt.parent(jnts[2], relative=True)
+            utils.addJntToSkinJnt(twistJnt.name, rig=self.rig)
+            cmds.pointConstraint(jnts[2], jnts[3], twistJnt.name)
+            orConstr = cmds.orientConstraint(jnts[2], jnts[3], twistJnt.name, sk=['y', 'z'])
+            cmds.setAttr('{}.interpType'.format(orConstr[0]), 2)
 
         ## arm parent stuff
         if parent:
@@ -760,16 +767,12 @@ class legModule:
 
         if options['ribbon']:
             miscFn.bendyJoints(jnts[0], jnts[1], jnts[2], 'leg', self)
-            # miscFn.bendyJoints(jnts[0], jnts[1], 'leg', self, 'Upper')
-            # miscFn.bendyJoints(jnts[1], jnts[2], 'leg', self, 'Lower')
 
         ## leg parent stuff
         if parent:
             legParentLoc = utils.newNode('locator', name='{}legParent'.format(extraName),
                                          side=self.side, skipNum=True, parent=parent)
             legParentLoc.matchTransforms(jnts[0])
-            # cmds.parentConstraint(legParentLoc.name, ikJnts[0], mo=1)
-            # cmds.parentConstraint(legParentLoc.name, fkJnts[0], mo=1)
             cmds.parentConstraint(legParentLoc.name, legMechSkelGrp.name, mo=1)
 
 
@@ -858,7 +861,8 @@ class digitsModule:
         self.side = side
         self.rig = rig
 
-    def create(self, mode, autoOrient=False, customNodes=False, parent=None, thumb=True):
+    def create(self, mode, autoOrient=False, customNodes=False, parent=None, thumb=True,
+               skipDigits=None):
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         col = utils.getColors(self.side)
@@ -869,12 +873,16 @@ class digitsModule:
             typ = 'fngr'
             digitsList = ['Index', 'Middle', 'Ring', 'Pinky']
             if thumb:
-                digitsList.append('Thumb')
+                digitsList.insert(0, 'Thumb')
         else:
             typ = 'toe'
             digitsList = ['Big', 'Index', 'Middle', 'Ring', 'Pinky']
             if thumb:
                 digitsList[0] = 'Thumb'
+
+        if skipDigits:
+            for each in skipDigits:
+                digitsList.remove(each)
 
         digitCtrls = {}
         palmMults = []
@@ -992,12 +1000,10 @@ class digitsModule:
                 prevLoc = loc
                 ctrlParent = ctrl.ctrlEnd
             digitCtrls[each] = segmentCtrls
-        self.indexCtrls = digitCtrls['Index']
-        self.middleCtrls = digitCtrls['Middle']
-        self.ringCtrls = digitCtrls['Ring']
-        self.pinkyCtrls = digitCtrls['Pinky']
-        if thumb:
-            self.thumbCtrls = digitCtrls['Thumb']
+
+        for key, val in digitCtrls.iteritems():
+            exec('self.{}Ctrls = val'.format(key))
+
         palmLocParGrp = utils.newNode('group', name='{}{}PalmLoc'.format(extraName, mode),
                                       side=self.side, parent=parent)
         palmLoc = utils.newNode('locator', name='{}{}Palm'.format(extraName, mode),

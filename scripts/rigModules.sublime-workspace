@@ -4,6 +4,78 @@
 		"selected_items":
 		[
 			[
+				"bendy",
+				"bendyCtrl\tstatement"
+			],
+			[
+				"endCluGrp",
+				"endCluGrpTrans\tstatement"
+			],
+			[
+				"endC",
+				"endCtrl\tparam"
+			],
+			[
+				"endClu",
+				"endCluGrpTrans\tstatement"
+			],
+			[
+				"endCluGrpOrient",
+				"endCluGrpOrientYZ\tstatement"
+			],
+			[
+				"endCl",
+				"endCluGrpTrans\tstatement"
+			],
+			[
+				"BendyEnd",
+				"BendyEndCluOrient"
+			],
+			[
+				"bend",
+				"bendyName\tparam"
+			],
+			[
+				"module",
+				"moduleType\tparam"
+			],
+			[
+				"modul",
+				"moduleType\tparam"
+			],
+			[
+				"mod",
+				"moduleType\tparam"
+			],
+			[
+				"parent",
+				"parentConstraint\tfunction"
+			],
+			[
+				"PROJE",
+				"PROJECT_NAME"
+			],
+			[
+				"CMAKE_CURRENT",
+				"CMAKE_CURRENT_SOURCE_DIR"
+			],
+			[
+				"endF",
+				"endfunction"
+			],
+			[
+				"FindPackage",
+				"FindPackageHandleStandardArgs"
+			],
+			[
+				"mjRivet_ex",
+				"mjRivet_EXTRA_LFLAGS"
+			],
+			[
+				"DEV",
+				"DEVKIT_LOCATION"
+			],
+			[
 				"outIKTra",
 				"outIKTransX"
 			],
@@ -272,10 +344,6 @@
 				"midCtrlParent\tstatement"
 			],
 			[
-				"parent",
-				"parentMidCtrls\tparam"
-			],
-			[
 				"baseC",
 				"baseCtrlParent\tstatement"
 			],
@@ -396,10 +464,6 @@
 				"globalCtrl\tstatement"
 			],
 			[
-				"module",
-				"moduleName"
-			],
-			[
 				"translation",
 				"translation\t(0, 0, 0)"
 			],
@@ -450,124 +514,24 @@
 			[
 				"custo",
 				"customStretchNode\tFalse"
-			],
-			[
-				"legMe",
-				"legMechGrp\tstatement"
-			],
-			[
-				"legM",
-				"legMechGrp\tstatement"
-			],
-			[
-				"mod",
-				"moduleName"
-			],
-			[
-				"fk",
-				"fkCtrlGrp\tstatement"
-			],
-			[
-				"gro",
-				"group"
-			],
-			[
-				"mode",
-				"mode\t'from'"
-			],
-			[
-				"settn",
-				"settingCtrl"
-			],
-			[
-				"mo",
-				"moduleType\tparam"
-			],
-			[
-				"setting",
-				"settingCtrl"
-			],
-			[
-				"newJn",
-				"newJntChains\tstatement"
-			],
-			[
-				"cl",
-				"clavIKCtrl\tstatement"
-			],
-			[
-				"sp",
-				"spineArmJnt\tstatement"
-			],
-			[
-				"spineI",
-				"spineIKStartLoc\tstatement"
-			],
-			[
-				"a",
-				"advancedTwist\tfunction"
-			],
-			[
-				"con",
-				"constrain\tfunction"
-			],
-			[
-				"chest",
-				"chestBindJnt\tstatement"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "rigModules/skinFunctions.py",
-			"settings":
-			{
-				"buffer_size": 2851,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "rigModules/bodyFunctions.py",
 			"settings":
 			{
-				"buffer_size": 69021,
+				"buffer_size": 71893,
 				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pipelineMenu.mel",
-			"settings":
-			{
-				"buffer_size": 8217,
-				"line_ending": "Windows"
 			}
 		},
 		{
 			"file": "rigModules/miscFunctions.py",
 			"settings":
 			{
-				"buffer_size": 11699,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "rigModules/utilityFunctions.py",
-			"settings":
-			{
-				"buffer_size": 25701,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "rigModules/ctrlFunctions.py",
-			"settings":
-			{
-				"buffer_size": 16241,
-				"encoding": "UTF-8",
+				"buffer_size": 21375,
 				"line_ending": "Unix"
 			}
 		},
@@ -575,16 +539,7 @@
 			"file": "rigModules/fileFunctions.py",
 			"settings":
 			{
-				"buffer_size": 17244,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "rigModules/apiFuncitons.py",
-			"settings":
-			{
-				"buffer_size": 1927,
+				"buffer_size": 17457,
 				"line_ending": "Unix"
 			}
 		}
@@ -596,13 +551,45 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 400.0,
-		"last_filter": "ssc",
+		"height": 250.0,
+		"last_filter": "sscma",
 		"selected_items":
 		[
 			[
-				"ssc",
-				"Set Syntax: C++"
+				"sscma",
+				"Set Syntax: CMakeEditor"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"packag",
+				"Package Control: Remove Package"
+			],
+			[
+				"sscm",
+				"Set Syntax: CMakeEditor"
+			],
+			[
+				"ssba",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"ssbas",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"ssmake",
+				"Set Syntax: Makefile"
 			],
 			[
 				"ssp",
@@ -613,20 +600,16 @@
 				"Set Syntax: Markdown"
 			],
 			[
-				"install",
-				"Package Control: Install Package"
-			],
-			[
 				"theme",
 				"Colorsublime: Install Theme"
 			],
 			[
-				"package",
-				"Package Control: List Packages"
-			],
-			[
 				"packa",
 				"Package Control: Install Package"
+			],
+			[
+				"ssc",
+				"Set Syntax: C++"
 			],
 			[
 				"pack",
@@ -693,15 +676,11 @@
 				"Set Syntax: Shell Script (Bash)"
 			],
 			[
-				"ssba",
-				"Set Syntax: Shell Script (Bash)"
-			],
-			[
 				"ssshe",
 				"Set Syntax: Shell Script (Bash)"
 			]
 		],
-		"width": 472.0
+		"width": 529.0
 	},
 	"console":
 	{
@@ -722,22 +701,57 @@
 	},
 	"expanded_folders":
 	[
-		"/C/Docs/maya/scripts/Jenks/scripts/rigModules",
-		"/C/Docs/maya/scripts/Jenks/scripts/controlShapes"
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules",
+		"/home/Jenks/maya/scripts/Jenks/scripts/controlShapes"
 	],
 	"file_history":
 	[
-		"/home/Jenks/Downloads/mjRivet.cpp",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/ikFunctions.py",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/build_Instructions",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/mjStretchArray/src/pluginMain.cpp",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/modules/FindMaya.cmake",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/mjRivet/CMakeLists.txt",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/mjStretchArray/CMakeLists.txt",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/mjStretchArray/src/CMakeLists.txt",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/mjRivet/src/CMakeLists.txt",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/CMakeLists.txt",
+		"/home/Jenks/Desktop/mjRivet/mjRivet/Makefile",
+		"/home/Jenks/Desktop/mjRivet/buildconfig",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/build/Makefile",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/src/CMakeLists.txt",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/src/mainPlugin.cpp",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/src/mjRivet.cpp",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/src/mjRivet.h",
+		"/home/Jenks/Desktop/mjRivet/buildrules",
+		"/home/Jenks/Desktop/cmakeNodesStuffs/modules/findMaya.cmake",
+		"/home/Jenks/Desktop/mjRivet/mjRivet/mjRivet.cpp",
+		"/home/Jenks/Desktop/mjRivet/mjRivet/mjRivet.h",
+		"/home/Jenks/Desktop/mjStretchArray/mjStretchArray/mjStretchArray.cpp",
+		"/usr/autodesk/maya2017/devkit/plug-ins/testNsolverNode/Makefile",
+		"/usr/autodesk/maya2017/devkit/plug-ins/Makefile.subdirs",
+		"/home/Jenks/Desktop/mjStretchArray/mjStretchArray/mjStretchArray.h",
+		"/home/Jenks/Desktop/mjStretchArray/mjStretchArray/Makefile",
+		"/home/Jenks/Desktop/mjStretchArray/linux_plugin.map",
+		"/home/Jenks/Desktop/mjStretchArray/buildconfig",
+		"/home/Jenks/Desktop/mjStretchArray/buildrules",
+		"/usr/autodesk/maya2017/devkit/plug-ins/helloWorldCmd/Makefile",
+		"/usr/autodesk/maya2017/devkit/plug-ins/transCircleNode/Makefile",
 		"/usr/autodesk/maya2017/devkit/plug-ins/Makefile",
+		"/home/Jenks/Downloads/mjRivet.cpp",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/apiFuncitons.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/fileFunctions.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/ctrlFunctions.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/utilityFunctions.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/miscFunctions.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/pipelineMenu.mel",
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/bodyFunctions.py",
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/skinFunctions.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/nodes/mjSoftIK.py",
 		"/home/Jenks/Downloads/mjStretchArray.cpp",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/TemplateProject/workspace.mel",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/TemplateProject/mayaProj/workspace.mel",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/TemplateProject/untitled",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/finalProject/assets/testRigStuff/rig/WIP/skin/pPlane1_v001.skin",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/apiFuncitons.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/pipelineMenu.mel",
 		"/home/Jenks/maya/scripts/Jenks/scripts/magicalRenamer/magicalRenamer.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/magicalRenamer/magicalRenamerUI.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/magicalRenamer/magicalRenamerSmallUI.py",
@@ -751,10 +765,6 @@
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/defaultBodyOptions.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/uiTest2.py",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/TheResistance/assets/rigScripts/femalePeasant.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/fileFunctions.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/ctrlFunctions.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/utilityFunctions.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/ikFunctions.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/templateRig.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/setupFn.py",
 		"/home/Jenks/Downloads/devkitBase/devkit/plug-ins/mjRivet/Makefile",
@@ -769,8 +779,6 @@
 		"/home/Jenks/Desktop/mayaNodes/Makefile",
 		"/home/Jenks/Downloads/devkitBase/devkit/plug-ins/buildconfig",
 		"/home/Jenks/Downloads/Discord/discord.desktop",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/skinFunctions.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/miscFunctions.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/orientJoints.py",
 		"/home/Jenks/maya/scripts/Jenks/jenksMenu.mel",
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/pipelineMenuFn.py",
@@ -825,40 +833,11 @@
 		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/defaultLocData.py",
 		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Accessories/Navigation Light/part.cfg",
 		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Accessories/Spotlight/part.cfg",
-		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Submarine/Sub Floodlight/part.cfg",
-		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Submarine/PartCategories.cfg",
-		"/tmp/.fr-wZYU9h/readme.txt",
-		"/tmp/.fr-WTnyGn/readme.txt",
-		"/usr/share/applications/Autodesk-Maya2016.desktop",
-		"/home/Jenks/Downloads/maya/EULA/English.txt",
-		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/KSP.log",
-		"/tmp/.fr-Kft8sK/GameData/000_FilterExtensions/ReadMe.txt",
-		"/tmp/.fr-2qkBaR/ReadMe.txt",
-		"/tmp/.fr-Yt32po/readme.txt",
-		"/tmp/.fr-1kqI1d/readme.txt",
-		"/mnt/DataDrive/SteamLibrary_LINUX/steamapps/common/Kerbal Space Program/settings.cfg",
-		"/home/Jenks/.config/sublime-text-3/Packages/Colorsublime - Themes/DeerAntlerDark_2.tmTheme",
-		"/tmp/Flat-Plat-20170605/install.sh",
-		"/run/media/Jenks/JENKS_STICK/Uni_Tomfoolery/Misc/Zygote/Rig/Zygote_RenderRig.ma",
-		"/run/media/Jenks/JENKS_STICK/Uni_Tomfoolery/Misc/Zygote/Rig/Zygote_AnimRig.ma",
-		"/home/Jenks/.conkyrc",
-		"/sys/class/net/enp3s0/operstate",
-		"/sys/class/net/wlp0s29u1u3/operstate",
-		"/home/Jenks/a.json",
-		"/usr/bin/conky.spotify.nowplaying.work.sh",
-		"/home/Jenks/.config/unity3d/Fishing Planet LLC/FishingPlanet/prefs",
-		"/home/Jenks/.conky/anowplaying.py",
-		"/home/Jenks/.conkyrc2",
-		"/home/Jenks/.conky/anowplaying_spotify.py",
-		"/usr/bin/conky/spotify-nowplaying-work.sh",
-		"/usr/bin/conky/spotify-nowplaying-work",
-		"/home/Jenks/.conky/spotify-nowplaying-work",
-		"/home/Jenks/.conky/spotify-nowplaying-length",
-		"/home/Jenks/.conky/spotify-nowplaying"
+		"/mnt/MediaDrive/SteamLibrary/steamapps/common/Kerbal Space Program/GameData/Maritime Pack/Submarine/Sub Floodlight/part.cfg"
 	],
 	"find":
 	{
-		"height": 24.0
+		"height": 41.0
 	},
 	"find_in_files":
 	{
@@ -872,134 +851,10 @@
 		"case_sensitive": true,
 		"find_history":
 		[
-			"tan",
-			"ompx",
-			"Thumb",
-			"Pinky",
-			"moduleName",
-			"Ring",
-			"Thumb",
-			"ikfkMechanics",
-			"pin",
-			"clavIK",
-			"clavJnts",
-			"r=1",
-			"ctrlFn",
-			"self.name",
-			"ctrlAttr",
-			"xformFirstObj",
-			"parent",
-			"rp",
-			"name, extraName",
-			"{}_{}",
-			"2",
-			"1",
-			"base",
-			"ikfkMechanics",
-			"ctrlFn.ctrl",
-			"ctrlFn",
-			"Funtions",
-			"\n             ",
-			"\"+\n                 \"",
-			"\"+\n                \"",
-			"\"+\n                 \"",
-			"file",
-			"jenksMenu",
-			"-enableCommandRepeat 0",
-			"ikfkMechanics",
-			"\"uiScript\": \"global string",
-			"shelf",
-			"ctrlVal",
-			"1",
-			"0.667",
-			"parent",
-			"palmLoc",
-			"thumbCtrl",
-			"digitCtrls",
-			"headCtrl",
-			"True",
-			"arm",
-			"newNode",
-			"0.5",
-			"Heel",
-			"heel",
-			"rfMechGrp",
-			"hip",
-			"shoulder",
-			"ikCtrl",
-			"armIK",
-			"module.handIKCtrl",
-			"self",
-			"armMechSkelGrp",
-			"self.constGrp.name",
-			"armCtrlsGrp.name,",
-			"print",
-			"1",
-			"endCtrl",
-			"shoulder",
-			"clav",
-			"side",
-			"icons",
-			"file_type",
-			"Theme - Default",
-			"Theme - Toxin/textures",
-			"[140, 68, 94]",
-			"file",
-			"\" \"",
-			"getScriptDirs",
-			"\" \"",
-			";",
-			"cv",
-			"load",
-			"save",
-			"ctrlFunctions",
-			"saveLocsToJson",
-			"OpenMaya",
-			"obj",
-			"self.name",
-			"rootGrp",
-			"fileType",
-			"path",
-			"guidePath",
-			"IK",
-			"offsetGrps",
-			"offsets",
-			"sj",
-			"self.",
-			"\"",
-			"'_L'",
-			"if side ==",
-			"limbControl",
-			"'\\+|\\+'",
-			"/",
-			"A",
-			"clavParLoc",
-			"stretchPointCond",
-			"PVConst_GRP",
-			"upper",
-			"upperPinDist",
-			"upper",
-			"rigName, ",
-			"{0}_{1}",
-			"KEYBDINPUT",
-			"Keyboard",
-			"loc2",
-			"loc1",
-			"limbGlobalScale",
-			"limbSizeDiv",
-			"obj",
-			"for ",
-			"for",
-			"artist",
-			"/usr/bin",
-			"'+num+'",
-			"'+i+'",
-			"'+num+'",
-			"setParentText",
-			"updateLimbMirTog",
-			"updateMirrorBtn",
-			"updateLimbName",
-			"updateLimbMirName"
+			"elbowBendCtrl",
+			"Start",
+			"St",
+			"IKStart"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1007,133 +862,6 @@
 		"regex": false,
 		"replace_history":
 		[
-			"Functions",
-			"jenksPipeMenu",
-			"-enableCommandRepeat 1",
-			"Theme - Toxin",
-			"[94, 140, 68]",
-			"ctrlFn",
-			"self.sj",
-			"",
-			"'",
-			"createParCrvShape",
-			"j_utils.connectAttrs(",
-			"j_utils.createAttr(",
-			"j_utils.createBuffer(",
-			"j_utils.createSpSwConstraint(",
-			"j_utils.createCtrlShape(",
-			"j_utils.createSplineIK(",
-			"j_utils.createFKIK(",
-			"j_utils.createIK(",
-			"j_utils.createJnts",
-			"j_utils.createLocsOnCurve",
-			"j_utils.resizeLocs",
-			"j_utils.createSingleLoc",
-			"j_utils.createLocs",
-			"if mirror:\n        if limbName is not '':\n            limbName = str(limbName)+'_'\n        name=str(prefix)+'_'+str(mirrorSide)+'_'+limbName",
-			"if limbName is not '':\n            limbName = str(limbName)+'_'\n        name=str(prefix)+'_'+str(side)+'_'+limbName",
-			"if limbName is not '':\n        limbName = str(limbName)+'_'\n    name=str(prefix)+'_'+str(mirrorSide)+'_'+limbName",
-			"if limbName is not '':\n        limbName = str(limbName)+'_'\n    name=str(prefix)+'_'+str(side)+'_'+limbName",
-			"j_wwiar_rigNameTxt",
-			"j_wwiar_limbMirTog_",
-			"j_wwiar_limbMirName_",
-			"j_wwiar_limbOpt",
-			"j_wwiar_limbOpt'+optNum+'_'+num+'Val",
-			"j_wwiar_limbType_",
-			"j_wwiar_limbParent_",
-			"j_wwiar_limbSide_",
-			"j_wwiar_limbName_",
-			"j_wwiar_ctrlScaleSpnBoxVal",
-			"j_wwiar_locScaleSpnBoxVal",
-			"j_wwiar_spineJntsNum",
-			"j_wwiar_rigName",
-			"j_wwiar_rigMode",
-			"j_wwiar_currentLimbBoxes",
-			"j_wwiar_limbBoxNum",
-			"j_wwiar_rigMode",
-			"j_wwiar_currentLimbBoxes",
-			"j_wwiar_limbBoxNum",
-			"exec('",
-			"exec(",
-			"bdstorage.json",
-			"hitconfirm_crit",
-			"TdlQ",
-			"loverkill",
-			"mirrorSide",
-			"mirSide",
-			"getCrv",
-			"getParents",
-			"swapDigits",
-			"if not side == 'L' or 'L_' not in side or '_L' not in side:",
-			"if side == 'L' or 'L_' in side or '_L' in side:",
-			"is None",
-			"spineIK_chest_BIND",
-			"spineIK_hips_BIND",
-			"cmds.",
-			"RIG.043",
-			"font exo2",
-			"size=10",
-			"size=8",
-			"size=9",
-			"size=7",
-			"size=10",
-			"size=11",
-			"size=12",
-			"size=9",
-			"[117, 156, 79]",
-			"[132, 179, 86]",
-			"[149, 212, 87]",
-			"../assets",
-			"\"../assets",
-			"jntStretchName",
-			"hdlName",
-			"effName",
-			"crvName",
-			"crvInfoName'",
-			"crvInfoName",
-			"crvGlobalScaleName'",
-			"crvGlobalScaleName",
-			"crvStretchName'",
-			"crvStretchName",
-			"..",
-			"../",
-			"source \\\"Jenks/UHmenu/scripts/comet/",
-			"",
-			"zoomCloseSpan",
-			"zoomer",
-			"zoomerImg",
-			"mainZoomer",
-			"img-enlargable",
-			"zoomer-close",
-			"zoomer-caption",
-			"zoomer-content",
-			"zoom-id",
-			"zoomer",
-			"zoom-id",
-			"zoom-close",
-			"zoomer",
-			"zoom-caption",
-			"zoom-content",
-			"zoomImg",
-			"img-enlargable",
-			"bgDesign.png",
-			"from UHmenu import",
-			"../css/",
-			"../js/",
-			"../assets/",
-			"../js/",
-			"../css/",
-			"",
-			"../js/",
-			"../assets/img",
-			"../css/",
-			"assets/img/",
-			"href=\"",
-			"href=\"html/port",
-			"href=\"html/",
-			"href=\"html/.*\\.html\"",
-			"assets/img/",
-			"QtWidgets.QIcon"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -1149,229 +877,19 @@
 			[
 				{
 					"buffer": 0,
-					"file": "rigModules/skinFunctions.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2851,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2004,
-								2004
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"show_definitions": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
 					"file": "rigModules/bodyFunctions.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 69021,
+						"buffer_size": 71893,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								206,
-								206
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"show_definitions": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "pipelineMenu.mel",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8217,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2264,
-								2264
+								46470,
+								46470
 							]
 						],
 						"settings":
@@ -1383,343 +901,8 @@
 								{
 									"1":
 									[
-										2399,
-										2400
-									]
-								},
-								"icon":
-								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/double_quote.png",
-										"brackethighlighter.default"
-									]
-								},
-								"open":
-								{
-									"1":
-									[
-										2262,
-										2263
-									]
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"syntax": "Packages/MayaSublime/MEL.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 150.0,
-						"translation.y": 144.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "rigModules/miscFunctions.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 11699,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"show_definitions": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 35.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 2,
-			"sheets":
-			[
-				{
-					"buffer": 4,
-					"file": "rigModules/utilityFunctions.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 25701,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6079,
-								6079
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content"
-							],
-							"show_definitions": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 8017.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "rigModules/ctrlFunctions.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 16241,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-									"1":
-									[
-										1155,
-										1156
+										46470,
+										46471
 									]
 								},
 								"icon":
@@ -1734,8 +917,8 @@
 								{
 									"1":
 									[
-										1149,
-										1150
+										46431,
+										46432
 									]
 								},
 								"unmatched":
@@ -1744,36 +927,36 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
 								"bh_double_quote_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
@@ -1784,21 +967,21 @@
 								"bh_c_define_open",
 								"bh_c_define_close",
 								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content"
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
 							],
 							"show_definitions": false,
 							"syntax": "Packages/Python/Python.sublime-syntax",
@@ -1806,27 +989,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 5520.0,
+						"translation.y": 4896.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "rigModules/fileFunctions.py",
+					"buffer": 1,
+					"file": "rigModules/miscFunctions.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 17244,
+						"buffer_size": 21375,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								6497,
+								6497
 							]
 						],
 						"settings":
@@ -1838,15 +1021,15 @@
 								{
 									"1":
 									[
-										15715,
-										15716
+										6497,
+										6498
 									]
 								},
 								"icon":
 								{
 									"1":
 									[
-										"Packages/BracketHighlighter/icons/single_quote.png",
+										"Packages/BracketHighlighter/icons/round_bracket.png",
 										"brackethighlighter.default"
 									]
 								},
@@ -1854,8 +1037,8 @@
 								{
 									"1":
 									[
-										15700,
-										15701
+										6469,
+										6470
 									]
 								},
 								"unmatched":
@@ -1864,21 +1047,6 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
@@ -1889,36 +1057,51 @@
 								"bh_angle_open",
 								"bh_angle_close",
 								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
 								"bh_curly",
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
 								"bh_single_quote",
 								"bh_single_quote_center",
 								"bh_single_quote_open",
 								"bh_single_quote_close",
 								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_tag_content"
+								"bh_tag_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
 							],
 							"show_definitions": false,
 							"syntax": "Packages/Python/Python.sublime-syntax",
@@ -1926,27 +1109,33 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6029.0,
+						"translation.y": 384.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
 				{
-					"buffer": 7,
-					"file": "rigModules/apiFuncitons.py",
+					"buffer": 2,
+					"file": "rigModules/fileFunctions.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1927,
+						"buffer_size": 17457,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								103,
-								37
+								32,
+								32
 							]
 						],
 						"settings":
@@ -1969,21 +1158,11 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
 								"bh_double_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -1994,36 +1173,46 @@
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
 								"bh_round",
 								"bh_round_center",
 								"bh_round_open",
 								"bh_round_close",
 								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
 								"bh_unmatched_close",
 								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_tag_content"
+								"bh_tag_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
 							],
 							"show_definitions": false,
 							"syntax": "Packages/Python/Python.sublime-syntax",
@@ -2034,7 +1223,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -2082,9 +1271,9 @@
 	{
 		"height": 0.0
 	},
-	"output.unsaved_changes":
+	"output.mdpopups":
 	{
-		"height": 110.0
+		"height": 0.0
 	},
 	"pinned_build_system": "",
 	"project": "rigModules.sublime-project",
@@ -2120,7 +1309,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},

@@ -5,7 +5,9 @@ reload(utils)
 
 def createNewShader(bump=False, sss=False, disp=True):
     name = fileFn.textAssetNamePrompt()
-    shad = utils.newNode('aiStandardSurface', name=name, side='ai', skipNum=True)
+    if not name:
+        return False
+    shad = utils.newNode('aiStandardSurface', name=name, side='ai', skipNum=True, shaderNode='shader')
     sg = utils.newNode('shadingEngine', name=name, side='ai', skipNum=True)
     sg.connect('surfaceShader', '{}.outColor'.format(shad.name), 'to')
 
@@ -19,21 +21,25 @@ def createNewShader(bump=False, sss=False, disp=True):
 
     for extraName, fromAttr, destAttr in nodesToMake:
         ccNd = utils.newNode('aiColorCorrect', name='{}_{}'.format(name, extraName),
-                             side='ai', skipNum=True)
+                             side='ai', skipNum=True, shaderNode='utility')
         ccNd.connect(fromAttr, '{}.{}'.format(shad.name, destAttr), 'from')
         imgNd = utils.newNode('aiImage', name='{}_{}'.format(name, extraName),
-                              side='ai', skipNum=True)
+                              side='ai', skipNum=True, shaderNode='texture')
         imgNd.connect('outColor', '{}.input'.format(ccNd.name), 'from')
 
     if bump:
-        bumpNd = utils.newNode('bump2d', name=name, side='ai', skipNum=True)
+        bumpNd = utils.newNode('bump2d', name=name, side='ai', skipNum=True, shaderNode='utility')
         bumpNd.connect('outNormal', '{}.normalCamera'.format(shad.name))
-        bumpImg = utils.newNode('aiImage', name='{}_bump'.format(name), side='ai', skipNum=True)
+        bumpImg = utils.newNode('aiImage', name='{}_bump'.format(name), side='ai', skipNum=True,
+                                shaderNode='texture')
         bumpImg.connect('outColorR', '{}.bumpValue'.format(bumpNd.name))
 
     if disp:
-        displacementNd = utils.newNode('displacementShader', name=name, side='ai', skipNum=True)
+        displacementNd = utils.newNode('displacementShader', name=name, side='ai', skipNum=True,
+                                       shaderNode='shader')
         displacementNd.connect('displacement', '{}.displacementShader'.format(sg.name))
         displacementImgNd = utils.newNode('aiImage', name='{}_disp'.format(name),
-                                          side='ai', skipNum=True)
+                                          side='ai', skipNum=True, shaderNode='texture')
         displacementImgNd.connect('outColorR', '{}.displacement'.format(displacementNd.name))
+
+    return True

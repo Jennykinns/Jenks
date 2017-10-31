@@ -564,7 +564,7 @@ class newNode:
     """ Used for creating new nodes.
     """
     def __init__(self, node, name='', suffixOverride='', parent='', side='C',
-                 operation=None, skipNum=False):
+                 operation=None, skipNum=False, shaderNode=False):
         """ The creation function to create new nodes.
         [Args]:
         node (string) - The type of node to create
@@ -584,31 +584,40 @@ class newNode:
         nodeName = setupName(name if name else node,
                              obj=node if not suffixOverride else suffixOverride,
                              side=side, skipNumber=skipNum)
-        if node == 'locator':
-            self.name = cmds.spaceLocator(n=nodeName)[0]
-        elif node == 'group':
-            self.name = cmds.group(n=nodeName, em=1)
-        elif node == 'control' or node == 'gimbalCtrl':
-            self.name = cmds.circle(n=nodeName, ch=0)[0]
-        elif node == 'follicle':
-            fol = cmds.createNode(node, ss=1)
-            folTransform = cmds.listRelatives(fol, p=1)
-            self.name = cmds.rename(folTransform, nodeName)
-        elif node == 'hairSystem':
-            hs = cmds.createNode(node, ss=1)
-            hsTransform = cmds.listRelatives(hs, p=1)
-            self.name = cmds.rename(hsTransform, nodeName)
-        elif node == 'cluster':
-            clu, cluHdl = cmds.cluster(n=nodeName)
-            self.name = cmds.rename(cluHdl, '{}H'.format(nodeName))
-        elif node == 'aiStandardSurface':
-            self.name = cmds.shadingNode('aiStandardSurface', n=nodeName, ss=1, asShader=1)
+        if shaderNode:
+            if shaderNode == 'shader':
+                self.name = cmds.shadingNode(node, n=nodeName, ss=1, asShader=1)
+            if shaderNode == 'texture':
+                self.name = cmds.shadingNode(node, n=nodeName, ss=1, asTexture=1)
+            if shaderNode == 'utility':
+                self.name = cmds.shadingNode(node, n=nodeName, ss=1, asUtility=1)
         else:
-            self.name = cmds.createNode(node, n=nodeName, ss=1)
-        if parent:
-            cmds.parent(self.name, parent)
-        if operation and 'operation' in cmds.listAttr(self.name):
-            cmds.setAttr('{}.operation'.format(self.name), operation)
+            if node == 'locator':
+                self.name = cmds.spaceLocator(n=nodeName)[0]
+            elif node == 'group':
+                self.name = cmds.group(n=nodeName, em=1)
+            elif node == 'control' or node == 'gimbalCtrl':
+                self.name = cmds.circle(n=nodeName, ch=0)[0]
+            elif node == 'follicle':
+                fol = cmds.createNode(node, ss=1)
+                folTransform = cmds.listRelatives(fol, p=1)
+                self.name = cmds.rename(folTransform, nodeName)
+            elif node == 'hairSystem':
+                hs = cmds.createNode(node, ss=1)
+                hsTransform = cmds.listRelatives(hs, p=1)
+                self.name = cmds.rename(hsTransform, nodeName)
+            elif node == 'cluster':
+                clu, cluHdl = cmds.cluster(n=nodeName)
+                self.name = cmds.rename(cluHdl, '{}H'.format(nodeName))
+            elif node == 'shadingEngine':
+                self.name = cmds.sets(renderable=True, noSurfaceShader=True,
+                                      empty=True, name=nodeName)
+            else:
+                self.name = cmds.createNode(node, n=nodeName, ss=1)
+            if parent:
+                cmds.parent(self.name, parent)
+            if operation and 'operation' in cmds.listAttr(self.name):
+                cmds.setAttr('{}.operation'.format(self.name), operation)
         cmds.select(cl=1)
 
     def parent(self, parent, relative=False):

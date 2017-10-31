@@ -268,14 +268,31 @@ def setupLookDevScene(assetName=None, prompt=False):
         return False
     geoGrp = utils.newNode('group', name='geometry', skipNum=True)
     loadGeo(assetName, geoGrp.name)
-    for each in cmds.listRelatives(geoGrp.name, c=1):
-        print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
-        i = 1
-        geoSetName = '{}{}'.format(each.rstrip(suffix['geometry']), str(i).zfill(2))
-        while cmds.objExists(geoSetName):
-            i += 1
-            geoSetName = '{}{}'.format(each.rstrip(suffix['geometry']), str(i).zfill(2))
-        cmds.sets(each, n='geoSet_{}'.format(geoSetName))
+    print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
+    geoSetName = 'geoSet_{}'.format(assetName)
+    i = 1
+    while cmds.objExists(geoSetName):
+        i += 1
+        geoSetName = '{}{}'.format(geoSetName, str(i).zfill(2))
+    geo = cmds.listRelatives(geoGrp.name, c=1)
+    setName = cmds.sets(geo, n=geoSetName)
+    geoSetAttrs = {
+        'aiMatte', ('bool', None),
+        'primaryVisibility', ('bool', None),
+        'aiSubdivIterations', ('enum', '0:1:2:3:4:5:6:7'),
+        'aiSubdivType', ('enum', 'None:Catclark:Linear'),
+    }
+    for k, v in geoSetAttrs.iteritems():
+        if not v[1]:
+            cmds.addAttr(setName, longName=k, attributeType=v[0])
+        else:
+            cmds.addAttr(setName, longName=k, attributeType=v[0], enumName=v[1])
+
+
+    # cmds.addAttr('geoSet_Name_of_Asset', longName = 'aiMatte', attributeType = "bool", )
+    # cmds.addAttr('geoSet_Name_of_Asset', longName = 'primaryVisibility', attributeType = "bool" )
+#     cmds.addAttr('geoSet_Name_of_Asset', longName = 'aiSubdivType', attributeType = "enum", enumName = "0 :1 ")
+# cmds.addAttr('geoSet_Name_of_Asset', longName = 'aiSubdivIterations', attributeType = "enum", enumName = "0 :1 : 2 : 3")
 
 
 def saveWipLookDev(assetName=None, autoName=False, prompt=False):

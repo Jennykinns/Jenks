@@ -601,6 +601,8 @@ class newNode:
         elif node == 'cluster':
             clu, cluHdl = cmds.cluster(n=nodeName)
             self.name = cmds.rename(cluHdl, '{}H'.format(nodeName))
+        elif node == 'aiStandardSurface':
+            self.name = cmds.shadingNode('aiStandardSurface', n=nodeName, ss=1, asShader=1)
         else:
             self.name = cmds.createNode(node, n=nodeName, ss=1)
         if parent:

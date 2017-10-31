@@ -121,14 +121,18 @@ def newScene():
     f = cmds.file(new=1, force=1)
     return True
 
-def abcExport(fileName, selection=True, frameRange=(1, 1)):
+def abcExport(fileName, selection=True, frameRange=(1, 1), step=1.0):
+    if not frameRange == (1, 1):
+        frameRange = (frameRange[0]-3, frameRange[1]+3)
     if selection:
         sel = cmds.ls(sl=True)
     else:
         a = cmds.ls(dag=1, v=1)
         b = cmds.ls(lights=1, cameras=1)
         sel = list(set(a)-set(b))
-    args = '-f {0} -fr {1[0]} {1[1]} -ro -uv -ws -wv -ef'.format(fileName, frameRange, sel)
+    args = '-f {0} -fr {1[0]} {1[1]} -s {2} -uv -ws -wv -ef -wuvs -wc'.format(fileName,
+                                                                              frameRange, sel,
+                                                                              step)
     for each in sel:
         args = '{} -rt {}'.format(args, each)
     cmds.AbcExport(j=args)

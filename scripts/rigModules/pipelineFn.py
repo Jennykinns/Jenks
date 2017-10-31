@@ -1,6 +1,8 @@
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
+reload(utils)
+
 def createNewShader(bump=False, sss=False, disp=True):
     name = fileFn.textAssetNamePrompt()
     shad = utils.newNode('aiStandardSurface', name=name, side='ai', skipNum=True)

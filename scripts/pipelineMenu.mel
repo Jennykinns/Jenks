@@ -77,7 +77,6 @@ setParent -menu jenksPipeMenu;
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveWipLighting()\");";
     menuItem -label "Load WIP Lighting Scene" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadWipLighting(latest=True)\");";
     menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadWipLighting()\");";
-    menuItem -label "Setup Scene For Render []" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.setupSceneForRender()\");";
     menuItem -d true;
     menuItem -label "Select Rig Controls" -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.selectRigControls()\");";
     menuItem -label "Select Rig Skinning Joints" -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.selectSkinJnts()\");";

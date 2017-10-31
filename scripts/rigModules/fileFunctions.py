@@ -153,13 +153,16 @@ def publishRig(assetName=None, autoName=True, prompt=False):
                  selectionOnly=True)
     return True
 
-def referenceRig(assetName=None, prompt=False):
+def referenceRig(assetName=None, prompt=False, replace=False, refNd=None):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'rig/Published')
-    cmds.file(fileName, r=1, ns=newNameSpace(assetName))
+    if not replace:
+        cmds.file(fileName, r=1, ns=newNameSpace(assetName))
+    else:
+        cmds.file(fileName, lr=refNd)
     print 'Referenced Rig: {}'.format(fileName)
     return True
 
@@ -671,3 +674,8 @@ def assetNameSetup(assetName, prompt, textPrompt=False, typ='asset'):
     if not assetName:
         print 'Asset Name not specified.'
     return assetName
+
+def reloadReferences():
+    assets, refNd = utils.getAssetsInScene()
+    for i, each in enumerate(assets):
+        referenceRig(each, replace=True, refNd=refNd[i])

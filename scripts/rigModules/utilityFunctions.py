@@ -559,6 +559,20 @@ def getAllChildren(obj):
             jnts.extend(getAllChildren(each))
     return jnts
 
+def getAssetsInScene():
+    assets = []
+    refNds = cmds.ls(type='reference')
+    if 'sharedReferenceNode' in refNds:
+        refNds.remove('sharedReferenceNode')
+    for each in refNds:
+        filePath = cmds.referenceQuery(each, f=True)
+        if '/rig/Published/' in filePath:
+            if filePath.endswith('}'):
+                filePath = filePath[:-3]
+            fileName = filePath.rpartition('/')[-1]
+            assetName = fileName.rpartition('_')[0]
+            assets.append(assetName)
+    return assets, refNds
 
 class newNode:
     """ Used for creating new nodes.

@@ -24,6 +24,7 @@ setParent -menu jenksPipeMenu;
     menuItem -label "Get Current Shot" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.getShotName(dialog=True)\");";
     menuItem -d true;
     menuItem -label "Remove All References" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.removeReferences()\");";
+    menuItem -label "Reload Referenced Rigs" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.reloadReferences()\");";
     menuItem -d true;
     menuItem -label "Publish Asset Geometry" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.publishGeo(autoName=True)\");";
     menuItem -label "Publish Asset Rig" -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.publishRig()\");";

@@ -605,7 +605,7 @@ def treeAssetNamePrompt(typ='asset'):
 
     if typ == 'shot':
         directory = getShotDir()
-        icon = 'sphere.png'
+        icon = 'Camera.png'
     elif typ == 'asset':
         directory = getAssetDir()
         icon = 'alignOnMin.png'

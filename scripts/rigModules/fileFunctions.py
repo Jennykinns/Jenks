@@ -130,9 +130,9 @@ def abcExport(fileName, selection=True, frameRange=(1, 1), step=1.0):
         a = cmds.ls(dag=1, v=1)
         b = cmds.ls(lights=1, cameras=1)
         sel = list(set(a)-set(b))
-    args = '-f {0} -fr {1[0]} {1[1]} -s {2} -uv -ws -wv -ef -wuvs -wc'.format(fileName,
-                                                                              frameRange, sel,
-                                                                              step)
+    args = '-f {0} -fr {1[0]} {1[1]} -uv -ws -wv -ef -wuvs -wc'.format(fileName, frameRange, sel)
+    if not frameRange ==  (1, 1):
+        args = '{} -s {}'.format(args, step)
     for each in sel:
         args = '{} -rt {}'.format(args, each)
     cmds.AbcExport(j=args)

@@ -65,8 +65,31 @@ class strapModule:
         self.side = side
         self.rig = rig
 
-    def create(self, sj, ej, parent=None):
-        ribbonJoints(sj, ej, '', self, extraName=self.extraName, moduleType=self.name, par=parent)
+    def create(self, jnts, nrb, parent=None, numOfJnts=10):
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        self.ctrls = []
+        self.strapMechGrp = utils.newNode('group', name='{}{}Mech'.format(extraName, self.name),
+                                          side=self.side, parent=self.rig.mechGrp.name,
+                                          skipNum=True)
+        cmds.parent(nrb, self.strapMechGrp.name)
+        self.strapCtrlsGrp = utils.newNode('group', name='{}{}Ctrls'.format(extraName, self.name),
+                                           side=self.side, parent=self.rig.ctrlsGrp.name,
+                                           skipNum=True)
+        cmds.parentConstraint(parent, self.strapCtrlsGrp.name, mo=1)
+        for each in jnts:
+            cmds.parent(each, self.strapMechGrp.name)
+            ## create control
+            ctrl = ctrlFn.ctrl(name='{}{}'.format(extraName, self.name), side=self.side,
+                               guide=each, rig=self.rig, parent=self.strapCtrlsGrp.name,
+                               scaleOffset=self.rig.scaleOffset)
+            ctrl.constrain(each)
+            self.ctrls.append(ctrl)
+        ## skin jnts to nrb / clusters
+        skin = cmds.skinCluster(jnts, nrb, parent)[0]
+        ## rivet locators + jnts
+        for i in range(numOfJnts):
+            createRivet(self.name, extraName, self, nrb, parent=self.strapMechGrp.name,
+                        pv=0.5, pu=(1.0/(numOfJnts-1.0))*i, rivJntPar=parent)
 
 
 def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=None,
@@ -143,21 +166,9 @@ def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=N
     ## rivets
     rivJntPar = sj
     for i in [0.1, 0.3, 0.5, 0.7, 0.9]:
-        rivJnt = utils.newNode('joint', name='{}{}BendyRiv'.format(extraName, bendyName),
-                               side=module.side, parent=rivJntPar)
-        utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)
-        cmds.setAttr('{}.jointOrient'.format(rivJnt.name), 0, 0, 0)
-        rivJntPar = rivJnt.name
-        rivLoc = utils.newNode('locator', name='{}{}BendyRiv'.format(extraName, bendyName),
-                               side=module.side, parent=par)
-        cmds.parentConstraint(rivLoc.name, rivJnt.name)
-        rivNd = utils.newNode('mjRivet', name='{}{}BendyRiv'.format(extraName, bendyName),
-                              side=module.side)
-        rivNd.connect('is', '{}.ws'.format(nPlane), 'to')
-        rivNd.connect('ot', '{}.t'.format(rivLoc.name), 'from')
-        rivNd.connect('or', '{}.r'.format(rivLoc.name), 'from')
-        cmds.setAttr('{}.pv'.format(rivNd.name), 0.5)
-        cmds.setAttr('{}.pu'.format(rivNd.name), i)
+        rivJnt = createRivet('{}Bendy'.format(bendyName), extraName, module, nPlane, pv=0.5, pu=i,
+                             parent=par, rivJntPar=rivJntPar)
+        rivJntPar = rivJnt
     return bendyEndCtrl
 
 
@@ -324,3 +335,21 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
         cmds.connectAttr('{}.wp'.format(each.name), '{}Shape.cv[{}]'.format(skinCrvIn, i))
 
     ##
+
+
+def createRivet(rivName, extraName, module, nrb, pv=0.5, pu=0.5, parent=None, rivJntPar=None):
+    rivJnt = utils.newNode('joint', name='{}{}Riv'.format(extraName, rivName),
+                           side=module.side, parent=rivJntPar)
+    utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)
+    cmds.setAttr('{}.jointOrient'.format(rivJnt.name), 0, 0, 0)
+    rivLoc = utils.newNode('locator', name='{}{}Riv'.format(extraName, rivName),
+                           side=module.side, parent=parent)
+    cmds.parentConstraint(rivLoc.name, rivJnt.name)
+    rivNd = utils.newNode('mjRivet', name='{}{}Riv'.format(extraName, rivName),
+                          side=module.side)
+    rivNd.connect('is', '{}.ws'.format(nrb), 'to')
+    rivNd.connect('ot', '{}.t'.format(rivLoc.name), 'from')
+    rivNd.connect('or', '{}.r'.format(rivLoc.name), 'from')
+    cmds.setAttr('{}.pv'.format(rivNd.name), pv)
+    cmds.setAttr('{}.pu'.format(rivNd.name), pu)
+    return rivJnt.name

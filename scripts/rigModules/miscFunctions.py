@@ -71,6 +71,7 @@ class strapModule:
         self.strapMechGrp = utils.newNode('group', name='{}{}Mech'.format(extraName, self.name),
                                           side=self.side, parent=self.rig.mechGrp.name,
                                           skipNum=True)
+        cmds.setAttr('{}.it'.format(self.strapMechGrp.name), 0)
         cmds.parent(nrb, self.strapMechGrp.name)
         self.strapCtrlsGrp = utils.newNode('group', name='{}{}Ctrls'.format(extraName, self.name),
                                            side=self.side, parent=self.rig.ctrlsGrp.name,

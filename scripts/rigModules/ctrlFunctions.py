@@ -2,7 +2,7 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
-from Jenks.scripts.rigModules import apiFuncitons as api
+from Jenks.scripts.rigModules import apiFunctions as api
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 

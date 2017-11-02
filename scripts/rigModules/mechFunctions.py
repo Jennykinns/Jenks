@@ -67,6 +67,7 @@ class strapModule:
 
     def create(self, jnts, nrb, parent=None, numOfJnts=10):
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        col = utils.getColors(self.side)
         self.ctrls = []
         self.strapMechGrp = utils.newNode('group', name='{}{}Mech'.format(extraName, self.name),
                                           side=self.side, parent=self.rig.mechGrp.name,
@@ -77,14 +78,26 @@ class strapModule:
                                            side=self.side, parent=self.rig.ctrlsGrp.name,
                                            skipNum=True)
         cmds.parentConstraint(parent, self.strapCtrlsGrp.name, mo=1)
+        prevJnt = None
+        for each in jnts:
+            if prevJnt:
+                cmds.parent(each, prevJnt)
+            prevJnt = each
+        orientJoints.doOrientJoint(jointsToOrient=jnts,
+                                   aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+                                   upAxis=(0, 1, 0),
+                                   worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+                                   guessUp=1)
         for each in jnts:
             cmds.parent(each, self.strapMechGrp.name)
             ## create control
             ctrl = ctrlFn.ctrl(name='{}{}'.format(extraName, self.name), side=self.side,
                                guide=each, rig=self.rig, parent=self.strapCtrlsGrp.name,
-                               scaleOffset=self.rig.scaleOffset)
-            ctrl.constrain(each)
+                               scaleOffset=self.rig.scaleOffset*0.4)
+            ctrl.modifyShape(shape='sphere', color=col['col3'])
             self.ctrls.append(ctrl)
+            ctrl.constrain(each)
+            ctrl.constrain(each, typ='scale')
         ## skin jnts to nrb / clusters
         skin = cmds.skinCluster(jnts, nrb, parent)[0]
         ## rivet locators + jnts

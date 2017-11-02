@@ -2,7 +2,7 @@ import maya.cmds as cmds
 
 from Jenks.scripts.rigModules import suffixDictionary
 from Jenks.scripts.rigModules import orientJoints
-from Jenks.scripts.rigModules import apiFuncitons as apiFn
+from Jenks.scripts.rigModules import apiFunctions as apiFn
 
 import re
 

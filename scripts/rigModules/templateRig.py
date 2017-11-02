@@ -4,6 +4,7 @@ from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 from Jenks.scripts.rigModules import skinFunctions as skinFn
 from Jenks.scripts.rigModules import bodyFunctions as bodyFn
+from Jenks.scripts.rigModules import mechFunctions as mechFn
 from Jenks.scripts.rigModules import setupFn
 
 reload(fileFn)

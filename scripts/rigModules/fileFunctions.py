@@ -5,7 +5,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
-from Jenks.scripts.rigModules import apiFuncitons as api
+from Jenks.scripts.rigModules import apiFunctions as api
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 
 def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None):

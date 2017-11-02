@@ -4,8 +4,8 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ikFunctions as ikFn
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 from Jenks.scripts.rigModules import fileFunctions as fileFn
-from Jenks.scripts.rigModules import miscFunctions as miscFn
-from Jenks.scripts.rigModules import apiFuncitons as apiFn
+from Jenks.scripts.rigModules import mechFunctions as mechFn
+from Jenks.scripts.rigModules import apiFunctions as apiFn
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 from Jenks.scripts.rigModules import defaultBodyOptions
 from Jenks.scripts.rigModules import orientJoints
@@ -14,7 +14,7 @@ reload(orientJoints)
 reload(utils)
 reload(ikFn)
 reload(ctrlFn)
-reload(miscFn)
+reload(mechFn)
 reload(defaultBodyOptions)
 
 
@@ -63,7 +63,7 @@ class armModule:
         ## ik/fk
         if options['IK'] and options['FK']:
             clavChild = armMechSkelGrp.name
-            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = miscFn.ikfkMechanics(self, extraName, jnts,
+            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = mechFn.ikfkMechanics(self, extraName, jnts,
                                                                        armMechSkelGrp, armCtrlsGrp,
                                                                        moduleType='arm', rig=self.rig)
         else:
@@ -318,7 +318,7 @@ class armModule:
                 print '## add proper stretch to arm fk'
         ## ribbon
         if options['ribbon']:
-            miscFn.bendyJoints(jnts[1], jnts[2], jnts[3], 'arm', self)
+            mechFn.bendyJoints(jnts[1], jnts[2], jnts[3], 'arm', self)
         else:
             ## add forearm twist
             twistJnt = utils.newNode('joint', name='{}forearmTwist'.format(extraName),
@@ -487,7 +487,7 @@ class legModule:
                                        guessUp=1)
         ## ik/fk
         if options['IK'] and options['FK']:
-            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = miscFn.ikfkMechanics(self, extraName, jnts,
+            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = mechFn.ikfkMechanics(self, extraName, jnts,
                                                                        legMechSkelGrp, legCtrlsGrp,
                                                                        moduleType='leg',
                                                                        rig=self.rig)
@@ -766,7 +766,7 @@ class legModule:
                 print '## add proper stretch to leg fk'
 
         if options['ribbon']:
-            miscFn.bendyJoints(jnts[0], jnts[1], jnts[2], 'leg', self)
+            mechFn.bendyJoints(jnts[0], jnts[1], jnts[2], 'leg', self)
 
         ## leg parent stuff
         if parent:
@@ -1055,7 +1055,7 @@ class tailModule:
         if options['IK']:
             for jnt in jnts:
                 utils.addJntToSkinJnt(jnt, self.rig)
-            miscFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
+            mechFn.createLayeredSplineIK(jnts, 'tail', rig=self.rig, side=self.side,
                                          extraName=self.extraName, parent=parent,
                                          dyn=options['dynamics'])
         else:

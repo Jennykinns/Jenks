@@ -785,9 +785,11 @@ class headModule:
 
     def create(self, options=defaultBodyOptions.head, autoOrient=True,
                parent=None, extraSpaces=''):
+        ctrlSpaceSwitches = [self.rig.globalCtrl.ctrlEnd]
         if parent:
-            gParent = cmds.listRelatives(parent, p=1)[0]
-            ctrlSpaceSwitches = [self.rig.globalCtrl.ctrlEnd, gParent]
+            if cmds.listRelatives(parent, p=1):
+                gParent = cmds.listRelatives(parent, p=1)[0]
+                ctrlSpaceSwitches.append(gParent)
         else:
             cmds.error('FUCK, I DON\'T KNOW WHAT TO DO WITHOUT A PARENT FOR THE HEAD YET.')
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
@@ -811,8 +813,10 @@ class headModule:
                                      parent=self.rig.ctrlsGrp.name, skipNum=True)
         if type(extraSpaces) == type(list()) and len(extraSpaces) > 1:
             ctrlSpaceSwitches.extend(extraSpaces)
-        else:
-            ctrlSpaceSwitches.append(extraSpaces)
+            if extraSpaces:
+                ctrlSpaceSwitches.append(extraSpaces)
+        # else:
+        #     ctrlSpaceSwitches.append(extraSpaces)
         if options['IK']:
             ## IK mechanics
             headMechGrp = utils.newNode('group', name='{}headMech'.format(extraName),

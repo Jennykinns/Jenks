@@ -23,34 +23,5 @@ class face:
         self.side = side
         self.rig = rig
 
-    def createEyes(self, side='C'):
-        extraName = '{}_'.format(self.extraName) if self.extraName else ''
-        crvs = [
-            'eyeLow',
-            'eyeHigh'
-        ]
-        for name in crvs:
-            print name
-            crv = '{}_{}face_{}{}'.format(side, extraName, name, suffix['nurbsCrv'])
-            jnts = utils.createJntsFromCrv(crv, numOfJnts=5, chain=False,
-                                           name='{}face_{}'.format(extraName, name))
-        pass
-
-
-    def createMouth(self):
-        pass
-
-    def createDetailMech(self):
-        crvs = cmds.listRelatives('{}faceCrvs{}'.format(self.moduleName, suffix['group']))
-        for crv in crvs:
-            name = crv.strip('{}face'.format(self.moduleName))
-            name = name.rstrip(suffix['nurbsCrv'])
-            jnts = utils.createJntsFromCrv(crv, numOfJnts=5, chain=False,
-                                           name='face_{}'.format(name))
-        ## create joints on curves
-        ## constrain joints on crv
-        ##
-        pass
-
-    def createBaseMech(self):
+    def basicFace(self):
         pass

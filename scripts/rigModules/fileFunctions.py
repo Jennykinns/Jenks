@@ -280,10 +280,10 @@ def setupLookDevScene(assetName=None, prompt=False):
     geo = cmds.listRelatives(geoGrp.name, c=1)
     setName = cmds.sets(geo, n=geoSetName)
     geoSetAttrs = {
-        'aiMatte', ('bool', None),
-        'primaryVisibility', ('bool', None),
-        'aiSubdivIterations', ('enum', '0:1:2:3:4:5:6:7'),
-        'aiSubdivType', ('enum', 'None:Catclark:Linear'),
+        'aiMatte' : ('bool', None),
+        'primaryVisibility' : ('bool', None),
+        'aiSubdivIterations' : ('enum', '0:1:2:3:4:5:6:7'),
+        'aiSubdivType' : ('enum', 'None:Catclark:Linear'),
     }
     for k, v in geoSetAttrs.iteritems():
         if not v[1]:

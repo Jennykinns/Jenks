@@ -58,7 +58,8 @@ def saveSkin(geo, assetName=None, prompt=False):
     path = fileFn.getAssetDir()
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
     skinCls = getSkinInfo(geo)
-    cmds.deformerWeights(fileName, path='', deformer=skinCls, ex=1, wp=5, wt=0.00001)
+    if skinCls:
+        cmds.deformerWeights(fileName, path='', deformer=skinCls, ex=1, wp=5, wt=0.00001)
     return True
 
 def saveAllSkin(assetName=None, prompt=False):

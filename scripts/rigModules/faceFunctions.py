@@ -64,6 +64,7 @@ class face:
                                      rig=self.rig, parent=faceCtrlsGrp.name,
                                      scaleOffset=self.rig.scaleOffset)
             upperEyelidCtrl.constrain(upperEyelidJnt)
+            upperEyelidCtrl.constrain(upperEyelidJnt, typ='scale')
             upperEyelidCtrl.modifyShape(shape='arc', scale=(0.1, 0.1, 0.1), rotation=(0, 0, 90),
                                         mirror=True)
 
@@ -76,6 +77,7 @@ class face:
                                      rig=self.rig, parent=faceCtrlsGrp.name,
                                      scaleOffset=self.rig.scaleOffset)
             lowerEyelidCtrl.constrain(lowerEyelidJnt)
+            lowerEyelidCtrl.constrain(lowerEyelidJnt, typ='scale')
             lowerEyelidCtrl.modifyShape(shape='arc', scale=(0.1, 0.1, 0.1), rotation=(0, 0, 90),
                                         mirror=True)
 
@@ -119,8 +121,12 @@ class face:
                                side=side, parent=par,
                                scaleOffset=self.rig.scaleOffset)
             if name == 'mouthCorner':
-                cmds.parentConstraint(jawCtrl.ctrlEnd, faceCtrlsGrp.name, ctrl.offsetGrps[0].name, mo=1)
+                constr = cmds.parentConstraint(jawCtrl.ctrlEnd, faceCtrlsGrp.name,
+                                               ctrl.offsetGrps[0].name, mo=1)[0]
+                cmds.setAttr('{}.interpType'.format(constr), 2)
             ctrl.modifyShape(shape='pin', scale=(0.2, 0.2, 0.2), rotation=(-90, 0, 0), mirror=True)
             ## constrain
             ctrl.constrain(jnt)
+            ctrl.constrain(jnt, typ='scale')
+        cmds.delete('{}_{}faceJnts{}'.format(self.side, extraName, suffix['group']))
 

@@ -61,12 +61,16 @@ from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 from Jenks.scripts.rigModules import skinFunctions as skinFn
 from Jenks.scripts.rigModules import bodyFunctions as bodyFn
+from Jenks.scripts.rigModules import mechFunctions as mechFn
+from Jenks.scripts.rigModules import faceFunctions as faceFn
 from Jenks.scripts.rigModules import setupFn
 
 reload(fileFn)
 reload(ctrlFn)
 reload(skinFn)
 reload(bodyFn)
+reload(mechFn)
+reload(faceFn)
 reload(setupFn)
 
 def create():
@@ -92,6 +96,8 @@ def create():
         toes.create('foot', parent=leg.footJnt, thumb=False)
     tail = bodyFn.tailModule(rig, side='C')
     tail.create()
+    face = faceFn.face(rig, side='C')
+    face.basicFace(jntPar=spine.endJnt, ctrlPar=head.headCtrl.ctrlEnd)
 
     ##
 

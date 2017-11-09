@@ -10,7 +10,7 @@ reload(suffixDictionary)
 reload(apiFn)
 
 def setupName(name, obj='', suffix='', side='C', extraName='', skipNumber=False):
-    """ Sets up a suitable name for a node to avoid naming conflicts.
+    """ Set up a suitable name for a node to avoid naming conflicts.
         [Args]:
         name (string) - The base name
         obj (string) - The object type of the node
@@ -40,7 +40,7 @@ def setupName(name, obj='', suffix='', side='C', extraName='', skipNumber=False)
     return newName
 
 def setupBodyPartName(extraName='', side='C'):
-    """ Sets up a suitable name for a body part to avoid naming
+    """ Set up a suitable name for a body part to avoid naming
         conflicts.
         [Args]:
         side (string) - The side of the node
@@ -63,7 +63,7 @@ def setupBodyPartName(extraName='', side='C'):
     return newName
 
 def hashToNumber(name, suffix, startNum=1):
-    """ Turns all the hashes in string to numbers. (also checks for
+    """ Turn all the hashes in string to numbers. (also checks for
         naming conflicts)
         [Args]:
         name (string) - The base string with hashes
@@ -103,7 +103,7 @@ def getSuffixForObjType(obj):
     return suffix
 
 def rename(mObj, newName, side=None, startNum=1, skipSuff=False):
-    """ Renames object with suffix to avoid conflicts.
+    """ Rename object with suffix to avoid conflicts.
         [Args]:
         mObj (mObj) - The mObj for the node to rename
         newName (string) - The new name for the node
@@ -133,7 +133,7 @@ def rename(mObj, newName, side=None, startNum=1, skipSuff=False):
     return r
 
 def findReplace(mObj, find, replace, startNum=1):
-    """ Finds a string and replaces it with another.
+    """ Find a string and replaces it with another.
         (supports regex)
         [Args]:
         mObj (mObj) - The mObj for the node to rename
@@ -149,7 +149,7 @@ def findReplace(mObj, find, replace, startNum=1):
     return r
 
 def stripName(mObj, stripFromRight=False, startNum=1):
-    """ Strips the left (or right) character from the name segment
+    """ Strip the left (or right) character from the name segment
         of an object.
         [Args]:
         mObj (mObj) - The mObj for the node to rename
@@ -171,7 +171,7 @@ def stripName(mObj, stripFromRight=False, startNum=1):
     return r
 
 def swapSide(mObj, side='C', startNum=1):
-    """ Swaps the side prefix.
+    """ Swap the side prefix.
         [Args]:
         mObj (mObj) - The mObj for the node to rename
         side (string) - The side to swap to ('R', 'L' or 'C')
@@ -193,7 +193,7 @@ def swapSide(mObj, side='C', startNum=1):
 
 
 def renameSelection(newName, side):
-    """ Renames the selected objects.
+    """ Rename the selected objects.
         [Args]:
         newName (string) - The new name for the objects
         [Returns]:
@@ -218,7 +218,7 @@ def findReplaceSelection(find, replace):
     return True
 
 def stripNameSelection(stripFromRight=False):
-    """ Strips the name of the selected objects.
+    """ Strip the name of the selected objects.
         [Args]:
         stripFromRight (bool) - Toggles stripping from the right
                                 instead of the left
@@ -231,7 +231,7 @@ def stripNameSelection(stripFromRight=False):
     return True
 
 def swapSideSelection(side='C'):
-    """ Swaps the side prefix of the selected objects.
+    """ Swap the side prefix of the selected objects.
         [Args]:
         side (string) - The side to swap to ('R', 'L' or 'C')
         [Returns]:
@@ -243,6 +243,7 @@ def swapSideSelection(side='C'):
     return True
 
 def addSuffixToSelection():
+    """ Add suffix to selected objects."""
     sel = apiFn.getSelectionAsMObjs()
     for i, mObj in enumerate(sel, 1):
         lN, sN = apiFn.getPath(mObj, returnString=True)
@@ -251,7 +252,7 @@ def addSuffixToSelection():
 
 
 def addJntToSkinJnt(jnt, rig):
-    """ Adds the specified joint to the rig's skin joints category.
+    """ Add the specified joint to the rig's skin joints category.
         [Args]:
         jnt (string) - The name of the joint node
         rig (class) - The rig Class of the destination rig
@@ -264,7 +265,7 @@ def addJntToSkinJnt(jnt, rig):
     cmds.connectAttr(rig.skinJntsAttr, rigConnection)
 
 def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
-    """ Gets the children DAGs between two objects.
+    """ Get the children DAGs between two objects.
         [Args]:
         startObj (string) - The name of the start DAG
         endObj (string) - The name of the end DAG
@@ -284,7 +285,7 @@ def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
     return objs
 
 def getColors(typ):
-    """ Gets the specified colours depending on the position
+    """ Get the specified colours depending on the position
         on the rig.
         [Args]:
         typ (string) - The position on the rig
@@ -316,7 +317,7 @@ def getColors(typ):
     return colors
 
 def setShapeColor(obj, color=None):
-    """ Sets the specified objects shape node colour.
+    """ Set the specified objects shape node colour.
         [Args]:
         obj (string) - The name of the object to change colour
         color (int) - The colour ID value
@@ -327,7 +328,7 @@ def setShapeColor(obj, color=None):
         setColor(each, color)
 
 def setColor(obj, color=None):
-    """ Sets the specified objects colour.
+    """ Set the specified objects colour.
         [Args]:
         obj (string) - The name of the object to change colour
         color (int) - The colour ID value
@@ -341,7 +342,7 @@ def setColor(obj, color=None):
         cmds.setAttr('{}.overrideVisibility'.format(obj), 0)
 
 def setOutlinerColor(obj, color=None):
-    """ Sets the outliner colour for the specified node.
+    """ Set the outliner colour for the specified node.
         [Args]:
         obj (string) - the name of the node to change
         color (int) - The colour ID value
@@ -351,7 +352,7 @@ def setOutlinerColor(obj, color=None):
     cmds.setAttr('{}.outlinerColor'.format(obj), color[0], color[1], color[2])
 
 def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
-    """ Matches the transforms of one object to another.
+    """ Match the transforms of one object to another.
         [Args]:
         obj (string) - The object to move
         targetObj (string) - The object to match to
@@ -372,7 +373,7 @@ def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
         cmds.delete(cmds.parentConstraint(targetObj, each))
 
 def addAttr(node, name, nn, typ, defaultVal=0, minVal=None, maxVal=None, enumOptions=None):
-    """ Adds an attribute to a node.
+    """ Add an attribute to a node.
         [Args]:
         node (string) - The name of the node to add the attribute to
         name (string) - The name of the attribute
@@ -413,7 +414,7 @@ def addAttr(node, name, nn, typ, defaultVal=0, minVal=None, maxVal=None, enumOpt
     return '{}.{}'.format(node, name)
 
 def lockAttr(node, attr='', hide=True, unlock=False):
-    """ Locks attributes of specified node.
+    """ Lock attributes of specified node.
         [Args]:
         node (string) - name of the node
         attr (list) - A list of attributes to lock
@@ -441,7 +442,7 @@ def lockAttr(node, attr='', hide=True, unlock=False):
             cmds.setAttr('{}.{}'.format(node, each), l=not unlock, k=not hide)
 
 def getShapeNodes(obj):
-    """ Gets the shape nodes of the specified object.
+    """ Get the shape nodes of the specified object.
         [Args]:
         obj (string) - The name of the object
         [Returns]:
@@ -451,7 +452,7 @@ def getShapeNodes(obj):
     return children
 
 def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
-    """ Creates joints on a curve.
+    """ Create joints on a curve.
         [Args]:
         crv (string) - The name of the curve
         numOfJnts (int) - The amount of joints to create
@@ -480,7 +481,7 @@ def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
     return jntList
 
 def duplicateJntChain(chainName, jnts, parent=None):
-    """ Duplicates a joint chain.
+    """ Duplicate a joint chain.
         [Args]:
         chainName (string) - The name of the new joint chain
         jnts (list) - a list of the joints in the chain to duplicate
@@ -503,7 +504,7 @@ def duplicateJntChain(chainName, jnts, parent=None):
     return newJnts
 
 def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=None, parent=None):
-    """ Creates a joint chain from a list of objects.
+    """ Create a joint chain from a list of objects.
         [Args]:
         objs (list) - A list of object names to create the joints from
         chainName (string) - The name of the new joint chain
@@ -530,7 +531,7 @@ def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=Non
     return newJnts
 
 def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None):
-    """ Creates a curve from a list of objects.
+    """ Create a curve from a list of objects.
         [Args]:
         objs (list) - Names of objects to create the curve from
         crvName (string) - The name of the new curve
@@ -551,6 +552,12 @@ def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None
     return crv
 
 def getAllChildren(obj):
+    """ Return a list of children for the specified object.
+        [Args]:
+        obj (string) - Name of the object to list children
+        [Returns]:
+        jnts (list) - Names of child objects
+    """
     jnts = []
     a = cmds.listRelatives(obj, type='joint')
     if a:
@@ -560,6 +567,11 @@ def getAllChildren(obj):
     return jnts
 
 def getAssetsInScene():
+    """ Return current assets in the scene.
+        [Returns]:
+        assets (list) - The names of the assets in the scene
+        refNds (list) - The reference nodes of the assets in the scene
+    """
     assets = []
     refNds = cmds.ls(type='reference')
     if 'sharedReferenceNode' in refNds:
@@ -575,8 +587,7 @@ def getAssetsInScene():
     return assets, refNds
 
 class newNode:
-    """ Used for creating new nodes.
-    """
+    """ Create new nodes."""
     def __init__(self, node, name='', suffixOverride='', parent='', side='C',
                  operation=None, skipNum=False, shaderNode=False):
         """ The creation function to create new nodes.
@@ -635,7 +646,7 @@ class newNode:
         cmds.select(cl=1)
 
     def parent(self, parent, relative=False):
-        """ Parents the node.
+        """ Parent the node.
         [Args]:
         parent (string) - The name of the parent
         relative (bool) - Toggles if the parent should be relative
@@ -646,7 +657,7 @@ class newNode:
 
     def addAttr(self, name, nn, typ='double', defaultVal=0, minVal=None, maxVal=None,
                 enumOptions=None):
-        """ Adds an attribute to the node.
+        """ Add an attribute to the node.
         [Args]:
         node (string) - The name of the node to add the attribute to
         name (string) - The name of the attribute
@@ -667,7 +678,7 @@ class newNode:
         return True
 
     def lockAttr(self, attr='', hide=True, unlock=False):
-        """ Locks attrubutes on node.
+        """ Lock attrubutes on node.
         [Args]:
         attr (list) - A list of attributes to lock
         hide (bool) - Toggles hiding the attributes as well
@@ -676,7 +687,7 @@ class newNode:
         lockAttr(self.name, attr, hide, unlock)
 
     def connect(self, nodeAttr, dest, mode='from'):
-        """ Connects an attribute to the node.
+        """ Connect an attribute to the node.
         [Args]:
         nodeAttr (string) - The name of the node's attribute
         dest (string) - The long name of the another node's attribute
@@ -695,7 +706,7 @@ class newNode:
             cmds.connectAttr(dest, nodeAttrFull)
 
     def matchTransforms(self, obj, skipTrans=False, skipRot=False):
-        """ Matches the transforms of one object to another.
+        """ Match the transforms of one object to another.
         [Args]:
         obj (string) - The object to match to
         skipTrans (bool) - Toggles skipping translation

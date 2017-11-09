@@ -19,7 +19,14 @@ reload(defaultBodyOptions)
 
 
 class armModule:
+
+    """ Manage an arm rig.
+    """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the arm.
+
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side

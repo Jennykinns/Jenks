@@ -20,12 +20,14 @@ reload(defaultBodyOptions)
 
 class armModule:
 
-    """ Manage an arm rig.
-    """
+    """ Create an arm rig. """
 
     def __init__(self, rig, extraName='', side='C'):
         """ Setup the initial variables to use when creating the arm.
-
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
         """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
@@ -34,6 +36,15 @@ class armModule:
 
     def create(self, options=defaultBodyOptions.arm, autoOrient=False,
                customNodes=False, parent=None):
+        """ Create the arm rig.
+        [Args]:
+        options (dictionary) - A dictionary of options for the arm
+        autoOrient (bool) - Toggles auto orienting the joints
+        customNodes (bool) - Toggles the use of custom nodes
+        parent (string) - The name of the parent
+        [Returns]
+        True
+        """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -347,13 +358,26 @@ class armModule:
 
 
 class spineModule:
+
+    """ Create a spine rig. """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the ititial variables to use when creating the spine.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extraName of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side
         self.rig = rig
 
     def createFromJnts(self, autoOrient=False):
+        """ Create the spine from joints.
+        [Args]:
+        autoOrient (bool) - Toggles auto orienting the joints
+        """
         jntSuffix = suffix['joint']
         spineJnts = utils.getChildrenBetweenObjs('{}spine_base{}'.format(self.moduleName,
                                                                         jntSuffix),
@@ -363,6 +387,11 @@ class spineModule:
 
 
     def createFromCrv(self, crv, numOfJnts=7):
+        """ Create the spine from a curve.
+        [Args]:
+        crv (string) - The name of the curve to create from
+        numOfJnts (int) - The amount of joints to create for the spine
+        """
         ##create jnts
         spineJnts = utils.createJntsFromCrv(crv, numOfJnts, name='{}spine'.format(self.extraName),
                                             side=self.side)
@@ -384,6 +413,14 @@ class spineModule:
 
 
     def spineMech(self, autoOrient, spineJnts, crv=None):
+        """ Create the mechanics for the spine.
+        [Args]:
+        autoOrient (bool) - Toggles auto orienting the joints
+        spineJnts (list)(string) - A list of the names of the joints to
+                                   create the mechanics on
+        crv (string) - The curve to use for the spline IK (if None a
+                       new curve will be made)
+        """
         jntSuffix = suffix['joint']
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         col = utils.getColors('C')
@@ -459,7 +496,16 @@ class spineModule:
 
 
 class legModule:
+
+    """ Create a leg rig. """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the leg.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side
@@ -467,6 +513,13 @@ class legModule:
 
     def create(self, options=defaultBodyOptions.leg, autoOrient=False,
                customNodes=False, parent=None):
+        """ Create the leg rig.
+        [Args]:
+        options (dictionary) - A dictionary of options for the leg
+        autoOrient (bool) - Toggles auto orienting the joints
+        customNodes (bool) - Toggles the use of custom nodes
+        parent (string) - The name of the parent
+        """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -784,7 +837,16 @@ class legModule:
 
 
 class headModule:
+
+    """ Create a head rig. """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the head.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side
@@ -792,6 +854,14 @@ class headModule:
 
     def create(self, options=defaultBodyOptions.head, autoOrient=True,
                parent=None, extraSpaces=''):
+        """ Create the head rig.
+        [Args]:
+        options (dictionary) - A dictionary of options for the arm
+        autoOrient (bool) - Toggles auto orienting the joints
+        parent (string) - The name of the parent
+        extraSpaces (list)(string) - A list of the names of the extra
+                                     spaces of the control
+        """
         ctrlSpaceSwitches = [self.rig.globalCtrl.ctrlEnd]
         if parent:
             if cmds.listRelatives(parent, p=1):
@@ -866,7 +936,16 @@ class headModule:
 
 
 class digitsModule:
+
+    """ Create finger or toe rigs. """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the digits.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side
@@ -874,6 +953,17 @@ class digitsModule:
 
     def create(self, mode, autoOrient=False, customNodes=False, parent=None, thumb=True,
                skipDigits=None):
+        """ Create the arm rig.
+        [Args]:
+        mode (string) - the mode of the digits ('hand' or 'foot')
+        autoOrient (bool) - Toggles auto orienting the joints
+        customNodes (bool) - Toggles the use of custom nodes
+        parent (string) - The name of the parent
+        thumb (bool) - Toggles creating the thumb
+        skipDigits (list)(string) - A list of digit names to skip
+                                    ('Index', 'Middle', 'Ring',
+                                    'Pinky', etc)
+        """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         col = utils.getColors(self.side)
@@ -1042,7 +1132,16 @@ class digitsModule:
 
 
 class tailModule:
+
+    """ Create a tail rig. """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the tail.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side
@@ -1050,6 +1149,15 @@ class tailModule:
 
     def create(self, crv=False, jntNum=16, options=defaultBodyOptions.tail,
                autoOrient=False, parent=None):
+        """ Create the tail rig.
+        [Args]:
+        crv (string) - The curve to create the tail from (if False
+                       create from joints instead)
+        jntNum (int) - The number of joints if creating from a curve
+        options (dictionary) - A dictionary of options for the arm
+        autoOrient (bool) - Toggles auto orienting the joints
+        parent (string) - The name of the parent
+        """
         jntSuffix = suffix['joint']
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         col = utils.getColors(self.side)
@@ -1091,6 +1199,14 @@ class tailModule:
 
 
 def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
+    """ Rename module guide joints.
+    [Args]:
+    typ (string) - The type of module ('arm', 'leg', 'spine', etc)
+    jntNames (list)(string) - A list of new joint names
+    side (string) - The side of the module
+    extraName (string) - The extra name of the module
+    chain (bool) - Toggles renaming the entire hierarchy chain
+    """
     if extraName.endswith('_'):
         extraName = extraName[:-1]
     moduleName = utils.setupBodyPartName(extraName, side)
@@ -1114,6 +1230,13 @@ def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
         utils.renameSelection(name, side)
 
 def renameBodyPartLocGuides(typ, locNames, side='C', extraName=''):
+    """ Rename module guide locators.
+    [Args]:
+    typ (string) - The type of module ('arm', 'leg', 'spine', etc)
+    locNames (list)(string) - A list of new locator names
+    side (string) - The side of the module
+    extraName (string) - The extra name of the module
+    """
     if extraName.endswith('_'):
         extraName = extraName[:-1]
     moduleName = utils.setupBodyPartName(extraName, side)
@@ -1125,6 +1248,11 @@ def renameBodyPartLocGuides(typ, locNames, side='C', extraName=''):
     return locators
 
 def renameLegGuides(side='C', extraName=''):
+    """ Rename the guides for a leg.
+    [Args]:
+    side (string) - The side of the leg
+    extraName (string) - The extra name of the leg
+    """
     moduleName = utils.setupBodyPartName(extraName, side)
     if extraName:
         extraName = '{}_'.format(extraName)
@@ -1190,6 +1318,11 @@ def renameLegGuides(side='C', extraName=''):
     cmds.select(cl=1)
 
 def renameArmGuides(side='C', extraName=''):
+    """ Rename the guides for an arm.
+    [Args]:
+    side (string) - The side of the arm
+    extraName (string) - The extra name of the arm
+    """
     moduleName = utils.setupBodyPartName(extraName, side)
     if extraName:
         extraName = '{}_'.format(extraName)
@@ -1238,6 +1371,11 @@ def renameArmGuides(side='C', extraName=''):
     cmds.select(cl=1)
 
 def renameSpineGuides(side='C', extraName=''):
+    """ Rename the guides a spine.
+    [Args]:
+    side (string) - The side of the spine
+    extraName (string) - The extra name of the spine
+    """
     moduleName = utils.setupBodyPartName(extraName, side)
     if extraName:
         extraName += '_'
@@ -1253,6 +1391,11 @@ def renameSpineGuides(side='C', extraName=''):
     cmds.select(cl=1)
 
 def renameHeadGuides(side='C', extraName=''):
+    """ Rename the guides for a head.
+    [Args]:
+    side (string) - The side of the head
+    extraName (string) - The extra name of the head
+    """
     moduleName = utils.setupBodyPartName(extraName, side)
     if extraName:
         extraName += '_'
@@ -1267,6 +1410,11 @@ def renameHeadGuides(side='C', extraName=''):
     cmds.select(cl=1)
 
 def renameTailGuides(side='C', extraName=''):
+    """ Rename the guides for a tail.
+    [Args]:
+    side (string) - The side of the tail
+    extraName (string) - The extra name of the tail
+    """
     moduleName = utils.setupBodyPartName(extraName, side)
     if extraName:
         extraName += '_'
@@ -1286,6 +1434,9 @@ def renameTailGuides(side='C', extraName=''):
     cmds.select(cl=1)
 
 def renameAllBodyPartGuides():
+    """ Rename all body modules in the current scene based on their
+    parent group name.
+    """
     cmds.select(cmds.ls(l=1))
     sceneMObjs = apiFn.getSelectionAsMObjs()
     for each in sceneMObjs:

@@ -17,13 +17,27 @@ reload(defaultBodyOptions)
 
 
 class face:
+
+    """ Create a face rig. """
+
     def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the face.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
         self.side = side
         self.rig = rig
 
     def basicFace(self, jntPar=None, ctrlPar=None):
+        """ Create a basic face setup.
+        [Args]:
+        jntPar (string) - The name of the joint parent
+        ctrlPar (string) - The name of the control parent
+        """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         faceCtrlsGrp = utils.newNode('group', name='{}faceCtrls'.format(extraName), side=self.side,
                                     skipNum=True, parent=self.rig.ctrlsGrp.name)

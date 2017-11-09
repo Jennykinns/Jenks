@@ -10,6 +10,22 @@ reload(utils)
 reload(orientJoints)
 
 def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig):
+    """ Create the mechanics for a IK/FK setup.
+    [Args]:
+    module (class) - The class of the body part module
+    extraName (string) - The extra name for the setup
+    jnts (list)(string) - A list of jnts to create the mechanics on
+    mechSkelGrp (string) - The name of the mechanics skeleton group
+    ctrlGrp (string) - The name of the control group
+    moduleType (string) - The type of module ('arm', 'leg', etc)
+    rig (class) - The rig class to use
+    [Returns]:
+    ikJnts (list)(string) - The names of the IK joints
+    fkJnts (list)(string) - The names of the FK joints
+    jnts (list)(string) - The names of the result joints
+    ikCtrlGrp (string) - The name of the IK controls group
+    fkCtrlGrp (string) - The name of the FK controls group
+    """
     jntSuffix = suffix['joint']
     newJntChains = []
     ## create duplicate chains
@@ -58,7 +74,17 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
     return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
 
 class strapModule:
+
+    """ Create a strap rig. """
+
     def __init__(self, rig, name='strap', extraName='', side='C'):
+        """ Setup the initial variables to use when creating the strap.
+        [Args]:
+        rig (class) - The rig class to use
+        name (string) - The name of the strap
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
         self.name = name
         self.moduleName = utils.setupBodyPartName(extraName, side)
         self.extraName = extraName
@@ -66,6 +92,14 @@ class strapModule:
         self.rig = rig
 
     def create(self, jnts, nrb, parent=None, numOfJnts=10):
+        """ Create the strap.
+        [Args]:
+        jnts (list)(string) - The names of the joints to bind to the
+                              nurbs plane
+        nrb (string) - The name of the nurbs plane
+        parent (string) - The name of the parent
+        numOfJnts (int) - The amount of skinning joints to create
+        """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         col = utils.getColors(self.side)
         self.ctrls = []
@@ -108,6 +142,20 @@ class strapModule:
 
 def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=None,
                  endCtrl=False, basePar=None):
+    """ Create a ribbon setup.
+    [Args]:
+    sj (string) -
+    ej (string) -
+    bendyName (string) - The name of the ribbon setup
+    module (class) - The class of the body part module
+    extraName (string) - The extra name of the ribbon setup
+    moduleType (string) - The type of module
+    par (string) - The name of the mechanics parent
+    endCtrl (bool) - Toggles creating an end control
+    basePar (string) - The name of the joints parent
+    [Returns]:
+    bendyEndCtrl (class) - The end control class or False
+    """
     if not basePar:
         basePar = sj
     moduleName = utils.setupBodyPartName(module.extraName, module.side)
@@ -187,6 +235,14 @@ def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=N
 
 
 def bendyJoints(sj, mj, ej, moduleType, module):
+    """ Create a bendy joints setup (mainly for arms & legs).
+    [Args]:
+    sj (string) - The name of the start joint
+    mj (string) - The name of the middle joint
+    ej (string) - The name of the end joint
+    moduleType (string) - The type of body part ('arm', 'leg')
+    module (class) - The class of the body part module
+    """
     moduleName = utils.setupBodyPartName(module.extraName, module.side)
     extraName = '{}_'.format(module.extraName) if module.extraName else ''
     mechGrp = utils.newNode('group', name='{}BendyMech'.format(extraName),
@@ -199,8 +255,17 @@ def bendyJoints(sj, mj, ej, moduleType, module):
 
 
 
-def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLayers=2,
-                          parent=None, dyn=False):
+def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', parent=None, dyn=False):
+    """ Create a layered spline IK.
+    [Args]:
+    jnts (list)(string) - The names of the joints to create the IK with
+    name (string) - The name of the IK
+    rig (class) - The rig class to use
+    side (string) - The side of the IK
+    extraName (string) - The extra name of the IK
+    parent (string) - The name of the parent
+    dyn (bool) - Toggles dynamics on the spline IK
+    """
     moduleName = utils.setupBodyPartName(extraName, side)
     extraName = '{}_'.format(extraName) if extraName else ''
     col = utils.getColors(side)
@@ -352,6 +417,19 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', ctrlLaye
 
 
 def createRivet(rivName, extraName, module, nrb, pv=0.5, pu=0.5, parent=None, rivJntPar=None):
+    """ Create a rivet.
+    [Args]:
+    rivName (string) - The name of the rivet
+    extraName (string) - The extra name of the rivet
+    module (class) - The class of the body part module
+    nrb (string) - The nurbs plane to create the rivet on
+    pv (float) - The V position for the rivet
+    pu (float) - The U position for the rivet
+    parent (string) - The name of the mechanics parent
+    rivJntPar (string) - The name of the joint parent
+    [Returns]:
+    rivJnt.name (string) - The name of the rivet joint
+    """
     rivJnt = utils.newNode('joint', name='{}{}Riv'.format(extraName, rivName),
                            side=module.side, parent=rivJntPar)
     utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)

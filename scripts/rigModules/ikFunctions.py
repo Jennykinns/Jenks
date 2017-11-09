@@ -3,9 +3,9 @@ import maya.cmds as cmds
 from Jenks.scripts.rigModules import utilityFunctions as utils
 
 class ik:
-    """
-    Create and manipulate Ik handles.
-    """
+
+    """ Create and manipulate Ik handles. """
+
     def __init__(self, sj, ej, name='IK', side='C', rig=None):
         ## initial variables
         self.sj = sj

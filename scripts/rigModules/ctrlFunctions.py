@@ -220,8 +220,25 @@ def loadCtrls(assetName=None, prompt=False):
                 applyShapeData(ctrl, crvData)
 
 class ctrl:
+
+    """ Create and manipulate a control. """
+
     def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None, rig=None,
-                 deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1):
+                 deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1.0):
+        """ Create the control, offset groups, root group and const group.
+        [Args]:
+        name (string) - The name of the control
+        gimbal (bool) - Toggles creating a gimbal control
+        offsetGrpNum (int) - The amount of offset groups to create
+        guide (string) - The guide to match transforms to
+        rig (class) - The rig class to link the control to
+        deleteGuide (bool) - Toggles deleting the guide
+        side (string) - The side of the control
+        skipNum (bool) - Toggles skipping the number in the control name
+                         if possible
+        parent (string) - The parent of the control
+        scaleOffset (float) - The scale offset of the control shape
+        """
         self.side = side
         self.gimbal = gimbal
         self.scaleOffset = scaleOffset

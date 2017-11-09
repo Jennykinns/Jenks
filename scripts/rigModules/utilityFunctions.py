@@ -271,8 +271,8 @@ def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
         endObj (string) - The name of the end DAG
         typ (string) - The type of object to limit the function to
         [Returns]:
-        objs (list) - A list of the names of the DAG nodes that are
-                      between the specified nodes.
+        objs (list)(string) - A list of the names of the DAG nodes
+                              that are between the specified nodes.
     """
     sChilds = cmds.listRelatives(startObj, ad=1, type=typ)
     eChilds = cmds.listRelatives(endObj, ad=1, type=typ)
@@ -385,7 +385,7 @@ def addAttr(node, name, nn, typ, defaultVal=0, minVal=None, maxVal=None, enumOpt
                          (if applicable)
         maxVal (float) - The maximum value of the attribute
                          (if applicable)
-        enumOptions (list) - A list of enum otions
+        enumOptions (list)(string) - A list of enum otions
         [Returns]:
         (string) the long name of the attribute
     """
@@ -417,7 +417,7 @@ def lockAttr(node, attr='', hide=True, unlock=False):
     """ Lock attributes of specified node.
         [Args]:
         node (string) - name of the node
-        attr (list) - A list of attributes to lock
+        attr (list)(string) - A list of attributes to lock
         hide (bool) - Toggles hiding the attributes as well
         unlock (bool) - Unlocks the attributes instead
     """
@@ -446,7 +446,7 @@ def getShapeNodes(obj):
         [Args]:
         obj (string) - The name of the object
         [Returns]:
-        children (list) - A list of children shapes
+        children (list)(string) - A list of children shapes
     """
     children = cmds.listRelatives(obj, s=1)
     return children
@@ -460,7 +460,7 @@ def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
         name (string) - The name of the new joints
         side (string) - The side of the new joints
         [Returns]:
-        jntList (list) - A list of the new joint names
+        jntList (list)(string) - A list of the new joint names
     """
     cmds.makeIdentity(crv, a=1, t=1, r=1)
     tmpCrv = cmds.rebuildCurve(crv, rt=0, end=1, kr=0, kt=0, s=numOfJnts-1, d=3)[0]
@@ -484,11 +484,12 @@ def duplicateJntChain(chainName, jnts, parent=None):
     """ Duplicate a joint chain.
         [Args]:
         chainName (string) - The name of the new joint chain
-        jnts (list) - a list of the joints in the chain to duplicate
+        jnts (list)(string) - A list of the joints in the chain to
+                              duplicate
         parent (string) - The name of the object to parent the
                           new joint chain
         [Returns]:
-        newJnts (list) - A list of the new joints created
+        newJnts (list)(string) - A list of the new joints created
     """
     newJnts = []
     dupeChain = cmds.duplicate(jnts[0], rc=1)
@@ -506,16 +507,18 @@ def duplicateJntChain(chainName, jnts, parent=None):
 def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=None, parent=None):
     """ Create a joint chain from a list of objects.
         [Args]:
-        objs (list) - A list of object names to create the joints from
+        objs (list)(string) - A list of object names to create the
+                              joints from
         chainName (string) - The name of the new joint chain
         side (string) - The side of the new chain
         extraName (string) - The optional extra name for the
                              new joint chain
-        jntNames (list) - A list of optional extra names for each joint
+        jntNames (list)(string) - A list of optional extra names for
+                                  each joint
         parent (string) - The name of the object to parent the
                           new joint chain
         [Returns]:
-        newJnts (list) - A list of the new joints created
+        newJnts (list)(string) - A list of the new joints created
     """
     newJnts = []
     for i, each in enumerate(objs):
@@ -533,7 +536,7 @@ def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=Non
 def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None):
     """ Create a curve from a list of objects.
         [Args]:
-        objs (list) - Names of objects to create the curve from
+        objs (list)(string) - Names of objects to create the curve from
         crvName (string) - The name of the new curve
         side (string) - The side of the new curve
         extraName (string) - The optional extra name for the new curve
@@ -556,7 +559,7 @@ def getAllChildren(obj):
         [Args]:
         obj (string) - Name of the object to list children
         [Returns]:
-        jnts (list) - Names of child objects
+        jnts (list)(string) - Names of child objects
     """
     jnts = []
     a = cmds.listRelatives(obj, type='joint')
@@ -569,8 +572,9 @@ def getAllChildren(obj):
 def getAssetsInScene():
     """ Return current assets in the scene.
         [Returns]:
-        assets (list) - The names of the assets in the scene
-        refNds (list) - The reference nodes of the assets in the scene
+        assets (list)(string) - The names of the assets in the scene
+        refNds (list)(string) - The reference nodes of the assets in
+                                the scene
     """
     assets = []
     refNds = cmds.ls(type='reference')
@@ -669,7 +673,7 @@ class newNode:
                          (if applicable)
         maxVal (float) - The maximum value of the attribute
                          (if applicable)
-        enumOptions (list) - A list of enum otions
+        enumOptions (list)(string) - A list of enum otions
         [Returns]:
         (bool) If sucessful
         """
@@ -680,7 +684,7 @@ class newNode:
     def lockAttr(self, attr='', hide=True, unlock=False):
         """ Lock attrubutes on node.
         [Args]:
-        attr (list) - A list of attributes to lock
+        attr (list)(string) - A list of attributes to lock
         hide (bool) - Toggles hiding the attributes as well
         unlock (bool) - Unlocks the attributes instead
         """

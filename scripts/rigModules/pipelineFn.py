@@ -4,6 +4,15 @@ from Jenks.scripts.rigModules import fileFunctions as fileFn
 reload(utils)
 
 def createNewShader(bump=False, sss=False, disp=True):
+    """ Create a new aiStandardSurface shader with colour corrects
+    and aiImage nodes for each important input.
+    [Args]:
+    bump (bool) - Toggles creating the bump map nodes
+    sss (bool) - Toggles creating the sss map nodes
+    disp (bool) - Toggles creating the displacement map nodes
+    [Returns]:
+    True
+    """
     name = fileFn.textAssetNamePrompt()
     if not name:
         return False

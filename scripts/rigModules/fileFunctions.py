@@ -225,25 +225,30 @@ def loadGeo(assetName=None, group=None, prompt=False, abc=True):
     print 'Loaded geometry: {}'.format(fileName)
     return True
 
-def publishGeo(assetName=None, autoName=True, prompt=False):
+def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
     path = getAssetDir()
-    if not autoName:
-        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
-        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Geometry',
-                                    fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/model/Published'.format(path, assetName))
-        if fileName:
-            fileName = fileName[0]
+    if abc:
+        if not autoName:
+            fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+            fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Geometry',
+                                        fileMode=0, fileFilter=fileFilter,
+                                        dir='{}{}/model/Published'.format(path, assetName))
+            if fileName:
+                fileName = fileName[0]
+            else:
+                return False
         else:
-            return False
+            fileName = getLatestVersion(assetName, path, 'model/Published', new=True)
+        removeReferences()
+        abcExport(fileName, selection=True, frameRange=(1, 1))
+        print 'Published Geometry: {}'.format(fileName)
     else:
-        fileName = getLatestVersion(assetName, path, 'model/Published', new=True)
-    removeReferences()
-    abcExport(fileName, selection=True, frameRange=(1, 1))
-    print 'Published Geometry: {}'.format(fileName)
+        saveMayaFile(assetName, typ='model/Published', autoName=autoName, removeRefs=True,
+                     selectionOnly=True)
+        print 'Saved as Maya File.'
     return True
 
 def referenceGeo(assetName=None, prompt=False):

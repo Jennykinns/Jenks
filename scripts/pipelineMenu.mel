@@ -64,6 +64,7 @@ setParent -menu jenksPipeMenu;
         menuItem -label "Get Current Asset" -i $i_getAsset -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.getAssetName(dialog=True)\");";
         menuItem -d true;
         menuItem -label "Publish Asset Geometry" -i $i_publishGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.publishGeo(autoName=True)\");";
+        menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.publishGeo(autoName=True, abc=False)\");";
         menuItem -d true;
         menuItem -label "Remove All References" -i $i_removeRefs -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.removeReferences()\");";
         menuItem -label "Reference Published Geometry" -i $i_refGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.referenceGeo()\");";

@@ -102,6 +102,7 @@ class face:
             tongueSj = 'C_{}tongue_base_JNT'.format(extraName)
             tongueEj = 'C_{}tongue_tip_JNT'.format(extraName)
             tongueJnts = utils.getChildrenBetweenObjs(tongueSj, tongueEj)
+            cmds.parent(tongueSj, jntPar)
 
             tongueCtrlPar = jawCtrl.ctrlEnd
             for each in tongueJnts[:-1]:

@@ -60,7 +60,7 @@ class armModule:
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         armMechGrp = utils.newNode('group', name='{}armMech'.format(extraName),
                                    side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
-        cmds.setAttr('{}.it'.format(armMechGrp.name), 0)
+        # cmds.setAttr('{}.it'.format(armMechGrp.name), 0)
         if not parent:
             parentCtrl = ctrlFn.ctrl(name='{}armParent'.format(extraName), side=self.side,
                                      parent=armCtrlsGrp.name, guide=jnts[0], skipNum=True)
@@ -429,7 +429,7 @@ class spineModule:
 
         spineMechGrp = utils.newNode('group', name='{}spineMech'.format(self.extraName),
                                      side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
-        cmds.setAttr('{}.it'.format(spineMechGrp.name), 0)
+        # cmds.setAttr('{}.it'.format(spineMechGrp.name), 0)
         ## orient joints
         if autoOrient:
             orientJoints.doOrientJoint(jointsToOrient=spineJnts, aimAxis=(1, 0, 0),
@@ -535,7 +535,7 @@ class legModule:
                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
         legMechGrp = utils.newNode('group', name='{}legMech'.format(extraName),
                                    side=self.side, skipNum=True, parent=self.rig.mechGrp.name)
-        cmds.setAttr('{}.it'.format(legMechGrp.name), 0)
+        # cmds.setAttr('{}.it'.format(legMechGrp.name), 0)
         if options['IK']:
             legMechSkelGrp = utils.newNode('group', name='{}legMechSkel'.format(extraName),
                                            side=self.side, skipNum=True, parent=legMechGrp.name)
@@ -833,6 +833,8 @@ class legModule:
             legParentLoc = utils.newNode('locator', name='{}legParent'.format(extraName),
                                          side=self.side, skipNum=True, parent=parent)
             legParentLoc.matchTransforms(jnts[0])
+            cmds.parentConstraint(legParentLoc.name,
+                                  '{}legFKCtrls{}'.format(self.moduleName, suffix['group']), mo=1)
             cmds.parentConstraint(legParentLoc.name, legMechSkelGrp.name, mo=1)
 
 
@@ -898,7 +900,7 @@ class headModule:
             ## IK mechanics
             headMechGrp = utils.newNode('group', name='{}headMech'.format(extraName),
                                         side=self.side, parent=self.rig.mechGrp.name, skipNum=True)
-            cmds.setAttr('{}.it'.format(headMechGrp.name), 0)
+            # cmds.setAttr('{}.it'.format(headMechGrp.name), 0)
             headIKsGrp = utils.newNode('group', name='{}headIKs'.format(extraName),
                                        side=self.side, parent=headMechGrp.name, skipNum=True)
             neckIK = ikFn.ik(jnts[0], jnts[1], name='{}neckIK'.format(extraName), side=self.side)
@@ -1069,16 +1071,25 @@ class digitsModule:
                                            side=self.side)
                     distNd.connect('point1', '{}.wp'.format(prevLoc.name), mode='to')
                     distNd.connect('point2', '{}.wp'.format(loc.name), mode='to')
+                    scaleNormDiv = utils.newNode('multiplyDivide',
+                                                 name='{}{}{}_{}ScaleNorm'.format(extraName, typ,
+                                                                                  each, seg),
+                                                 side=self.side, operation=2,
+                                                 suffixOverride='multiplyDivide_div')
+                    scaleNormDiv.connect('input1X', '{}.distance'.format(distNd.name), 'to')
+                    scaleNormDiv.connect('input2X', self.rig.scaleAttr, 'to')
                     if self.side == 'R':
                         distRevNd = utils.newNode('multDoubleLinear',
                                                   name='{}{}{}_{}Rev'.format(extraName, typ,
                                                                              each, seg),
                                                   side=self.side)
-                        distRevNd.connect('input1', '{}.distance'.format(distNd.name), mode='to')
+                        # distRevNd.connect('input1', '{}.distance'.format(distNd.name), mode='to')
+                        distRevNd.connect('input1', '{}.outputX'.format(scaleNormDiv.name), 'to')
                         cmds.setAttr('{}.input2'.format(distRevNd.name), -1)
                         distRevNd.connect('output', '{}.tx'.format(jnts[i]))
                     else:
-                        distNd.connect('distance', '{}.tx'.format(jnts[i]))
+                        # distNd.connect('distance', '{}.tx'.format(jnts[i]))
+                        scaleNormDiv.connect('outputX', '{}.tx'.format(jnts[i]), 'from')
                 else:
                     palmOrientMult = utils.newNode('multiplyDivide',
                                                    name='{}{}{}_baseOrient'.format(extraName, typ,

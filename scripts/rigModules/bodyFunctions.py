@@ -76,7 +76,7 @@ class armModule:
             orientJoints.doOrientJoint(jointsToOrient=jnts[1:],
                                        aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
                                        upAxis=(0, 1, 0),
-                                       worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+                                       worldUp=(0, 1, 0),
                                        guessUp=1)
         ## ik/fk
         if options['IK'] and options['FK']:
@@ -104,7 +104,7 @@ class armModule:
             ##- controls
             if self.side == 'R':
                 tmpJnt = cmds.duplicate(ikJnts[3], po=1)
-                cmds.xform(tmpJnt, r=1, ro=(0, 0, 180))
+                cmds.xform(tmpJnt, r=1, ro=(180, 0, 0))
                 self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
                                           guide=tmpJnt, skipNum=True, parent=ikCtrlGrp.name,
                                           deleteGuide=True, scaleOffset=self.rig.scaleOffset,

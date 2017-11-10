@@ -32,17 +32,17 @@ class face:
         self.side = side
         self.rig = rig
 
-    def basicFace(self, jntPar=None, ctrlPar=None):
+    def basicFace(self, jntPar=None, tongue=False):
         """ Create a basic face setup.
         [Args]:
         jntPar (string) - The name of the joint parent
-        ctrlPar (string) - The name of the control parent
+        tongue (bool) - Toggles creating the tongue
         """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         faceCtrlsGrp = utils.newNode('group', name='{}faceCtrls'.format(extraName), side=self.side,
                                     skipNum=True, parent=self.rig.ctrlsGrp.name)
-        if ctrlPar:
-            cmds.parentConstraint(ctrlPar, faceCtrlsGrp.name, mo=1)
+        if jntPar:
+            cmds.parentConstraint(jntPar, faceCtrlsGrp.name, mo=1)
         ## jaw
         jawJnt = 'C_{}jawLower{}'.format(extraName, suffix['joint'])
         utils.addJntToSkinJnt(jawJnt, self.rig)
@@ -51,6 +51,7 @@ class face:
                               guide=jawJnt,
                               rig=self.rig, parent=faceCtrlsGrp.name,
                               scaleOffset=self.rig.scaleOffset)
+        jawCtrl.modifyShape(shape='cube', color=27, scale=(0.3, 0.3, 0.3))
         jawCtrl.constrain(jawJnt)
         if jntPar:
             cmds.parent(jawJnt, jntPar)
@@ -68,6 +69,7 @@ class face:
             if jntPar:
                 cmds.parent(eyeJnt, jntPar)
             ## do aim controls
+            print '## Do eye aim controls.'
             ## eyelids
             upperEyelidJnt = '{}_{}eyelidUpper{}'.format(s, extraName, suffix['joint'])
             if jntPar:
@@ -96,6 +98,18 @@ class face:
                                         mirror=True)
 
         ## tongue
+        if tongue:
+            tongueSj = 'C_{}tongue_base_JNT'.format(extraName)
+            tongueEj = 'C_{}tongue_tip_JNT'.format(extraName)
+            tongueJnts = utils.getChildrenBetweenObjs(tongueSj, tongueEj)
+
+            tongueCtrlPar = jawCtrl.ctrlEnd
+            for each in tongueJnts[:-1]:
+                ctrl = ctrlFn.ctrl(name='tongue', side='C', guide=each, rig=self.rig,
+                                   parent=tongueCtrlPar, scaleOffset=self.rig.scaleOffset)
+                tongueCtrlPar = ctrl.ctrlEnd
+                ctrl.modifyShape(shape='circle', color=27, scale=(0.1, 0.1, 0.1))
+                ctrl.constrain(each)
 
 
         ## lips

@@ -1209,7 +1209,7 @@ class tailModule:
 
 
 
-def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
+def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False, sideList=None):
     """ Rename module guide joints.
     [Args]:
     typ (string) - The type of module ('arm', 'leg', 'spine', etc)
@@ -1227,6 +1227,7 @@ def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
     # partGuidesJnts.reverse()
     if not chain:
         oldNewNames = zip(partGuidesJnts, jntNames)
+        print oldNewNames
     else:
         oldNewNames = []
         for i, each in enumerate(partGuidesJnts):
@@ -1236,9 +1237,16 @@ def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False):
                 oldNewNames.append((each, jntNames[-1]))
             else:
                 oldNewNames.append((each, jntNames[1]))
-    for each, name in oldNewNames:
-        cmds.select(each)
-        utils.renameSelection(name, side)
+    if not sideList:
+        for each, name in oldNewNames:
+            cmds.select(each)
+            utils.renameSelection(name, side)
+    else:
+        for i, onn in enumerate(oldNewNames):
+            each, name = onn
+            print name
+            cmds.select(each)
+            utils.renameSelection(name, sideList[i])
 
 def renameBodyPartLocGuides(typ, locNames, side='C', extraName=''):
     """ Rename module guide locators.
@@ -1418,6 +1426,69 @@ def renameHeadGuides(side='C', extraName=''):
     renameBodyPartJntGuides('head', jntNameList)
     cmds.parent(cmds.listRelatives(headGrp), w=1)
     cmds.delete(headGrp)
+    cmds.select(cl=1)
+
+def renameFaceGuides(side='C', extraName=''):
+    """ Rename the guides for a face.
+    [Args]:
+    side (string) - The side of the face
+    extraName (string) - The extraName of the face
+    """
+    moduleName = utils.setupBodyPartName(extraName, side)
+    if extraName:
+        extraName += '_'
+    faceGrp = '{}faceJnts{}'.format(moduleName, suffix['group'])
+    jntNameList = [
+        '{}jawLower'.format(extraName),
+        '{}jawLowerEnd'.format(extraName),
+        '{}jawUpper'.format(extraName),
+        '{}lipLower'.format(extraName),
+        '{}lipUpper'.format(extraName),
+        '{}mouthCorner'.format(extraName),
+        '{}mouthCorner'.format(extraName),
+        '{}noseCorner'.format(extraName),
+        '{}nodeCorner'.format(extraName),
+        '{}cheek'.format(extraName),
+        '{}cheek'.format(extraName),
+        '{}eyebrowInner'.format(extraName),
+        '{}eyebrowMid'.format(extraName),
+        '{}eyebrowOuter'.format(extraName),
+        '{}eyebrowInner'.format(extraName),
+        '{}eyebrowMid'.format(extraName),
+        '{}eyebrowOuter'.format(extraName),
+        '{}eye'.format(extraName),
+        '{}eyelidUpper'.format(extraName),
+        '{}eyelidLower'.format(extraName),
+        '{}eye'.format(extraName),
+        '{}eyelidUpper'.format(extraName),
+        '{}eyelidLower'.format(extraName),
+    ]
+    sideList = [
+        'C',
+        'C',
+        'C',
+        'C',
+        'C',
+        'L',
+        'R',
+        'L',
+        'R',
+        'L',
+        'R',
+        'L',
+        'L',
+        'L',
+        'R',
+        'R',
+        'R',
+        'L',
+        'L',
+        'L',
+        'R',
+        'R',
+        'R',
+    ]
+    renameBodyPartJntGuides('faceJnts', jntNameList, sideList=sideList)
     cmds.select(cl=1)
 
 def renameTailGuides(side='C', extraName=''):

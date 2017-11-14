@@ -8,10 +8,18 @@ from Jenks.scripts.rigModules import apiFunctions as apiFn
 import xml.etree.cElementTree
 
 def getAllSkinJnts(rigNode):
+    """ Return all skin joints connected to the specified rig.
+    [Args]:
+    rigNode (string) - The name of the rig global control
+    [Returns]:
+    jnts (list)(string) - The names of all the joints connected to the
+                          'rigSkinJnts' attribute of the rigNode
+    """
     jnts = cmds.listConnections('{}.rigSkinJnts'.format(rigNode), d=1, s=0)
     return jnts
 
 def selectSkinJnts():
+    """ Select the all the skinning joints of the selected rig. """
     sel = cmds.ls(sl=1)
     rigNodes = []
     for each in sel:
@@ -28,6 +36,12 @@ def selectSkinJnts():
     return True
 
 def getSkinInfo(obj):
+    """ Return skin cluster node of specified object.
+    [Args]:
+    obj (string) - The name of the skin mesh
+    [Returns]:
+    skinCls (list)(string) - The names of the skin cluster nodes
+    """
     ## skin cluster(s)
     shapes = cmds.listRelatives(obj, s=1)
     if not shapes:
@@ -39,7 +53,16 @@ def getSkinInfo(obj):
             skinCls.extend(cls)
     return skinCls
 
-def loadSkin(geo, assetName=None, prompt=False, override=False):
+def loadSkin(geo, assetName=None, prompt=False):
+    """ Load skin values for the specified geometry from a file.
+    [Args]:
+    geo (string) - The name of the geometry to apply the skin to
+    assetName (string) - The name of the rig the geometry is part of
+    prompt (bool) - Toggles prompting the user to select the
+                    assetName
+    [Returns]:
+    True
+    """
     assetName = fileFn.assetNameSetup(assetName, prompt)
     path = fileFn.getAssetDir()
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', name=geo)
@@ -57,6 +80,13 @@ def loadSkin(geo, assetName=None, prompt=False, override=False):
     return True
 
 def saveSkin(geo, assetName=None, prompt=False):
+    """ Save skin values for the specified geometry to a file.
+    [Args]:
+    geo (string) - The name of the geometry to save the skin of
+    assetName (string) - The name of the rig the geometry is part of
+    prompt (bool) - Toggles prompting the user to select the
+                    assetName
+    """
     assetName = fileFn.assetNameSetup(assetName, prompt)
     path = fileFn.getAssetDir()
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
@@ -68,6 +98,13 @@ def saveSkin(geo, assetName=None, prompt=False):
     return True
 
 def saveAllSkin(assetName=None, prompt=False):
+    """ Save skin values for all the skin of a rig.
+    [Args]:
+    assetName (string) - The name of the rig
+    prompt (bool) - Toggles prompting the user to select the assetName
+    [Returns]:
+    True if rig has geometry, else False
+    """
     assetName = fileFn.assetNameSetup(assetName, prompt)
     geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
     if geo:
@@ -78,6 +115,13 @@ def saveAllSkin(assetName=None, prompt=False):
         return False
 
 def loadAllSkin(assetName=None, prompt=False):
+    """ Load skin values for all the skin of a rig.
+    [Args]:
+    assetName (string) - The name of the rig
+    prompt (bool) - Toggles prompting the user to select the assetName
+    [Returns]:
+    True if rig has geometry, else False
+    """
     assetName = fileFn.assetNameSetup(assetName, prompt)
     print 'Starting Skinning From Saved Files.'
     geo = cmds.ls(type='transform')
@@ -91,6 +135,12 @@ def loadAllSkin(assetName=None, prompt=False):
         return False
 
 def truncateWeights(skinCls, geo):
+    """ Shorten the weight values of the skin cluster to 5 decimal
+    places.
+    [Args]:
+    skinCls (string) - The name of the skin cluster to truncate
+    geo (string) - The geometry the skin cluster is connected to
+    """
     normVal = cmds.getAttr('{}.normalizeWeights'.format(skinCls))
     cmds.setAttr('{}.normalizeWeights'.format(skinCls), 0)
     cmds.skinPercent(skinCls, geo, prw=0.001, nrm=1)
@@ -140,22 +190,3 @@ def truncateWeights(skinCls, geo):
                          vertWeights[inflIdList[inflId]])
 
     cmds.setAttr('{}.normalizeWeights'.format(skinCls), normVal)
-
-
-
-    ## get skincluster as MFnSkinCluster
-    ## get skincluster influence objects
-    ## for influence objects
-    ##      append ids and influence object paths to lists
-    ## get weightList plug (vertices)
-    ## get weights plug (influence objects)
-
-    ## for vertices
-    ##      setup remainder and empty largeVal
-    ##      for influence objects
-    ##          round value
-    ##          if largest set largest
-    ##          minus from reminder
-    ##      add remainder to largest weight
-    ##      for influence objects
-    ##          set attr value

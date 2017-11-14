@@ -1,6 +1,9 @@
 import maya.cmds as cmds
+import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
 
 from Jenks.scripts.rigModules import fileFunctions as fileFn
+from Jenks.scripts.rigModules import apiFunctions as apiFn
 
 import xml.etree.cElementTree
 
@@ -59,7 +62,9 @@ def saveSkin(geo, assetName=None, prompt=False):
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', new=True, name=geo)
     skinCls = getSkinInfo(geo)
     if skinCls:
-        cmds.deformerWeights(fileName, path='', deformer=skinCls, ex=1, wp=5, wt=0.00001)
+        for each in skinCls:
+            truncateWeights(each, geo)
+            cmds.deformerWeights(fileName, path='', deformer=each, ex=1, wp=5, wt=0.00001)
     return True
 
 def saveAllSkin(assetName=None, prompt=False):
@@ -84,3 +89,73 @@ def loadAllSkin(assetName=None, prompt=False):
     else:
         print 'Skinning From Saved Files FAILED.'
         return False
+
+def truncateWeights(skinCls, geo):
+    normVal = cmds.getAttr('{}.normalizeWeights'.format(skinCls))
+    cmds.setAttr('{}.normalizeWeights'.format(skinCls), 0)
+    cmds.skinPercent(skinCls, geo, prw=0.001, nrm=1)
+
+    skinMObj = apiFn.getMObj(skinCls)
+    skin = oma.MFnSkinCluster(skinMObj)
+    inflObj = skin.influenceObjects()
+
+    inflIdList = {}
+    for x in range(len(inflObj)):
+        inflId = int(skin.indexForInfluenceObject(inflObj[x]))
+        inflIdList[inflId] = x
+
+    weightListPlug = skin.findPlug('weightList', False)
+    weightsPlug = skin.findPlug('weights', False)
+    weightListAttr = weightListPlug.attribute()
+    weightsAttr = weightsPlug.attribute()
+
+    for vertId in range(weightListPlug.numElements()):
+        vertWeights = {}
+        weightsPlug.selectAncestorLogicalIndex(vertId, weightListAttr)
+        weightInfluenceIds = weightsPlug.getExistingArrayAttributeIndices()
+
+        remainder = 1
+        largestIndex = None
+        largestVal = 0
+
+        inflPlug = om.MPlug(weightsPlug)
+        for inflId in weightInfluenceIds:
+            inflPlug.selectAncestorLogicalIndex(inflId, weightsAttr)
+            try:
+                vertWeights[inflIdList[inflId]] = val = round(inflPlug.asDouble(), 5)
+                if val > largestVal:
+                    largestVal = val
+                    largestIndex = inflIdList[inflId]
+                remainder -= val
+            except KeyError:
+                pass
+
+        if largestVal <= 0:
+            continue
+
+        vertWeights[largestIndex] = round(vertWeights[largestIndex] + remainder, 5)
+        for inflId in weightInfluenceIds:
+            inflPlug.selectAncestorLogicalIndex(inflId, weightsAttr)
+            cmds.setAttr('{}.weightList[{}].weights[{}]'.format(skinCls, vertId, inflId),
+                         vertWeights[inflIdList[inflId]])
+
+    cmds.setAttr('{}.normalizeWeights'.format(skinCls), normVal)
+
+
+
+    ## get skincluster as MFnSkinCluster
+    ## get skincluster influence objects
+    ## for influence objects
+    ##      append ids and influence object paths to lists
+    ## get weightList plug (vertices)
+    ## get weights plug (influence objects)
+
+    ## for vertices
+    ##      setup remainder and empty largeVal
+    ##      for influence objects
+    ##          round value
+    ##          if largest set largest
+    ##          minus from reminder
+    ##      add remainder to largest weight
+    ##      for influence objects
+    ##          set attr value

@@ -511,8 +511,8 @@ class legModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.leg, autoOrient=False,
-               customNodes=False, parent=None):
+    def create(self, options=defaultBodyOptions.leg, autoOrient=False, customNodes=False,
+               parent=None):
         """ Create the leg rig.
         [Args]:
         options (dictionary) - A dictionary of options for the leg
@@ -548,9 +548,10 @@ class legModule:
         ## ik/fk
         if options['IK'] and options['FK']:
             ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = mechFn.ikfkMechanics(self, extraName, jnts,
-                                                                       legMechSkelGrp, legCtrlsGrp,
-                                                                       moduleType='leg',
-                                                                       rig=self.rig)
+                                                                              legMechSkelGrp,
+                                                                              legCtrlsGrp,
+                                                                              moduleType='leg',
+                                                                              rig=self.rig)
         else:
             ikJnts = jnts
             fkJnts = jnts
@@ -565,10 +566,13 @@ class legModule:
                             side=self.side)
             legIK.createIK(parent=legMechGrp.name)
             ## controls
+            footIKGuide = '{}footCtrlGuide{}'.format(self.moduleName, suffix['locator'])
+            useGuideLoc = cmds.objExists(footIKGuide)
+            if not useGuideLoc:
+                footIKGuide = ikJnts[2]
             self.footIKCtrl = ctrlFn.ctrl(name='{}footIK'.format(extraName), side=self.side,
-                                          guide='{}footCtrlGuide{}'.format(self.moduleName,
-                                                                           suffix['locator']),
-                                          skipNum=True, parent=ikCtrlGrp.name, deleteGuide=True,
+                                          guide=footIKGuide, skipNum=True, parent=ikCtrlGrp.name,
+                                          deleteGuide=True if useGuideLoc else False,
                                           scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.footIKCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
             self.footIKCtrl.lockAttr(attr=['s'])
@@ -607,8 +611,6 @@ class legModule:
             ## foot mechanics
             footMechGrp = utils.newNode('group', name='{}footMech'.format(extraName),
                                         side=self.side, parent=legMechGrp.name)
-            rfMechGrp = utils.newNode('group', name='{}RFMech'.format(extraName),
-                                      side=self.side, parent=footMechGrp.name)
             ##- iks
             footBallIK = ikFn.ik(ikJnts[2], ikJnts[3], side=self.side,
                                  name='{}footBallIK'.format(extraName))
@@ -617,6 +619,8 @@ class legModule:
                                  name='{}footToesIK'.format(extraName))
             footToesIK.createIK(parent=footMechGrp.name)
             ##- rf joints
+            rfMechGrp = utils.newNode('group', name='{}RFMech'.format(extraName),
+                                      side=self.side, parent=footMechGrp.name)
             rfJntGuides = [
                 '{}footHeelGuide{}'.format(self.moduleName, suffix['locator']),
                 '{}footToesGuide{}'.format(self.moduleName, suffix['locator']),
@@ -835,7 +839,8 @@ class legModule:
             legParentLoc.matchTransforms(jnts[0])
             cmds.parentConstraint(legParentLoc.name,
                                   '{}legFKCtrls{}'.format(self.moduleName, suffix['group']), mo=1)
-            cmds.parentConstraint(legParentLoc.name, legMechSkelGrp.name, mo=1)
+            if options['IK'] and options['FK']:
+                cmds.parentConstraint(legParentLoc.name, legMechSkelGrp.name, mo=1)
 
 
 class headModule:
@@ -1207,6 +1212,177 @@ class tailModule:
                 tailCtrls.append(ctrl)
 
 
+class simpleLimbModule:
+
+    """ Create a leg rig. """
+
+    def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the limb.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
+        self.moduleName = utils.setupBodyPartName(extraName, side)
+        self.extraName = extraName
+        self.side = side
+        self.rig = rig
+
+    def create(self, jntNames, options=defaultBodyOptions.limb, autoOrient=False, customNodes=False,
+               parent=None, limbType='limb', ikStartID=0, ikEndID=2):
+        """ Create the limb rig.
+        [Args]:
+        options (dictionary) - A dictionary of options for the limb
+        autoOrient (bool) - Toggles auto orienting the joints
+        customNodes (bool) - Toggles the use of custom nodes
+        parent (string) - The name of the parent
+        footRolls (bool) - Toggles creating foot roll mechanics
+        """
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        jntSuffix = suffix['joint']
+        jnts = []
+        for i in range(len(jntNames)):
+            jnts.append('{}{}{}'.format(self.moduleName, jntNames[i], jntSuffix))
+        col = utils.getColors(self.side)
+        cmds.parent(jnts[0], self.rig.skelGrp.name)
+        limbCtrlsGrp = utils.newNode('group', name='{}{}Ctrls'.format(extraName, limbType),
+                                     side=self.side, parent=self.rig.ctrlsGrp.name, skipNum=True)
+        limbMechGrp = utils.newNode('group', name='{}{}Mech'.format(extraName, limbType),
+                                    side=self.side, parent=self.rig.mechGrp.name, skipNum=True)
+        if options['IK']:
+            limbMechSkelGrp = utils.newNode('group',
+                                            name='{}{}MechSkel'.format(extraName, limbType),
+                                            side=self.side, skipNum=True, parent=limbMechGrp.name)
+        if autoOrient:
+            orientJoints.doOrientJoint(jointsToOrient=jnts,
+                                       aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+                                       upAxis=(0, 1, 0),
+                                       worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+                                       guessUp=1)
+        if options['IK'] and options['FK']:
+            (ikJnts, fkJnts, jnts,
+                ikCtrlGrp, fkCtrlGrp) = mechFn.ikfkMechanics(self, extraName, jnts,
+                                                             limbMechSkelGrp, limbCtrlsGrp,
+                                                             moduleType=limbType, rig=self.rig)
+        else:
+            for each in jnts:
+                utils.addJntToSkinJnt(each, self.rig)
+            ikJnts = jnts
+            fkJnts = jnts
+            ikCtrlGrp = limbCtrlsGrp
+            fkCtrlGrp = limbCtrlsGrp
+
+        if options['IK']:
+            ## mechanics
+            limbIK = ikFn.ik(ikJnts[ikStartID], ikJnts[ikEndID], side=self.side,
+                             name='{}{}IK'.format(extraName, limbType))
+            limbIK.createIK(parent=limbMechGrp.name)
+
+            ## controls
+            ikCtrlGuide = '{}{}CtrlGuide{}'.format(self.moduleName, limbType, suffix['locator'])
+            self.ikCtrl = ctrlFn.ctrl(name='{}{}IK'.format(extraName, limbType), side=self.side,
+                                      guide=ikCtrlGuide, skipNum=True, parent=ikCtrlGrp.name,
+                                      deleteGuide=True, scaleOffset=self.rig.scaleOffset,
+                                      rig=self.rig)
+            self.ikCtrl.modifyShape(shape='cube', color=col['col1'])
+            self.ikCtrl.lockAttr(attr=['s'])
+            self.ikCtrl.constrain(limbIK.grp)
+            # space switching?
+            ## polevector ctrl
+            pvGuide = '{}{}PV{}'.format(self.moduleName, limbType, suffix['locator'])
+            cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
+            self.pvCtrl = ctrlFn.ctrl(name='{}{}IK'.format(extraName, limbType), side=self.side,
+                                      guide=pvGuide, skipNum=True, deleteGuide=True,
+                                      parent=ikCtrlGrp.name, scaleOffset=self.rig.scaleOffset,
+                                      rig=self.rig)
+            self.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
+                                    scale=(0.4, 0.4, 0.4))
+            self.pvCtrl.lockAttr(['r', 's'])
+            self.pvCtrl.constrain(limbIK.hdl, typ='poleVector')
+            self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.ikCtrl.ctrlEnd])
+            pvCrv = cmds.curve(d=1,
+                               p=[cmds.xform(self.pvCtrl.ctrl.name, q=1, ws=1, t=1),
+                               cmds.xform(ikJnts[1], q=1, ws=1, t=1)])
+            cmds.setAttr('{}.it'.format(pvCrv), 0)
+            cmds.parent(pvCrv, self.pvCtrl.offsetGrps[0].name, r=1)
+            pvCrv = cmds.rename(pvCrv, '{}{}PVLine{}'.format(self.moduleName,
+                                limbType, suffix['nurbsCrv']))
+            cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
+            cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
+            cmds.select(cl=1)
+            cmds.select('{}.cv[1]'.format(pvCrv))
+            pvJntCluHdl = utils.newNode('cluster', name='{}{}PVJnt'.format(extraName, limbType),
+                                      side=self.side, parent=jnts[1])
+            cmds.select('{}.cv[0]'.format(pvCrv))
+            pvCtrlCluHdl = utils.newNode('cluster', name='{}{}PVCtrl'.format(extraName, limbType),
+                                      side=self.side, parent=self.pvCtrl.ctrlEnd)
+            utils.setColor(pvJntCluHdl.name, color=None)
+            utils.setColor(pvCtrlCluHdl.name, color=None)
+
+            if options['softIK']:
+                softIK = utils.newNode('mjSoftIK', name='{}{}IK'.format(extraName, limbType),
+                                       side=self.side)
+                jntLoc = utils.newNode('locator', name='{}{}JntBase'.format(extraName, limbType),
+                                       parent=cmds.listRelatives(jnts[0], p=1))
+                jntLoc.matchTransforms(jnts[0])
+                ctrlLoc = utils.newNode('locator', name='{}{}IKCtrl'.format(extraName, limbType),
+                                            side=self.side, skipNum=True,
+                                            parent=self.footIKCtrl.ctrlEnd)
+                ctrlLoc.matchTransforms(jnts[2])
+                softIK.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
+                softIK.connect('cm', '{}.wm'.format(ctrlLoc.name), 'to')
+                cmds.setAttr('{}.cl'.format(softIK.name), abs(cmds.getAttr('{}.tx'.format(jnts[1]))
+                             + cmds.getAttr('{}.tx'.format(jnts[2]))))
+                a = utils.newNode('group', name='{}{}SoftIK'.format(extraName, limbType),
+                                  side=self.side, parent=footMechGrp.name)
+                a.matchTransforms(limbIK.grp)
+                softIK.connect('ot', '{}.t'.format(a.name))
+                cmds.pointConstraint(a.name, innerPivGrp.name, mo=1)
+                self.footIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
+                                        enumOptions=['___'])
+                self.footIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
+                                        enumOptions=['Off', 'On'])
+                cmds.connectAttr(self.footIKCtrl.ctrl.softIKTog, '{}.tog'.format(softIK.name))
+                self.footIKCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
+                cmds.connectAttr(self.footIKCtrl.ctrl.softIKDist, '{}.sd'.format(softIK.name))
+
+        if options['FK']:
+            fkCtrlPar = fkCtrlGrp.name
+            ## controls
+            for i, each in enumerate(jntNames[:-1]):
+                fkCtrl = ctrlFn.ctrl(name='{}{}FK'.format(extraName, each),
+                                     side=self.side, guide=fkJnts[i], skipNum=True,
+                                     parent=fkCtrlPar, rig=self.rig, gimbal=True,
+                                     scaleOffset=self.rig.scaleOffset)
+                fkCtrl.modifyShape(shape='circle', color=col['col1'], scale=(0.6, 0.6, 0.6))
+                fkCtrl.lockAttr(attr=['s'])
+                fkCtrl.constrain(fkJnts[i])
+                fkCtrlPar = fkCtrl.ctrlEnd
+
+                exec('self.{}FKCtrl = fkCtrl'.format(each))
+
+        if options['stretchy']:
+            if options['IK']:
+                limbIK.addStretch(customStretchNode=customNodes,
+                                  globalScaleAttr=self.rig.scaleAttr)
+                self.ikCtrl.addAttr('stretchSep', nn='___   Stretch',
+                                    typ='enum', enumOptions=['___'])
+                self.ikCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
+                                    minVal=0, maxVal=1, defaultVal=1)
+                cmds.connectAttr(self.ikCtrl.ctrl.stretchySwitch, limbIK.stretchToggleAttr)
+            if options['FK']:
+                print '## add proper stretch to limb fk'
+
+        if options['ribbon']:
+            mechFn.bendyJoints(jnts[0], jnts[1], jnts[2], limbType, self)
+
+        if parent:
+            limbParentLoc = utils.newNode('locator', name='{}{}Parent'.format(extraName, limbType),
+                                          side=self.side, skipNum=True, parent=parent)
+            limbParentLoc.matchTransforms(jnts[0])
+            cmds.parentConstraint(limbParentLoc.name, fkCtrlGrp.name, mo=1)
+            if options['IK'] and options['FK']:
+                cmds.parentConstraint(limbParentLoc.name, limbMechSkelGrp.name, mo=1)
 
 
 def renameBodyPartJntGuides(typ, jntNames, side='C', extraName='', chain=False, sideList=None):

@@ -224,7 +224,8 @@ class ctrl:
     """ Create and manipulate a control. """
 
     def __init__(self, name='control', gimbal=False, offsetGrpNum=1, guide=None, rig=None,
-                 deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1.0):
+                 deleteGuide=False, side='C', skipNum=False, parent=None, scaleOffset=1.0,
+                 constrainGuide=False):
         """ Create the control, offset groups, root group and const group.
         [Args]:
         name (string) - The name of the control
@@ -281,6 +282,12 @@ class ctrl:
             cmds.parent(self.ctrlRoot, parent)
         self.ctrl.rigConnection = utils.addAttr(self.ctrl.name, name='rigConnection',
                                                 nn='Rig Connection', typ='message')
+
+        if constrainGuide and guide:
+            self.constrain(guide, typ=constrainGuide)
+            if rig:
+                utils.addJntToSkinJnt(guide, rig)
+
         if rig:
             cmds.connectAttr(rig.ctrlsAttr, self.ctrl.rigConnection)
         cmds.select(cl=1)

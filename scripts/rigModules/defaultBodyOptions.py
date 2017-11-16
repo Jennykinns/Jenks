@@ -15,6 +15,14 @@ leg = {
     'ribbon' : False,
 }
 
+limb = {
+    'IK' : True,
+    'FK' : True,
+    'stretchy': True,
+    'softIK' : False,
+    'ribbon' : False,
+}
+
 head = {
     'IK' : True,
 }

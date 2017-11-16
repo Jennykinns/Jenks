@@ -311,6 +311,8 @@ class ctrl:
 
     def modifyShape(self, shape=None, color=False, rotation=(0, 0, 0),
                     translation=(0, 0, 0), scale=(1, 1, 1), mirror=False):
+        if color == False:
+            color = cmds.getAttr('{}Shape1.overrideColor'.format(self.ctrl.name))
         scale = (scale[0]*self.scaleOffset,
                  scale[1]*self.scaleOffset,
                  scale[2]*self.scaleOffset)
@@ -324,12 +326,9 @@ class ctrl:
             translation = (-translation[0], translation[1], translation[2])
         applyShapeData(self.ctrl.name, crvData, transOffset=translation, rotOffset=rotation,
                        scaleOffset=scale)
-        if color or color is None:
-            utils.setShapeColor(self.ctrl.name, color=color)
-            if self.gimbal:
-                utils.setShapeColor(self.gimbalCtrl.name, color=color)
-        else:
-            print '## get existing colour and apply (for if the shape changes)'
+        utils.setShapeColor(self.ctrl.name, color=color)
+        if self.gimbal:
+            utils.setShapeColor(self.gimbalCtrl.name, color=color)
 
     def constrain(self, target, typ='parent', mo=True, offset=[0, 0, 0],
                   aimVector=[1, 0, 0], aimUp=[0, 1, 0], aimWorldUpType=2, aimWorldUp=[0, 1, 0],

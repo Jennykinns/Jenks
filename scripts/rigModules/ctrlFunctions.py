@@ -211,8 +211,9 @@ def loadCtrls(assetName=None, prompt=False):
         print 'Asset Name not specified.'
         return False
     path = fileFn.getAssetDir()
-    # for ctrl in getAllControls('C_{}{}'.format(assetName, suffix['rig'])):
-    for ctrl in getAllControls('C_global_CTRL'):
+    allCtrls = getAllControls('C_global_CTRL')
+    allCtrls.append('C_global_CTRL')
+    for ctrl in allCtrls:
         fo = fileFn.getLatestVersion(assetName, path, 'rig/WIP/controlShapes', name=ctrl)
         if fo:
             crvData = fileFn.loadJson(fileOverride=fo)

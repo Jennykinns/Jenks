@@ -9,12 +9,14 @@ def createRigNode(rigNode):
     rigNode.addAttr(name='rigCtrls', nn='Rig Controls', typ='message')
     rigNode.addAttr(name='rigSkinJnts', nn='Rig Skinning Joints', typ='message')
     return rigNode, rigNode.rigCtrls, rigNode.rigSkinJnts
+
 class rig:
     def __init__(self, name, scaleOffset=1, debug=False):
         cmds.file(force=1, new=1)
         fileFn.loadPlugin('mjSoftIK', python=True)
         fileFn.loadPlugin('mjStretchArray')
         fileFn.loadPlugin('mjRivet')
+        fileFn.setAssetName(name)
         self.scaleOffset = scaleOffset
         self.grp = utils.newNode('group', name='RIG_', skipNum=True, side='')
         self.worldLoc = utils.newNode('locator', name='world',

@@ -90,6 +90,10 @@ class armModule:
             ikCtrlGrp = armCtrlsGrp
             fkCtrlGrp = armCtrlsGrp
             # clavChild = jnts[0]
+
+        self.ikCtrlGrp = ikCtrlGrp
+        self.fkCtrlGrp = fkCtrlGrp
+
         # cmds.parentConstraint(clavJnts[1], clavChild, mo=1)
         self.handJnt = jnts[3]
         ## ik
@@ -105,16 +109,16 @@ class armModule:
             if self.side == 'R':
                 tmpJnt = cmds.duplicate(ikJnts[3], po=1)
                 cmds.xform(tmpJnt, r=1, ro=(180, 0, 0))
-                self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
+                self.ikCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
                                           guide=tmpJnt, skipNum=True, parent=ikCtrlGrp.name,
                                           deleteGuide=True, scaleOffset=self.rig.scaleOffset,
                                           rig=self.rig)
             else:
-                self.handIKCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
+                self.ikCtrl = ctrlFn.ctrl(name='{}handIK'.format(extraName), side=self.side,
                                               guide=ikJnts[3], skipNum=True, parent=ikCtrlGrp.name,
                                               scaleOffset=self.rig.scaleOffset, rig=self.rig)
-            self.handIKCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
-            self.handIKCtrl.lockAttr(attr=['s'])
+            self.ikCtrl.modifyShape(shape='cube', color=col['col1'], scale=(0.6, 0.6, 0.6))
+            self.ikCtrl.lockAttr(attr=['s'])
             if options['softIK']:
                 # fileFn.loadPlugin('mjSoftIK', '.py')
                 softIk = utils.newNode('mjSoftIK', name='{}armIK'.format(extraName),
@@ -124,55 +128,27 @@ class armModule:
                                        parent=cmds.listRelatives(jnts[1], p=1))
                 jntLoc.matchTransforms(jnts[1])
                 softIk.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
-                softIk.connect('cm', '{}.wm'.format(self.handIKCtrl.ctrlEnd), 'to')
+                softIk.connect('cm', '{}.wm'.format(self.ikCtrl.ctrlEnd), 'to')
                 cmds.setAttr('{}.cl'.format(softIk.name), abs(cmds.getAttr('{}.tx'.format(jnts[2]))
                              + cmds.getAttr('{}.tx'.format(jnts[3]))))
                 softIk.connect('ot', '{}.t'.format(armIK.grp))
-                self.handIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
+                self.ikCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
                                         enumOptions=['___'])
-                self.handIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
+                self.ikCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
                                         enumOptions=['Off', 'On'])
-                cmds.connectAttr(self.handIKCtrl.ctrl.softIKTog, '{}.tog'.format(softIk.name))
-                self.handIKCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
-                cmds.connectAttr(self.handIKCtrl.ctrl.softIKDist, '{}.sd'.format(softIk.name))
+                cmds.connectAttr(self.ikCtrl.ctrl.softIKTog, '{}.tog'.format(softIk.name))
+                self.ikCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
+                cmds.connectAttr(self.ikCtrl.ctrl.softIKDist, '{}.sd'.format(softIk.name))
             else:
-                self.handIKCtrl.constrain(armIK.grp)
-            self.handIKCtrl.constrain(handIK.grp)
-            self.handIKCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
+                self.ikCtrl.constrain(armIK.grp)
+            self.ikCtrl.constrain(handIK.grp)
+            self.ikCtrl.spaceSwitching([self.rig.globalCtrl.ctrl.name,
                                             parent],
                                            # niceNames=['World', 'Chest', 'Clavicle'],
                                            dv=0)
             ##-- PoleVector
             pvGuide = '{}armPV{}'.format(self.moduleName, suffix['locator'])
-            cmds.delete(cmds.aimConstraint(ikJnts[2], pvGuide))
-            self.pvCtrl = ctrlFn.ctrl(name='{}armPV'.format(extraName), side=self.side,
-                                      guide=pvGuide,
-                                      skipNum=True, deleteGuide=True, parent=ikCtrlGrp.name,
-                                      scaleOffset=self.rig.scaleOffset, rig=self.rig)
-            self.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
-                                    scale=(0.4, 0.4, 0.4))
-            self.pvCtrl.lockAttr(['r', 's'])
-            self.pvCtrl.constrain(armIK.hdl, typ='poleVector')
-            self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.handIKCtrl.ctrlEnd],
-                                           niceNames=['World', 'Hand'], dv=0)
-            pvCrv = cmds.curve(d=1,
-                               p=[cmds.xform(self.pvCtrl.ctrl.name, q=1, ws=1, t=1),
-                               cmds.xform(ikJnts[2], q=1, ws=1, t=1)])
-            cmds.setAttr('{}.it'.format(pvCrv), 0)
-            cmds.parent(pvCrv, self.pvCtrl.offsetGrps[0].name, r=1)
-            pvCrv = cmds.rename(pvCrv, '{}armPVLine{}'.format(self.moduleName,
-                                suffix['nurbsCrv']))
-            cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
-            cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
-            cmds.select(cl=1)
-            cmds.select('{}.cv[1]'.format(pvCrv))
-            pvJntCluHdl = utils.newNode('cluster', name='{}armPVJnt'.format(extraName),
-                                      side=self.side, parent=jnts[2])
-            cmds.select('{}.cv[0]'.format(pvCrv))
-            pvCtrlCluHdl = utils.newNode('cluster', name='{}armPVCtrl'.format(extraName),
-                                      side=self.side, parent=self.pvCtrl.ctrlEnd)
-            utils.setColor(pvJntCluHdl.name, color=None)
-            utils.setColor(pvCtrlCluHdl.name, color=None)
+            mechFn.poleVector(pvGuide, jnts[2], self, extraName, 'arm', self.moduleName, armIK)
 
             ## clav
             self.clavIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
@@ -220,7 +196,7 @@ class armModule:
                                     name='autoclavArmIK', side=self.side)
                 dupeArmIK.createIK(parent=autoClavMechGrp.name)
                 ## parent constrain to hand ctrl
-                self.handIKCtrl.constrain(dupeArmIK.grp)
+                self.ikCtrl.constrain(dupeArmIK.grp)
                 ## pole vector to arm pv
                 self.pvCtrl.constrain(dupeArmIK.hdl, typ='pv')
                 ## create duplicate spine joint + clav
@@ -327,11 +303,11 @@ class armModule:
             if options['IK']:
                 armIK.addStretch(customStretchNode=customNodes,
                                  globalScaleAttr='{}.sy'.format(self.rig.globalCtrl.ctrl.name))
-                self.handIKCtrl.addAttr('stretchSep', nn='___   Stretch',
+                self.ikCtrl.addAttr('stretchSep', nn='___   Stretch',
                                         typ='enum', enumOptions=['___'])
-                self.handIKCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
+                self.ikCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
                                          minVal=0, maxVal=1, defaultVal=1)
-                cmds.connectAttr(self.handIKCtrl.ctrl.stretchySwitch, armIK.stretchToggleAttr)
+                cmds.connectAttr(self.ikCtrl.ctrl.stretchySwitch, armIK.stretchToggleAttr)
             if options['FK']:
                 print '## add proper stretch to arm fk'
         ## ribbon
@@ -559,6 +535,8 @@ class legModule:
             fkCtrlGrp = legCtrlsGrp
 
         self.footJnt = jnts[3]
+        self.ikCtrlGrp = ikCtrlGrp
+        self.fkCtrlGrp = fkCtrlGrp
 
         if options['IK']:
             ## mechanics
@@ -570,44 +548,17 @@ class legModule:
             useGuideLoc = cmds.objExists(footIKGuide)
             if not useGuideLoc:
                 footIKGuide = ikJnts[2]
-            self.footIKCtrl = ctrlFn.ctrl(name='{}footIK'.format(extraName), side=self.side,
+            self.ikCtrl = ctrlFn.ctrl(name='{}footIK'.format(extraName), side=self.side,
                                           guide=footIKGuide, skipNum=True, parent=ikCtrlGrp.name,
                                           deleteGuide=True if useGuideLoc else False,
                                           scaleOffset=self.rig.scaleOffset, rig=self.rig)
-            self.footIKCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
-            self.footIKCtrl.lockAttr(attr=['s'])
+            self.ikCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
+            self.ikCtrl.lockAttr(attr=['s'])
             # space switching
             ## polevector ctrl
+            # pvGuide = '{}{}PV{}'.format(self.moduleName, limbType, suffix['locator'])
             pvGuide = '{}legPV{}'.format(self.moduleName, suffix['locator'])
-            cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
-            self.pvCtrl = ctrlFn.ctrl(name='{}legPV'.format(extraName), side=self.side,
-                                      guide=pvGuide, skipNum=True, deleteGuide=True,
-                                      parent=ikCtrlGrp.name, scaleOffset=self.rig.scaleOffset,
-                                      rig=self.rig)
-            self.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
-                                    scale=(0.4, 0.4, 0.4))
-            self.pvCtrl.lockAttr(['r', 's'])
-            self.pvCtrl.constrain(legIK.hdl, typ='poleVector')
-            self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.footIKCtrl.ctrlEnd],
-                                       niceNames=['World', 'Foot'], dv=0)
-            pvCrv = cmds.curve(d=1,
-                               p=[cmds.xform(self.pvCtrl.ctrl.name, q=1, ws=1, t=1),
-                               cmds.xform(ikJnts[1], q=1, ws=1, t=1)])
-            cmds.setAttr('{}.it'.format(pvCrv), 0)
-            cmds.parent(pvCrv, self.pvCtrl.offsetGrps[0].name, r=1)
-            pvCrv = cmds.rename(pvCrv, '{}legPVLine{}'.format(self.moduleName,
-                                suffix['nurbsCrv']))
-            cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
-            cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
-            cmds.select(cl=1)
-            cmds.select('{}.cv[1]'.format(pvCrv))
-            pvJntCluHdl = utils.newNode('cluster', name='{}legPVJnt'.format(extraName),
-                                      side=self.side, parent=jnts[1])
-            cmds.select('{}.cv[0]'.format(pvCrv))
-            pvCtrlCluHdl = utils.newNode('cluster', name='{}legPVCtrl'.format(extraName),
-                                      side=self.side, parent=self.pvCtrl.ctrlEnd)
-            utils.setColor(pvJntCluHdl.name, color=None)
-            utils.setColor(pvCtrlCluHdl.name, color=None)
+            mechFn.poleVector(pvGuide, jnts[1], self, extraName, 'leg', self.moduleName, legIK)
             ## foot mechanics
             footMechGrp = utils.newNode('group', name='{}footMech'.format(extraName),
                                         side=self.side, parent=legMechGrp.name)
@@ -647,34 +598,34 @@ class legModule:
                                name='{}RF_ankleIK'.format(extraName))
             rfAnkleIK.createIK(parent=rfMechGrp.name)
             ##- foot side pivots
-            self.footIKCtrl.addAttr('footRollsSep', nn='___   Foot Rolls', typ='enum',
+            self.ikCtrl.addAttr('footRollsSep', nn='___   Foot Rolls', typ='enum',
                                     enumOptions=['___'])
             innerPivGrp = utils.newNode('group', name='{}footInnerPivot'.format(extraName),
-                                        parent=self.footIKCtrl.ctrlEnd, side=self.side,
+                                        parent=self.ikCtrl.ctrlEnd, side=self.side,
                                         skipNum=True)
             innerPivGrp.matchTransforms('{}footInnerGuide{}'.format(self.moduleName, suffix['locator']))
             outerPivGrp = utils.newNode('group', name='{}footOuterPivot'.format(extraName),
                                         parent=innerPivGrp.name, side=self.side, skipNum=True)
             outerPivGrp.matchTransforms('{}footOuterGuide{}'.format(self.moduleName, suffix['locator']))
-            self.footIKCtrl.addAttr('sidePiv', nn='Side Pivot')
+            self.ikCtrl.addAttr('sidePiv', nn='Side Pivot')
             sidePivNeg = utils.newNode('condition', name='{}footSidePivNeg'.format(extraName),
                                         side=self.side, operation=3)
-            sidePivNeg.connect('firstTerm', self.footIKCtrl.ctrl.sidePiv, mode='to')
+            sidePivNeg.connect('firstTerm', self.ikCtrl.ctrl.sidePiv, mode='to')
             if self.side == 'R':
                 negFootPivAttr = utils.newNode('reverse',
                                                name='{}footSidePivNeg'.format(extraName),
                                                side=self.side)
-                negFootPivAttr.connect('inputX', self.footIKCtrl.ctrl.sidePiv, mode='to')
+                negFootPivAttr.connect('inputX', self.ikCtrl.ctrl.sidePiv, mode='to')
                 negFootPivAttr = '{}.outputX'.format(negFootPivAttr.name)
             else:
-                negFootPivAttr = self.footIKCtrl.ctrl.sidePiv
+                negFootPivAttr = self.ikCtrl.ctrl.sidePiv
             sidePivNeg.connect('colorIfTrueR', negFootPivAttr, mode='to')
             sidePivNeg.connect('outColorR', '{}.rz'.format(innerPivGrp.name), mode='from')
 
             sidePivPos = utils.newNode('condition', name='{}footSidePivPos'.format(extraName),
                                         side=self.side, operation=4)
-            sidePivPos.connect('firstTerm', self.footIKCtrl.ctrl.sidePiv, mode='to')
-            sidePivPos.connect('colorIfTrueR', self.footIKCtrl.ctrl.sidePiv, mode='to')
+            sidePivPos.connect('firstTerm', self.ikCtrl.ctrl.sidePiv, mode='to')
+            sidePivPos.connect('colorIfTrueR', self.ikCtrl.ctrl.sidePiv, mode='to')
             sidePivPos.connect('outColorR', '{}.rz'.format(outerPivGrp.name), mode='from')
             ##- controls
             self.footHeelIKCtrl = ctrlFn.ctrl(name='{}footHeelIK'.format(extraName),
@@ -719,24 +670,24 @@ class legModule:
             cmds.xform(self.footBallIKCtrl.offsetGrps[0].name, ro=(-90, 0, 90))
             self.footBallIKCtrl.constrain(rfAnkleIK.grp)
             ##-- control attributes
-            self.footIKCtrl.addAttr('footCtrlTog', nn='Fine Foot Controls', typ='enum',
+            self.ikCtrl.addAttr('footCtrlTog', nn='Fine Foot Controls', typ='enum',
                                     defaultVal=1, enumOptions=['Hide', 'Show'])
-            cmds.connectAttr(self.footIKCtrl.ctrl.footCtrlTog,
+            cmds.connectAttr(self.ikCtrl.ctrl.footCtrlTog,
                              '{}.v'.format(self.footHeelIKCtrl.rootGrp.name))
-            self.footIKCtrl.addAttr('heelRoll', nn='Heel Roll')
-            cmds.connectAttr(self.footIKCtrl.ctrl.heelRoll,
+            self.ikCtrl.addAttr('heelRoll', nn='Heel Roll')
+            cmds.connectAttr(self.ikCtrl.ctrl.heelRoll,
                              '{}.rx'.format(self.footHeelIKCtrl.offsetGrps[1].name))
-            self.footIKCtrl.addAttr('heelTwist', nn='Heel Twist')
-            cmds.connectAttr(self.footIKCtrl.ctrl.heelTwist,
+            self.ikCtrl.addAttr('heelTwist', nn='Heel Twist')
+            cmds.connectAttr(self.ikCtrl.ctrl.heelTwist,
                              '{}.ry'.format(self.footHeelIKCtrl.offsetGrps[1].name))
-            self.footIKCtrl.addAttr('ballRoll', nn='Ball Roll')
-            cmds.connectAttr(self.footIKCtrl.ctrl.ballRoll,
+            self.ikCtrl.addAttr('ballRoll', nn='Ball Roll')
+            cmds.connectAttr(self.ikCtrl.ctrl.ballRoll,
                              '{}.rx'.format(self.footBallIKCtrl.offsetGrps[1].name))
-            self.footIKCtrl.addAttr('toeRoll', nn='Toe Roll')
-            cmds.connectAttr(self.footIKCtrl.ctrl.toeRoll,
+            self.ikCtrl.addAttr('toeRoll', nn='Toe Roll')
+            cmds.connectAttr(self.ikCtrl.ctrl.toeRoll,
                              '{}.rx'.format(self.footToesIKCtrl.offsetGrps[1].name))
-            self.footIKCtrl.addAttr('toeTwist', nn='Toe Twist')
-            cmds.connectAttr(self.footIKCtrl.ctrl.toeTwist,
+            self.ikCtrl.addAttr('toeTwist', nn='Toe Twist')
+            cmds.connectAttr(self.ikCtrl.ctrl.toeTwist,
                              '{}.ry'.format(self.footToesIKCtrl.offsetGrps[1].name))
             ##- constraints
             # cmds.parentConstraint(rfJnts[1], footToesIK.grp, mo=1)
@@ -756,7 +707,7 @@ class legModule:
                 jntLoc.matchTransforms(jnts[0])
                 ctrlLoc = utils.newNode('locator', name='{}legIKCtrl'.format(extraName),
                                         side=self.side, skipNum=True,
-                                        parent=self.footIKCtrl.ctrlEnd)
+                                        parent=self.ikCtrl.ctrlEnd)
                 ctrlLoc.matchTransforms(jnts[2])
                 softIk.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
                 softIk.connect('cm', '{}.wm'.format(ctrlLoc.name), 'to')
@@ -767,13 +718,13 @@ class legModule:
                 a.matchTransforms(legIK.grp)
                 softIk.connect('ot', '{}.t'.format(a.name))
                 cmds.pointConstraint(a.name, innerPivGrp.name, mo=1)
-                self.footIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
+                self.ikCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
                                         enumOptions=['___'])
-                self.footIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
+                self.ikCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
                                         enumOptions=['Off', 'On'])
-                cmds.connectAttr(self.footIKCtrl.ctrl.softIKTog, '{}.tog'.format(softIk.name))
-                self.footIKCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
-                cmds.connectAttr(self.footIKCtrl.ctrl.softIKDist, '{}.sd'.format(softIk.name))
+                cmds.connectAttr(self.ikCtrl.ctrl.softIKTog, '{}.tog'.format(softIk.name))
+                self.ikCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
+                cmds.connectAttr(self.ikCtrl.ctrl.softIKDist, '{}.sd'.format(softIk.name))
 
         if options['FK']:
             ## controls
@@ -820,11 +771,11 @@ class legModule:
             if options['IK']:
                 legIK.addStretch(customStretchNode=customNodes,
                                  globalScaleAttr=self.rig.scaleAttr)
-                self.footIKCtrl.addAttr('stretchSep', nn='___   Stretch',
+                self.ikCtrl.addAttr('stretchSep', nn='___   Stretch',
                                         typ='enum', enumOptions=['___'])
-                self.footIKCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
+                self.ikCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
                                        minVal=0, maxVal=1, defaultVal=1)
-                cmds.connectAttr(self.footIKCtrl.ctrl.stretchySwitch,
+                cmds.connectAttr(self.ikCtrl.ctrl.stretchySwitch,
                                  legIK.stretchToggleAttr)
             if options['FK']:
                 print '## add proper stretch to leg fk'
@@ -1229,14 +1180,18 @@ class simpleLimbModule:
         self.rig = rig
 
     def create(self, jntNames, options=defaultBodyOptions.limb, autoOrient=False, customNodes=False,
-               parent=None, limbType='limb', ikStartID=0, ikEndID=2):
+               parent=None, limbType='limb', ikStartID=0, ikEndID=2, arrowPV=False):
         """ Create the limb rig.
         [Args]:
         options (dictionary) - A dictionary of options for the limb
         autoOrient (bool) - Toggles auto orienting the joints
         customNodes (bool) - Toggles the use of custom nodes
         parent (string) - The name of the parent
-        footRolls (bool) - Toggles creating foot roll mechanics
+        limbType (string) - The name of the type of limb
+        ikStartID (int) - The index of the start jnt
+        ikEndID (int) - The index of the end jnt
+        arrowPV (bool) - Toggles creating an arrow control for the
+                         poleVector instead
         """
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
@@ -1272,6 +1227,9 @@ class simpleLimbModule:
             ikCtrlGrp = limbCtrlsGrp
             fkCtrlGrp = limbCtrlsGrp
 
+        self.ikCtrlGrp = ikCtrlGrp
+        self.fkCtrlGrp = fkCtrlGrp
+
         if options['IK']:
             ## mechanics
             limbIK = ikFn.ik(ikJnts[ikStartID], ikJnts[ikEndID], side=self.side,
@@ -1290,34 +1248,8 @@ class simpleLimbModule:
             # space switching?
             ## polevector ctrl
             pvGuide = '{}{}PV{}'.format(self.moduleName, limbType, suffix['locator'])
-            cmds.delete(cmds.aimConstraint(ikJnts[1], pvGuide))
-            self.pvCtrl = ctrlFn.ctrl(name='{}{}IK'.format(extraName, limbType), side=self.side,
-                                      guide=pvGuide, skipNum=True, deleteGuide=True,
-                                      parent=ikCtrlGrp.name, scaleOffset=self.rig.scaleOffset,
-                                      rig=self.rig)
-            self.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
-                                    scale=(0.4, 0.4, 0.4))
-            self.pvCtrl.lockAttr(['r', 's'])
-            self.pvCtrl.constrain(limbIK.hdl, typ='poleVector')
-            self.pvCtrl.spaceSwitching([self.rig.globalCtrl.ctrlEnd, self.ikCtrl.ctrlEnd])
-            pvCrv = cmds.curve(d=1,
-                               p=[cmds.xform(self.pvCtrl.ctrl.name, q=1, ws=1, t=1),
-                               cmds.xform(ikJnts[1], q=1, ws=1, t=1)])
-            cmds.setAttr('{}.it'.format(pvCrv), 0)
-            cmds.parent(pvCrv, self.pvCtrl.offsetGrps[0].name, r=1)
-            pvCrv = cmds.rename(pvCrv, '{}{}PVLine{}'.format(self.moduleName,
-                                limbType, suffix['nurbsCrv']))
-            cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
-            cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
-            cmds.select(cl=1)
-            cmds.select('{}.cv[1]'.format(pvCrv))
-            pvJntCluHdl = utils.newNode('cluster', name='{}{}PVJnt'.format(extraName, limbType),
-                                      side=self.side, parent=jnts[1])
-            cmds.select('{}.cv[0]'.format(pvCrv))
-            pvCtrlCluHdl = utils.newNode('cluster', name='{}{}PVCtrl'.format(extraName, limbType),
-                                      side=self.side, parent=self.pvCtrl.ctrlEnd)
-            utils.setColor(pvJntCluHdl.name, color=None)
-            utils.setColor(pvCtrlCluHdl.name, color=None)
+            mechFn.poleVector(pvGuide, jnts[1], self, extraName, limbType, self.moduleName, limbIK,
+                              arrow=arrowPV, parent=parent)
 
             if options['softIK']:
                 softIK = utils.newNode('mjSoftIK', name='{}{}IK'.format(extraName, limbType),
@@ -1327,7 +1259,7 @@ class simpleLimbModule:
                 jntLoc.matchTransforms(jnts[0])
                 ctrlLoc = utils.newNode('locator', name='{}{}IKCtrl'.format(extraName, limbType),
                                             side=self.side, skipNum=True,
-                                            parent=self.footIKCtrl.ctrlEnd)
+                                            parent=self.ikCtrl.ctrlEnd)
                 ctrlLoc.matchTransforms(jnts[2])
                 softIK.connect('sm', '{}.wm'.format(jntLoc.name), 'to')
                 softIK.connect('cm', '{}.wm'.format(ctrlLoc.name), 'to')
@@ -1338,13 +1270,13 @@ class simpleLimbModule:
                 a.matchTransforms(limbIK.grp)
                 softIK.connect('ot', '{}.t'.format(a.name))
                 cmds.pointConstraint(a.name, innerPivGrp.name, mo=1)
-                self.footIKCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
+                self.ikCtrl.addAttr(name='softIKSep', nn='___   Soft IK', typ='enum',
                                         enumOptions=['___'])
-                self.footIKCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
+                self.ikCtrl.addAttr(name='softIKTog', nn='Toggle Soft IK', typ='enum',
                                         enumOptions=['Off', 'On'])
-                cmds.connectAttr(self.footIKCtrl.ctrl.softIKTog, '{}.tog'.format(softIK.name))
-                self.footIKCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
-                cmds.connectAttr(self.footIKCtrl.ctrl.softIKDist, '{}.sd'.format(softIK.name))
+                cmds.connectAttr(self.ikCtrl.ctrl.softIKTog, '{}.tog'.format(softIK.name))
+                self.ikCtrl.addAttr(name='softIKDist', nn='Soft IK Distance', defaultVal=0.2)
+                cmds.connectAttr(self.ikCtrl.ctrl.softIKDist, '{}.sd'.format(softIK.name))
 
         if options['FK']:
             fkCtrlPar = fkCtrlGrp.name

@@ -8,7 +8,7 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFunctions as api
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 
-def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None):
+def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None, img=False):
     if location == 'rig/Published':
         suffix = 'ma'
         name = assetName
@@ -31,6 +31,8 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
     else:
         suffix = 'ma'
         name = assetName
+    if img:
+        suffix = 'jpg'
     fileDirectory = '{}{}/{}/'.format(path, assetName, location)
     # ls = os.listdir(fileDirectory)
     ls = [f for f in os.listdir(fileDirectory) if os.path.isfile('{}/{}'.format(fileDirectory, f))]
@@ -147,10 +149,14 @@ def saveGuides(assetName=None, autoName=False, prompt=False):
     return True
 
 def publishRig(assetName=None, autoName=True, prompt=False):
+    assetName = assetNameSetup(assetName, prompt)
+    if not assetName:
+        return False
     removeReferences()
     cmds.select('_RIG__GRP')
     saveMayaFile(assetName, typ='rig/Published', prompt=prompt, autoName=autoName,
                  selectionOnly=True)
+    publishSnapshot(asset=assetName, typ='rig')
     return True
 
 def referenceRig(assetName=None, prompt=False, replace=False, refNd=None):
@@ -249,6 +255,7 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
         saveMayaFile(assetName, typ='model/Published', autoName=autoName, removeRefs=True,
                      selectionOnly=True)
         print 'Saved as Maya File.'
+    publishSnapshot(asset=assetName, typ='model')
     return True
 
 def referenceGeo(assetName=None, prompt=False):
@@ -319,6 +326,7 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
     cmds.select(setsToSave, add=1, noExpand=1)
     saveMayaFile(assetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
                  removeRefs=True, selectionOnly=True)
+    publishSnapshot(asset=assetName, typ='lookDev')
     return True
 
 def referenceLookDev(assetName=None, prompt=False):
@@ -368,6 +376,7 @@ def publishAnimation(shotName=None, autoName=True, prompt=False):
     # frameRange = cmds.timeControl(playBackSlider, q=1, ra=1)
     frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
     abcExport(fileName, selection=True, frameRange=frameRange)
+    publishSnapshot(shot=shotName, typ='anim')
     print 'Published Animation: {}'.format(fileName)
 
 def mergeAnimationAlembic(shotName=None, latest=True, prompt=False):
@@ -399,6 +408,7 @@ def loadWipLighting(shotName=None, latest=False, prompt=False):
 def publishLighting(shotName=None, autoName=True, prompt=False):
     saveMayaFile(shotName, typ='lighting/Published', prompt=prompt, autoName=autoName,
                  removeRefs=False, shot=True)
+    publishSnapshot(shot=shotName, typ='lighting')
     return True
 
 def setupSceneForRender(shotName=None, latest=True, prompt=False):
@@ -411,6 +421,34 @@ def setupSceneForRender(shotName=None, latest=True, prompt=False):
     cmds.file(fileName, r=1, ns=newNameSpace(shotName))
     print 'Referenced Lighting: {}'.format(fileName)
     print '## DO OTHER STUFF FOR SETTING UP THE RENDER - aov\'s, render settings, etc.'
+
+
+def publishSnapshot(asset=None, shot=None, typ=''):
+    if asset:
+        path = getAssetDir()
+        fileName = getLatestVersion(asset, path, typ, new=True, img=True)
+    elif shot:
+        path = getShotDir()
+        fileName = getLatestVersion(shot, path, typ, new=True, img=True)
+    else:
+        return False
+
+    cmds.select(cl=True)
+    ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')
+    multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')
+    cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', 1)
+    cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
+
+    cmds.playblast(format='image', cf=fileName,
+                   fr=1, percent=100, compression='jpg', quality=100, widthHeight=(1920, 1080),
+                   fp=False, orn=False, v=False)
+
+    print 'Snapshot image saved to: {}'.format(fileName)
+
+    cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ssao)
+    cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', multiSample)
+
+    return True
 
 
 def removeReferences():

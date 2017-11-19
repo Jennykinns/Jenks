@@ -73,6 +73,64 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
                            cd=module.settingCtrl.ctrl.ikfkSwitch, dv=0, v=0)
     return ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp
 
+def poleVector(pvGuide, jnt, module, extraName, limbType, moduleName, limbIK,
+               arrow=False, parent=None):
+    """ Create a polevector control for an ik handle.
+    [Args]:
+    pvGuide (string) - The name of the poleVector guide locator
+    jnt (string) - The name of the joint to aim at
+    module (class) - The limb module class
+    extraName (string) - The extra name of the module
+    limbType (string) - The name of the limb type
+    moduleName (string) - The module name
+    limbIK (class) - The ik class
+    arrow (bool) - Toggles creating an arrow from the start of the joint chain instead
+    """
+    col = utils.getColors(module.side)
+    cmds.delete(cmds.aimConstraint(jnt, pvGuide))
+    if not arrow:
+        module.pvCtrl = ctrlFn.ctrl(name='{}{}PV'.format(extraName, limbType), side=module.side,
+                                    guide=pvGuide, skipNum=True, deleteGuide=True,
+                                    parent=module.ikCtrlGrp.name, scaleOffset=module.rig.scaleOffset,
+                                    rig=module.rig)
+        module.pvCtrl.modifyShape(shape='3dArrow', color=col['col1'], rotation=(0, 180, 0),
+                                  scale=(0.4, 0.4, 0.4))
+        module.pvCtrl.lockAttr(['r', 's'])
+        module.pvCtrl.constrain(limbIK.hdl, typ='poleVector')
+        module.pvCtrl.spaceSwitching([module.rig.globalCtrl.ctrlEnd, module.ikCtrl.ctrlEnd])
+        pvCrv = cmds.curve(d=1,
+                           p=[cmds.xform(module.pvCtrl.ctrl.name, q=1, ws=1, t=1),
+                           cmds.xform(jnt, q=1, ws=1, t=1)])
+        cmds.setAttr('{}.it'.format(pvCrv), 0)
+        cmds.parent(pvCrv, module.pvCtrl.offsetGrps[0].name, r=1)
+        pvCrv = cmds.rename(pvCrv, '{}{}PVLine{}'.format(moduleName,
+                            limbType, suffix['nurbsCrv']))
+        cmds.setAttr('{}Shape.overrideEnabled'.format(pvCrv), 1)
+        cmds.setAttr('{}Shape.overrideDisplayType'.format(pvCrv), 1)
+        cmds.select(cl=1)
+        cmds.select('{}.cv[1]'.format(pvCrv))
+        pvJntCluHdl = utils.newNode('cluster', name='{}{}PVJnt'.format(extraName, limbType),
+                                     side=module.side, parent=jnt)
+        cmds.select('{}.cv[0]'.format(pvCrv))
+        pvCtrlCluHdl = utils.newNode('cluster', name='{}{}PVCtrl'.format(extraName, limbType),
+                                     side=module.side, parent=module.pvCtrl.ctrlEnd)
+        utils.setColor(pvJntCluHdl.name, color=None)
+        utils.setColor(pvCtrlCluHdl.name, color=None)
+    else:
+        ikStartJnt = cmds.listRelatives(jnt, p=1)[0]
+        module.pvCtrl = ctrlFn.ctrl(name='{}{}PV'.format(extraName, limbType), side=module.side,
+                                    guide=ikStartJnt, skipNum=True, parent=module.ikCtrlGrp.name,
+                                    scaleOffset=module.rig.scaleOffset, rig=module.rig)
+        module.pvCtrl.modifyShape(shape='pvArrow', color=col['col2'], scale=(0.4, 0.4, 0.4))
+        module.pvCtrl.lockAttr(['t', 's', 'rx'])
+        cmds.delete(cmds.aimConstraint(pvGuide, module.pvCtrl.rootGrp.name))
+        if parent:
+            cmds.parentConstraint(parent, module.pvCtrl.rootGrp.name, mo=1)
+        cmds.parent(pvGuide, module.pvCtrl.ctrlEnd)
+        cmds.poleVectorConstraint(pvGuide, limbIK.hdl)
+        utils.setShapeColor(pvGuide, color=None)
+
+
 class strapModule:
 
     """ Create a strap rig. """

@@ -86,6 +86,7 @@ setParent -menu jenksPipeMenu;
         menuItem -label "Get Current Asset" -i $i_getAsset -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.getAssetName(dialog=True)\");";
         menuItem -d true;
         menuItem -label "Remove All References" -i $i_removeRefs -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.removeReferences()\");";
+        menuItem -label "Reference Published Rig" -i $i_refRig -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.referenceRig()\");";
         menuItem -label "Reference Published Geometry" -i $i_refGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.referenceGeo()\");";
         menuItem -label "Import Published Geometry" -i $i_importGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGeo()\");";
         menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadGeo(abc=False)\");";

@@ -451,6 +451,54 @@ def getShapeNodes(obj):
     children = cmds.listRelatives(obj, s=1)
     return children
 
+def orientJoints(jnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
+    """ Orient the joints correctly.
+    [Args]:
+    jnts (list)(string) - The joints to orient
+    aimAxis (tuple) - The aim axis vector
+    upAxis (tuple) - The up axis vector
+    """
+    for each in jnts:
+        ## get vectors
+        curVector = apiFn.getVector(each)
+        # pos = cmds.xform(each, q=1, t=1, ws=1)
+        # curVector = om.MVector(pos)
+        child = cmds.listRelatives(each, typ='joint', c=1)
+        if child:
+            childVector = apiFn.getVector(child[0])
+            # childPos = cmds.xform(child[0], q=1, t=1, ws=1)
+            # childVector = om.MVector(childPos)
+        else:
+            cmds.setAttr('{}.jointOrient'.format(each), 0, 0, 0)
+            cmds.setAttr('{}.r'.format(each), 0, 0, 0)
+            continue
+        parent = cmds.listRelatives(each, typ='joint', p=1)
+        if parent:
+            parentVector = apiFn.getVector(parent[0])
+            # parentPos = cmds.xform(parent[0], q=1, t=1, ws=1)
+            # parentVector = om.MVector(parentPos)
+        else:
+            parentVector = curVector
+            curVector = childVector
+            gChild = cmds.listRelatives(child[0], typ='joint', c=1)
+            if gChild:
+                childVector = apiFn.getVector(gChild[0])
+                # gChildPos = cmds.xform(gChild[0], q=1, t=1, ws=1)
+                # childVector = om.MVector(gChildPos)
+
+        firstVector = curVector - parentVector
+        secondVector = curVector - childVector
+        crossProd = firstVector.normal() ^ secondVector.normal()
+
+
+        child = cmds.parent(child, w=1)
+        cmds.delete(cmds.aimConstraint(child[0], each, w=1, o=(0, 0, 0),
+                                       upVector=upAxis, aim=aimAxis,
+                                       worldUpVector=crossProd, worldUpType='vector'))
+        cmds.joint(each, e=True, zeroScaleOrient=True)
+        cmds.makeIdentity(each, a=1, t=0, r=1, s=0, n=0)
+        cmds.parent(child, each)
+
 def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
     """ Create joints on a curve.
         [Args]:
@@ -473,8 +521,9 @@ def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
             parent = jnt.name
         pos = cmds.getAttr('{}.ep[{}]'.format(tmpCrv, i))[0]
         cmds.xform(jnt.name, t=pos, ws=1)
-    orientJoints.doOrientJoint(jointsToOrient=jntList, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
-                                       worldUp=(0, 1, 0), guessUp=1)
+    # orientJoints.doOrientJoint(jointsToOrient=jntList, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
+    #                                    worldUp=(0, 1, 0), guessUp=1)
+    orientJoints(jntList)
     cmds.select(cl=1)
     if not tmpCrv == crv:
         cmds.delete(tmpCrv)
@@ -529,8 +578,9 @@ def createJntChainFromObjs(objs, chainName, side='C', extraName='', jntNames=Non
         jnt.matchTransforms(each)
         parent = jnt.name
         newJnts.append(jnt.name)
-    orientJoints.doOrientJoint(jointsToOrient=newJnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
-                               worldUp=(0, 1, 0), guessUp=1)
+    # orientJoints.doOrientJoint(jointsToOrient=newJnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0),
+    #                            worldUp=(0, 1, 0), guessUp=1)
+    orientJoints(newJnts)
     return newJnts
 
 def createCrvFromObjs(objs, crvName='curve', side='C', extraName='', parent=None):

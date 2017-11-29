@@ -73,11 +73,12 @@ class armModule:
                                            side=self.side, skipNum=True, parent=armMechGrp.name)
         ## orient joints
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=jnts[1:],
-                                       aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
-                                       upAxis=(0, 1, 0),
-                                       worldUp=(0, 1, 0),
-                                       guessUp=1)
+            # orientJoints.doOrientJoint(jointsToOrient=jnts[1:],
+            #                            aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+            #                            upAxis=(0, 1, 0),
+            #                            worldUp=(0, 1, 0),
+            #                            guessUp=1)
+            utils.orientJoints(jnts[1:], aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
         ## ik/fk
         if options['IK'] and options['FK']:
             clavChild = armMechSkelGrp.name
@@ -272,11 +273,12 @@ class armModule:
             self.clavFKCtrl.constrain(fkJnts[0])
             self.shoulderFKCtrl = ctrlFn.ctrl(name='{}shoulderFK'.format(extraName),
                                               side=self.side, guide=fkJnts[1], skipNum=True,
-                                              parent=self.clavFKCtrl.ctrlEnd, rig=self.rig,
+                                              parent=fkCtrlGrp.name, rig=self.rig,
                                               scaleOffset=self.rig.scaleOffset, gimbal=True)
             self.shoulderFKCtrl.modifyShape(color=col['col1'], shape='circle',
                                             scale=(0.6, 0.6, 0.6))
             self.shoulderFKCtrl.lockAttr(attr=['s'])
+            self.shoulderFKCtrl.spaceSwitching(parents=[parent, self.clavFKCtrl.ctrlEnd])
             self.shoulderFKCtrl.constrain(fkJnts[1], typ='parent')
 
             self.elbowFKCtrl = ctrlFn.ctrl(name='{}elbowFK'.format(extraName), side=self.side,
@@ -408,8 +410,9 @@ class spineModule:
         # cmds.setAttr('{}.it'.format(spineMechGrp.name), 0)
         ## orient joints
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=spineJnts, aimAxis=(1, 0, 0),
-                                       upAxis=(0, 1, 0), worldUp=(0, 1, 0), guessUp=1)
+            # orientJoints.doOrientJoint(jointsToOrient=spineJnts, aimAxis=(1, 0, 0),
+            #                            upAxis=(0, 1, 0), worldUp=(0, 1, 0), guessUp=1)
+            utils.orientJoints(spineJnts)
         cmds.parent(spineJnts[0], self.rig.skelGrp.name)
         chestJnt = spineJnts[len(spineJnts)/2]
         self.armJnt = spineJnts[int(len(spineJnts)-(len(spineJnts)/3.5))]
@@ -516,11 +519,12 @@ class legModule:
             legMechSkelGrp = utils.newNode('group', name='{}legMechSkel'.format(extraName),
                                            side=self.side, skipNum=True, parent=legMechGrp.name)
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=jnts,
-                                       aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
-                                       upAxis=(0, 1, 0),
-                                       worldUp=(0, 1 if not self.side == 'R' else -1, 0),
-                                       guessUp=1)
+            # orientJoints.doOrientJoint(jointsToOrient=jnts,
+            #                            aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+            #                            upAxis=(0, 1, 0),
+            #                            worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+            #                            guessUp=1)
+            utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
         ## ik/fk
         if options['IK'] and options['FK']:
             ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = mechFn.ikfkMechanics(self, extraName, jnts,
@@ -839,11 +843,12 @@ class headModule:
         col = utils.getColors(self.side)
         cmds.parent(jnts[1], jnts[0])
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=jnts,
-                                       aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
-                                       upAxis=(0, 1, 0),
-                                       worldUp=(0, 1 if not self.side == 'R' else -1, 0),
-                                       guessUp=1)
+            # orientJoints.doOrientJoint(jointsToOrient=jnts,
+            #                            aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+            #                            upAxis=(0, 1, 0),
+            #                            worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+            #                            guessUp=1)
+            utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
         headCtrlsGrp = utils.newNode('group', name='{}headCtrls'.format(extraName), side=self.side,
                                      parent=self.rig.ctrlsGrp.name, skipNum=True)
         if type(extraSpaces) == type(list()) and len(extraSpaces) > 1:
@@ -1136,8 +1141,9 @@ class tailModule:
             endJnt = '{}tail_tip{}'.format(self.moduleName, jntSuffix)
             jnts = utils.getChildrenBetweenObjs(baseJnt, endJnt)
             if autoOrient:
-                orientJoints.doOrientJoint(jointsToOrient=jnts, aimAxis=(1, 0, 0),
-                                           upAxis=(0, 1, 0), worldUp=(0, 1, 0), guessUp=1)
+                # orientJoints.doOrientJoint(jointsToOrient=jnts, aimAxis=(1, 0, 0),
+                #                            upAxis=(0, 1, 0), worldUp=(0, 1, 0), guessUp=1)
+                utils.orientJoints(jnts)
         if options['IK']:
             for jnt in jnts:
                 utils.addJntToSkinJnt(jnt, self.rig)
@@ -1209,11 +1215,12 @@ class simpleLimbModule:
                                             name='{}{}MechSkel'.format(extraName, limbType),
                                             side=self.side, skipNum=True, parent=limbMechGrp.name)
         if autoOrient:
-            orientJoints.doOrientJoint(jointsToOrient=jnts,
-                                       aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
-                                       upAxis=(0, 1, 0),
-                                       worldUp=(0, 1 if not self.side == 'R' else -1, 0),
-                                       guessUp=1)
+            # orientJoints.doOrientJoint(jointsToOrient=jnts,
+            #                            aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+            #                            upAxis=(0, 1, 0),
+            #                            worldUp=(0, 1 if not self.side == 'R' else -1, 0),
+            #                            guessUp=1)
+            utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
         if options['IK'] and options['FK']:
             (ikJnts, fkJnts, jnts,
                 ikCtrlGrp, fkCtrlGrp) = mechFn.ikfkMechanics(self, extraName, jnts,

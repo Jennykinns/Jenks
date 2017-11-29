@@ -37,6 +37,11 @@ def getPath(mObj, returnString=True):
     else:
         return dagPath
 
+def getVector(obj):
+    pos = cmds.xform(obj, q=1, t=1, ws=1)
+    vector = om.MVector(pos)
+    return vector
+
 def getNurbsCurve(crvShape):
     mObj = getMObj(crvShape)
     MFnNurbs = om.MFnNurbsCurve(mObj)

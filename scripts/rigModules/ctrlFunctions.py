@@ -313,7 +313,9 @@ class ctrl:
     def modifyShape(self, shape=None, color=False, rotation=(0, 0, 0),
                     translation=(0, 0, 0), scale=(1, 1, 1), mirror=False):
         if color == False:
-            color = cmds.getAttr('{}Shape1.overrideColor'.format(self.ctrl.name))
+            # color = cmds.getAttr('{}Shape1.overrideColor'.format(self.ctrl.name))
+            shapes = cmds.listRelatives(self.ctrl.name, s=1)
+            color = cmds.getAttr('{}.overrideColor'.format(shapes[0]))
         scale = (scale[0]*self.scaleOffset,
                  scale[1]*self.scaleOffset,
                  scale[2]*self.scaleOffset)

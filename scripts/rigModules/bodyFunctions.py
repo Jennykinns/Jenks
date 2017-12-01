@@ -848,7 +848,7 @@ class headModule:
             #                            upAxis=(0, 1, 0),
             #                            worldUp=(0, 1 if not self.side == 'R' else -1, 0),
             #                            guessUp=1)
-            utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
+            utils.orientJoints(jnts[1:], aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
         headCtrlsGrp = utils.newNode('group', name='{}headCtrls'.format(extraName), side=self.side,
                                      parent=self.rig.ctrlsGrp.name, skipNum=True)
         if type(extraSpaces) == type(list()) and len(extraSpaces) > 1:

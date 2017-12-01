@@ -458,6 +458,9 @@ def orientJoints(jnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
     aimAxis (tuple) - The aim axis vector
     upAxis (tuple) - The up axis vector
     """
+    tmpLoc = newNode('group', name='tmp')
+    prevUpVector = apiFn.getVector(tmpLoc.name)
+    cmds.delete(tmpLoc.name)
     for each in jnts:
         ## get vectors
         curVector = apiFn.getVector(each)
@@ -490,11 +493,23 @@ def orientJoints(jnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
         secondVector = curVector - childVector
         crossProd = firstVector.normal() ^ secondVector.normal()
 
-
         child = cmds.parent(child, w=1)
         cmds.delete(cmds.aimConstraint(child[0], each, w=1, o=(0, 0, 0),
                                        upVector=upAxis, aim=aimAxis,
                                        worldUpVector=crossProd, worldUpType='vector'))
+
+        dotProd = (float('{:3f}'.format(crossProd.x)) * prevUpVector.x
+                   + float('{:3f}'.format(crossProd.y)) * prevUpVector.y
+                   + float('{:3f}'.format(crossProd.z)) * prevUpVector.z)
+
+        prevUpVector = crossProd
+
+        if dotProd < 0.0:
+            cmds.xform(each, r=1, os=1, ra=(aimAxis[0] * 180.0,
+                                            aimAxis[1] * 180.0,
+                                            aimAxis[2] * 180.0))
+            prevUpVector *= -1
+
         cmds.joint(each, e=True, zeroScaleOrient=True)
         cmds.makeIdentity(each, a=1, t=0, r=1, s=0, n=0)
         cmds.parent(child, each)

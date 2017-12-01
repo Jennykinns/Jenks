@@ -404,6 +404,16 @@ def loadWipLookDev(assetName=None, latest=False, prompt=False):
     loadMayaFile(assetName, typ='lookDev/WIP', prompt=prompt, latest=latest, new=True)
     return True
 
+def saveSubAssetWipLookDev(subAssetName=None, autoName=False, prompt=False):
+    saveMayaFile(subAssetName, typ='lookDev/WIP', prompt=prompt, autoName=autoName,
+                 removeRefs=True, subAsset=True)
+    return True
+
+def loadSubAssetWipLookDev(subAssetName=None, latest=False, prompt=False):
+    loadMayaFile(subAssetName, typ='lookDev/WIP', prompt=prompt, latest=latest, new=True,
+                 subAsset=True)
+    return True
+
 def publishLookDev(assetName=None, autoName=True, prompt=False):
     setsToSave = []
     for each in cmds.listRelatives('C_geometry_GRP', c=1):

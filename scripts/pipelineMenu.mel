@@ -169,10 +169,10 @@ setParent -menu jenksPipeMenu;
         menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveWipLookDev()\");";
         menuItem -label "Load WIP LookDev" -i $i_loadLookdev -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadWipLookDev(latest=True)\");";
         menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadWipLookDev()\");";
-        menuItem -label "Save WIP SubAsset Geometry" -i $i_saveSubAssetGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveSubAssetWipGeo(autoName=True)\");";
-        menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveSubAssetWipGeo()\");";
-        menuItem -label "Load WIP SubAsset Geometry" -i $i_loadSubAssetGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadSubAssetWipGeo(latest=True)\");";
-        menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadSubAssetWipGeo()\");";
+        menuItem -label "Save WIP SubAsset LookDev" -i $i_saveSubAssetGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveSubAssetWipLookDev(autoName=True)\");";
+        menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.saveSubAssetWipLookDev()\");";
+        menuItem -label "Load WIP SubAsset LookDev" -i $i_loadSubAssetGeo -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadSubAssetWipLookDev(latest=True)\");";
+        menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import fileFunctions as fileFn\"); python(\"reload(fileFn)\"); python(\"fileFn.loadSubAssetWipLookDev()\");";
     setParent -menu jenksPipeMenu;
 
     menuItem -subMenu true -label "Animation" -i "animateSnapshot.png" -tearOff true;

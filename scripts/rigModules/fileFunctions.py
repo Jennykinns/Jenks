@@ -95,9 +95,13 @@ def loadAllPlugins():
 def getScriptDir():
     ## MIGHT NEED CHANGING - not sure if the path list will be
     ## consistant between pcs (or even restarts)
+    homeDir = os.environ['HOME']
     if os.path.isfile('C:\\Docs\\readMe.txt'):
         ## on uni computers
         scriptPath = 'C:\\Docs\\maya\\scripts'
+    elif os.path.isdir('{}\\maya'.format(homeDir)):
+        ## on other computers
+        scriptPath = '{}\\maya'.format(homeDir)
     else:
         scriptPath = sys.path[-1]
     return scriptPath

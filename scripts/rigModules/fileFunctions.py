@@ -110,6 +110,12 @@ def getAssetDir():
     path = cmds.workspace(q=1, rd=1)
     return '{}assets/'.format(path)
 
+def getSubAssetDir():
+    assetNameSetup(None, False)
+    assetName = getAssetName()
+    path = cmds.workspace(q=1, rd=1)
+    return '{}assets/{}/subAssets/'.format(path, assetName)
+
 def getShotDir():
     path = cmds.workspace(q=1, rd=1)
     return '{}shots/'.format(path)
@@ -254,7 +260,7 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
                 return False
         else:
             fileName = getLatestVersion(assetName, path, 'model/Published', new=True)
-        removeReferences()
+        # removeReferences()
         abcExport(fileName, selection=True, frameRange=(1, 1))
         print 'Published Geometry: {}'.format(fileName)
     else:
@@ -276,11 +282,82 @@ def referenceGeo(assetName=None, prompt=False):
 
 def saveWipGeo(assetName=None, autoName=False, prompt=False):
     saveMayaFile(assetName, typ='model/WIP', prompt=prompt, autoName=autoName,
-                 removeRefs=True)
+                 removeRefs=False)
     return True
 
 def loadWipGeo(assetName=None, latest=False, prompt=False):
     loadMayaFile(assetName, typ='model/WIP', prompt=prompt, latest=latest, new=True)
+    return True
+
+def loadSubAssetGeo(subAssetName=None, group=None, prompt=False, abc=True):
+    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    if not subAssetName:
+        return False
+    path = getSubAssetDir()
+    fileName = getLatestVersion(subAssetName, path, 'model/Published')
+    if abc:
+        if group:
+            cmds.AbcImport(fileName, mode='import', rpr=group)
+        else:
+            cmds.AbcImport(fileName, mode='import')
+    else:
+        nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
+        if group:
+            mNodes = []
+            for each in nodes:
+                mNodes.append(api.getMObj(each))
+            for each in mNodes:
+                lN, sN = api.getPath(each)
+                if cmds.nodeType(lN) == 'transform':
+                    cmds.parent(lN, group)
+    print 'Loaded SubAsset geometry: {}'.format(fileName)
+    return True
+
+def publishSubAssetGeo(subAssetName=None, autoName=True, prompt=False, abc=True):
+    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    if not subAssetName:
+        return False
+    path = getSubAssetDir()
+    if abc:
+        if not autoName:
+            fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+            fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish SubAsset Geometry',
+                                        fileMode=0, fileFilter=fileFilter,
+                                        dir='{}{}/model/Published'.format(path, subAssetName))
+            if fileName:
+                fileName = fileName[0]
+            else:
+                return False
+        else:
+            fileName = getLatestVersion(subAssetName, path, 'model/Published', new=True)
+        removeReferences()
+        abcExport(fileName, selection=True, frameRange=(1, 1))
+        print 'Published Geometry: {}'.format(fileName)
+    # else:
+    #     saveMayaFile(subAssetName, typ='model/Published', autoName=autoName, removeRefs=True,
+    #                  selectionOnly=True)
+    #     print 'Saved as Maya File.'
+    # publishSnapshot(asset=assetName, typ='model')
+    return True
+
+def referenceSubAssetGeo(subAssetName=None, prompt=False):
+    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    if not subAssetName:
+        return False
+    path = getSubAssetDir()
+    fileName = getLatestVersion(subAssetName, path, 'model/Published')
+    cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))
+    print 'Referenced geometry: {}'.format(fileName)
+    return True
+
+def saveSubAssetWipGeo(subAssetName=None, autoName=False, prompt=False):
+    saveMayaFile(subAssetName, typ='model/WIP', prompt=prompt, autoName=autoName,
+                 removeRefs=True, subAsset=True)
+    return True
+
+def loadSubAssetWipGeo(subAssetName=None, latest=False, prompt=False):
+    loadMayaFile(subAssetName, typ='model/WIP', prompt=prompt, latest=latest, new=True,
+                 subAsset=True)
     return True
 
 def setupLookDevScene(assetName=None, prompt=False):
@@ -310,10 +387,12 @@ def setupLookDevScene(assetName=None, prompt=False):
             cmds.addAttr(setName, longName=k, attributeType=v[0], enumName=v[1])
 
 
-    # cmds.addAttr('geoSet_Name_of_Asset', longName = 'aiMatte', attributeType = "bool", )
-    # cmds.addAttr('geoSet_Name_of_Asset', longName = 'primaryVisibility', attributeType = "bool" )
-#     cmds.addAttr('geoSet_Name_of_Asset', longName = 'aiSubdivType', attributeType = "enum", enumName = "0 :1 ")
-# cmds.addAttr('geoSet_Name_of_Asset', longName = 'aiSubdivIterations', attributeType = "enum", enumName = "0 :1 : 2 : 3")
+def setupSubAssetLookDevScene(subAssetName=None, prompt=False):
+    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    if not subAssetName:
+        return False
+    geoGrp = utils.newNode('group', name='geometry', skipNum=True)
+    loadSubAssetGeo(subAssetName, geoGrp.name)
 
 
 def saveWipLookDev(assetName=None, autoName=False, prompt=False):
@@ -335,6 +414,13 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
     publishSnapshot(asset=assetName, typ='lookDev')
     return True
 
+def publishSubAssetLookDev(subAssetName=None, autoName=True, prompt=False):
+    geo = cmds.listRelatives('C_geometry_GRP', c=1)
+    cmds.select(geo)
+    saveMayaFile(subAssetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
+                 removeRefs=True, selectionOnly=True, subAsset=True)
+    return True
+
 def referenceLookDev(assetName=None, prompt=False):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
@@ -344,6 +430,34 @@ def referenceLookDev(assetName=None, prompt=False):
     cmds.file(fileName, r=1, ns=newNameSpace(assetName))
     print 'Referenced LookDev: {}'.format(fileName)
     return True
+
+def referenceSubAssetLookDev(subAssetName=None, prompt=False):
+    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    if not subAssetName:
+        return False
+    path = getSubAssetDir()
+    fileName = getLatestVersion(subAssetName, path, 'lookDev/Published')
+    cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))
+    print 'Referenced SubAsset LookDev: {}'.format(fileName)
+    return True
+
+def mergeSubAssetAlembic(assetName=None, latest=True, prompt=False):
+    assetName = assetNameSetup(assetName, prompt)
+    if not assetName:
+        return False
+    path = getAssetDir()
+    if latest:
+        fileName = getLatestVersion(assetName, path, 'model/Published')
+    else:
+        fileFilter = fileDialogFilter(['Alembic Cache', '*.abc'])
+        fileName = cmds.fileDialog2(dialogStyle=2,
+                                    caption='Merge SubAsset Alembic',
+                                    fileMode=1,
+                                    fileFilter=fileFilter,
+                                    dir='{}{}/model/Published'.format(path, assetName))
+        fileName = fileName[0] if fileName else False
+    mel.eval('AbcImport -mode import -connect "/" "{}"'.format(fileName))
+
 
 def saveWipAnimation(shotName=None, autoName=False, prompt=False):
     saveMayaFile(shotName, typ='anim/WIP', prompt=prompt, autoName=autoName,
@@ -514,6 +628,15 @@ def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json
         data = json.load(f)
     return data
 
+def createNewDirs(folder, directory, subFolder=None):
+    if not os.path.isdir('{}/{}'.format(directory, folder)):
+        os.mkdir('{}/{}'.format(directory, folder))
+    if type(subFolder) == type(list()):
+        for each in subFolder:
+            createNewDirs(each, '{}/{}'.format(directory, folder))
+    elif type(subFolder) == type(dict()):
+        for f, sf in subFolder.iteritems():
+            createNewDirs(f, '{}/{}'.format(directory, folder), sf)
 
 def createNewPipelineAsset(assetName=None, prompt=False):
     assetName = assetNameSetup(assetName, prompt, textPrompt=True)
@@ -528,22 +651,79 @@ def createNewPipelineAsset(assetName=None, prompt=False):
     else:
         os.mkdir(newAssetDir)
         folderList = {
-            'lookDev' : {'Published' : None, 'WIP': None},
-            'model' : {'Published' : None, 'WIP': None},
-            'rig' : {'Published' : None, 'WIP': {'controlShapes' : None, 'guides' : None, 'skin' : None}},
-            'texture' : {'Published' : None, 'WIP': None},
+            'lookDev' : [
+                'Published',
+                'WIP',
+            ],
+            'model' : [
+                'Published',
+                'WIP',
+            ],
+            'subAssets' : [],
+            'rig' : {
+                'Published' : [],
+                'WIP' : [
+                    'controlShapes',
+                    'guides',
+                    'skin',
+                ],
+            },
+            'texture' : {
+                'Published' : [
+                    'bump',
+                    'diff',
+                    'disp',
+                    'masks',
+                    'spc',
+                    'spcRough',
+                    'sss',
+                ],
+                'WIP' : [],
+            },
         }
+
         for k, v in folderList.iteritems():
-            os.mkdir('{}/{}'.format(newAssetDir, k))
-            if v is None:
-                continue
-            for k2, v2 in v.iteritems():
-                os.mkdir('{}/{}/{}'.format(newAssetDir, k, k2))
-                if v2 is None:
-                    continue
-                for k3, v3 in v2.iteritems():
-                    os.mkdir('{}/{}/{}/{}'.format(newAssetDir, k, k2, k3))
-        print 'Created asset directories: {}'.format(newAssetDir)
+            createNewDirs(k, newAssetDir, v)
+        print 'Created Asset directories: {}'.format(newAssetDir)
+
+def createNewPipelineSubAsset(subAssetName=None, prompt=False):
+    subAssetName = assetNameSetup(subAssetName, prompt, textPrompt=True, typ='subAsset')
+    if not subAssetName:
+        return False
+    setSubAssetName(subAssetName)
+    subAssetDir = getSubAssetDir()
+    newSubAssetDir = '{}{}'.format(subAssetDir, subAssetName)
+    if os.path.isdir(newSubAssetDir):
+        print 'SubAsset directory already exists.'
+        return False
+    else:
+        os.mkdir(newSubAssetDir)
+        folderList = {
+            'model' : [
+                'Published',
+                'WIP',
+            ],
+            'texture' : {
+                'Published' : [
+                    'bump',
+                    'diff',
+                    'disp',
+                    'masks',
+                    'spc',
+                    'spcRough',
+                    'sss',
+                ],
+                'WIP' : [],
+            },
+            'lookDev' : [
+                'Published',
+                'WIP',
+            ],
+        }
+
+        for k, v in folderList.iteritems():
+            createNewDirs(k, newSubAssetDir, v)
+        print 'Created SubAsset directories: {}'.format(newSubAssetDir)
 
 def createNewPipelineShot(shotName=None, prompt=False):
     shotName = assetNameSetup(shotName, prompt, textPrompt=True, typ='shot')
@@ -558,32 +738,47 @@ def createNewPipelineShot(shotName=None, prompt=False):
     else:
         os.mkdir(newShotDir)
         folderList = {
-            'anim' : {'Published' : None, 'WIP' : None},
-            'lighting' : {'Published' : None, 'WIP' : None},
-            'nuke' : None,
-            'plates' : {'misc' : None, 'prep' : None, 'raw' : None,
-                        'retime' : None, 'roto' : None, 'undistort' : None},
-            'renders' : None
+            'anim' : [
+                'Published',
+                'WIP',
+            ],
+            'lighting' : [
+                'Published',
+                'WIP',
+            ],
+            'nuke' : [],
+            'plates' : [
+                'misc',
+                'prep',
+                'raw',
+                'retime',
+                'roto',
+                'undistort',
+            ],
+            'renders' : [],
         }
+
         for k, v in folderList.iteritems():
-            os.mkdir('{}/{}'.format(newShotDir, k))
-            if v is None:
-                continue
-            for k2, v2 in v.iteritems():
-                os.mkdir('{}/{}/{}'.format(newShotDir, k, k2))
-                if v2 is None:
-                    continue
-                for k3, v3 in v2.iteritems():
-                    os.mkdir('{}/{}/{}/{}'.format(newAssetDir, k, k2, k3))
-        print 'Created shot directories: {}'.format(newShotDir)
+            createNewDirs(k, newShotDir, v)
+        print 'Created Shot directories: {}'.format(newShotDir)
 
 
 
-def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True, shot=False):
-    assetName = assetNameSetup(assetName, prompt, typ='asset' if not shot else 'shot')
+def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
+                 shot=False, subAsset=False):
+    if shot:
+        directory = getShotDir()
+        assetTyp = 'shot'
+    elif subAsset:
+        directory = getSubAssetDir()
+        assetTyp = 'subAsset'
+    else:
+        directory = getAssetDir()
+        assetTyp = 'asset'
+
+    assetName = assetNameSetup(assetName, prompt, typ=assetTyp)
     if not assetName:
         return False
-    directory = getAssetDir() if not shot else getShotDir()
     subDir = '{}{}/{}/'.format(directory, assetName, typ)
     if not os.path.isdir(subDir):
         print '{} asset does not exist.'.format(assetName)
@@ -609,11 +804,20 @@ def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True, sho
     return False
 
 def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=False,
-                 selectionOnly=False, shot=False):
-    assetName = assetNameSetup(assetName, prompt, typ='asset' if not shot else 'shot')
+                 selectionOnly=False, shot=False, subAsset=False):
+    if subAsset:
+        directory = getSubAssetDir()
+        assetTyp = 'subAsset'
+    elif shot:
+        directory = getShotDir()
+        assetTyp = 'shot'
+    else:
+        directory = getAssetDir()
+        assetTyp = 'asset'
+    assetName = assetNameSetup(assetName, prompt, typ=assetTyp)
     if not assetName:
         return False
-    directory = getAssetDir() if not shot else getShotDir()
+
     subDir = '{}{}/{}/'.format(directory, assetName, typ)
     if autoName:
         fileName = getLatestVersion(assetName, directory, typ, new=1)
@@ -642,7 +846,7 @@ def treeAssetNamePrompt(typ='asset'):
                          width=200)
     form = cmds.formLayout()
     treeLister = cmds.treeLister(rc='fileFn.treeAssetNamePrompt("{}")'.format(typ))
-    btnCommand = 'fileFn.createNewPipeline{}(prompt=True) \nfileFn.treeAssetNamePrompt("{}")'.format(typ.capitalize(), typ)
+    btnCommand = 'fileFn.createNewPipeline{}{}(prompt=True) \nfileFn.treeAssetNamePrompt("{}")'.format(typ.capitalize()[0], typ[1:], typ)
     btn = cmds.button(label='Create New', command=btnCommand)
     cmds.formLayout(form, e=1, af=((treeLister, 'top', 0),
                                    (treeLister, 'left', 0),
@@ -658,6 +862,9 @@ def treeAssetNamePrompt(typ='asset'):
     elif typ == 'asset':
         directory = getAssetDir()
         icon = 'alignOnMin.png'
+    elif typ == 'subAsset':
+        directory = getSubAssetDir()
+        icon = 'subdivSphere.png'
     if not os.path.isdir(directory):
         return False
     ls = [f for f in os.listdir(directory) if os.path.isdir('{}/{}'.format(directory, f))]
@@ -666,7 +873,7 @@ def treeAssetNamePrompt(typ='asset'):
 
     for each in ls:
         # command = 'fileFn.assetNamePromptCommand("{}", "{}")'.format(each, window)
-        command = 'fileFn.set{}Name("{}") \ncmds.window("{}", e=1, vis=False)'.format(typ.capitalize(), each, window)
+        command = 'fileFn.set{}{}Name("{}") \ncmds.window("{}", e=1, vis=False)'.format(typ.capitalize()[0], typ[1:], each, window)
         cmds.treeLister(treeLister, e=1, add=[(each, icon, command)])
 
 def textAssetNamePrompt(title='Asset'):
@@ -695,6 +902,26 @@ def getAssetName(dialog=False):
         cmds.confirmDialog(m='Current Asset: {}'.format(name), button=['Ok'])
     return name
 
+def setSubAssetName(subAssetName=None):
+    assetName = assetNameSetup(None, False)
+    if not assetName:
+        return False
+    setAssetName(assetName)
+    if not subAssetName:
+        treeAssetNamePrompt(typ='subAsset')
+    if subAssetName:
+        mel.eval('putenv "subAssetName" {}'.format(subAssetName))
+
+def getSubAssetName(dialog=False):
+    assetName = assetNameSetup(None, False)
+    if not assetName:
+        return False
+    setAssetName(assetName)
+    name = mel.eval('getenv "subAssetName"')
+    if dialog:
+        cmds.confirmDialog(m='Current SubAsset: {}'.format(name), button=['Ok'])
+    return name
+
 def setShotName(shotName=None):
     if not shotName:
         treeAssetNamePrompt(typ='shot')
@@ -718,6 +945,8 @@ def assetNameSetup(assetName, prompt, textPrompt=False, typ='asset'):
             assetName = getAssetName()
         elif typ == 'shot':
             assetName = getShotName()
+        elif typ == 'subAsset':
+            assetName = getSubAssetName()
     if not assetName:
         assetName = treeAssetNamePrompt(typ)
     if not assetName:

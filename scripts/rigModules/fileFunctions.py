@@ -164,9 +164,9 @@ def publishRig(assetName=None, autoName=True, prompt=False):
         return False
     removeReferences()
     cmds.select('_RIG__GRP')
+    publishSnapshot(asset=assetName, typ='rig')
     saveMayaFile(assetName, typ='rig/Published', prompt=prompt, autoName=autoName,
                  selectionOnly=True)
-    publishSnapshot(asset=assetName, typ='rig')
     return True
 
 def referenceRig(assetName=None, prompt=False, replace=False, refNd=None):
@@ -179,7 +179,8 @@ def referenceRig(assetName=None, prompt=False, replace=False, refNd=None):
         cmds.file(fileName, r=1, ns=newNameSpace(assetName))
     else:
         cmds.file(fileName, lr=refNd)
-    print 'Referenced Rig: {}'.format(fileName)
+    # print 'Referenced Rig: {}'.format(fileName)
+    printToMaya('Referenced Rig: {}'.format(fileName))
     return True
 
 def loadWipRig(assetName=None, latest=False, prompt=False):
@@ -196,7 +197,8 @@ def loadRigScript(assetName=None, prompt=False, build=False):
         return False
     path = getAssetDir()
     fileName = '{}rigScripts/{}.py'.format(path, assetName)
-    print 'Loading rig script: {}'.format(fileName)
+    # print 'Loading rig script: {}'.format(fileName)
+    printToMaya('Loading Rig Script: {}'.format(fileName))
     f = open(fileName, 'r')
     rigScriptTxt = f.read()
     f.close()
@@ -240,7 +242,8 @@ def loadGeo(assetName=None, group=None, prompt=False, abc=True):
                 lN, sN = api.getPath(each)
                 if cmds.nodeType(lN) == 'transform':
                     cmds.parent(lN, group)
-    print 'Loaded geometry: {}'.format(fileName)
+    # print 'Loaded geometry: {}'.format(fileName)
+    printToMaya('Loaded Geometry: {}'.format(fileName))
     return True
 
 def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
@@ -248,6 +251,7 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
     if not assetName:
         return False
     path = getAssetDir()
+    publishSnapshot(asset=assetName, typ='model')
     if abc:
         if not autoName:
             fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
@@ -261,13 +265,15 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
         else:
             fileName = getLatestVersion(assetName, path, 'model/Published', new=True)
         # removeReferences()
+        importReferences()
         abcExport(fileName, selection=True, frameRange=(1, 1))
-        print 'Published Geometry: {}'.format(fileName)
+        # print 'Published Geometry: {}'.format(fileName)
+        printToMaya('Published Geometry: {}'.format(fileName))
     else:
         saveMayaFile(assetName, typ='model/Published', autoName=autoName, removeRefs=True,
                      selectionOnly=True)
-        print 'Saved as Maya File.'
-    publishSnapshot(asset=assetName, typ='model')
+        # print 'Saved as Maya File.'
+        printToMaya('Published Geometry as Maya File: {}'.format(fileName))
     return True
 
 def referenceGeo(assetName=None, prompt=False):
@@ -277,7 +283,8 @@ def referenceGeo(assetName=None, prompt=False):
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
     cmds.file(fileName, r=1, ns=newNameSpace(assetName))
-    print 'Referenced geometry: {}'.format(fileName)
+    # print 'Referenced geometry: {}'.format(fileName)
+    printToMaya('Referenced Geometry: {}'.format(fileName))
     return True
 
 def saveWipGeo(assetName=None, autoName=False, prompt=False):
@@ -310,7 +317,8 @@ def loadSubAssetGeo(subAssetName=None, group=None, prompt=False, abc=True):
                 lN, sN = api.getPath(each)
                 if cmds.nodeType(lN) == 'transform':
                     cmds.parent(lN, group)
-    print 'Loaded SubAsset geometry: {}'.format(fileName)
+    # print 'Loaded SubAsset geometry: {}'.format(fileName)
+    printToMaya('Loaded SubAsset Geometry: {}'.format(fileName))
     return True
 
 def publishSubAssetGeo(subAssetName=None, autoName=True, prompt=False, abc=True):
@@ -332,7 +340,8 @@ def publishSubAssetGeo(subAssetName=None, autoName=True, prompt=False, abc=True)
             fileName = getLatestVersion(subAssetName, path, 'model/Published', new=True)
         removeReferences()
         abcExport(fileName, selection=True, frameRange=(1, 1))
-        print 'Published Geometry: {}'.format(fileName)
+        # print 'Published Geometry: {}'.format(fileName)
+        printToMaya('Published SubAsset Geometry: {}'.format(fileName))
     # else:
     #     saveMayaFile(subAssetName, typ='model/Published', autoName=autoName, removeRefs=True,
     #                  selectionOnly=True)
@@ -347,7 +356,8 @@ def referenceSubAssetGeo(subAssetName=None, prompt=False):
     path = getSubAssetDir()
     fileName = getLatestVersion(subAssetName, path, 'model/Published')
     cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))
-    print 'Referenced geometry: {}'.format(fileName)
+    # print 'Referenced geometry: {}'.format(fileName)
+    printToMaya('Referenced SubAsset Geometry: {}'.format(fileName))
     return True
 
 def saveSubAssetWipGeo(subAssetName=None, autoName=False, prompt=False):
@@ -386,13 +396,38 @@ def setupLookDevScene(assetName=None, prompt=False):
         else:
             cmds.addAttr(setName, longName=k, attributeType=v[0], enumName=v[1])
 
+    a = cmds.listRelatives(geoGrp.name, c=1)
+    saGrps = cmds.ls('*_sa_*', typ='transform')
+    for each in saGrps:
+        if each in a:
+            if cmds.objExists(each):
+                saName = each[5:]
+                for suff in suffix.values():
+                    saName = saName.rpartition(suff)[0]
+                    if not saName == '':
+                        break
+                refNds = referenceSubAssetLookDev(saName)
+                saGeo = cmds.listRelatives(refNds, c=1, ad=1, typ='transform')
+                refGrp = cmds.listRelatives(saGeo, p=1)
+                cmds.sets(saGeo, e=1, include=setName)
+                cmds.parent(refGrp, geoGrp.name)
+                cmds.delete(each)
+                mergeSubAssetAlembic(saName)
+                cmds.select(refGrp)
+                importReferences()
+                a = getSubAssetName()
+                cmds.namespace(rm=a, mnr=1)
+    cmds.select(cl=1)
+
+
+
 
 def setupSubAssetLookDevScene(subAssetName=None, prompt=False):
     subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
     if not subAssetName:
         return False
-    geoGrp = utils.newNode('group', name='geometry', skipNum=True)
-    loadSubAssetGeo(subAssetName, geoGrp.name)
+    # geoGrp = utils.newNode('group', name=subAssetName, skipNum=True)
+    loadSubAssetGeo(subAssetName)
 
 
 def saveWipLookDev(assetName=None, autoName=False, prompt=False):
@@ -415,17 +450,22 @@ def loadSubAssetWipLookDev(subAssetName=None, latest=False, prompt=False):
     return True
 
 def publishLookDev(assetName=None, autoName=True, prompt=False):
+    publishSnapshot(asset=assetName, typ='lookDev')
     setsToSave = []
-    for each in cmds.listRelatives('C_geometry_GRP', c=1):
-        setsToSave.extend(cmds.listSets(o=each))
+    for each in cmds.listRelatives('C_geometry_GRP', c=1, ad=1):
+        sets = cmds.listSets(o=each)
+        if sets:
+            setsToSave.extend(cmds.listSets(o=each))
     cmds.select(setsToSave, add=1, noExpand=1)
     saveMayaFile(assetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
                  removeRefs=True, selectionOnly=True)
-    publishSnapshot(asset=assetName, typ='lookDev')
     return True
 
 def publishSubAssetLookDev(subAssetName=None, autoName=True, prompt=False):
-    geo = cmds.listRelatives('C_geometry_GRP', c=1)
+    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    if not subAssetName:
+        return False
+    geo = cmds.listRelatives('C_sa_{}_GRP'.format(subAssetName), c=1)
     cmds.select(geo)
     saveMayaFile(subAssetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
                  removeRefs=True, selectionOnly=True, subAsset=True)
@@ -438,7 +478,8 @@ def referenceLookDev(assetName=None, prompt=False):
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'lookDev/Published')
     cmds.file(fileName, r=1, ns=newNameSpace(assetName))
-    print 'Referenced LookDev: {}'.format(fileName)
+    # print 'Referenced LookDev: {}'.format(fileName)
+    printToMaya('Referenced LookDev: {}'.format(fileName))
     return True
 
 def referenceSubAssetLookDev(subAssetName=None, prompt=False):
@@ -447,9 +488,10 @@ def referenceSubAssetLookDev(subAssetName=None, prompt=False):
         return False
     path = getSubAssetDir()
     fileName = getLatestVersion(subAssetName, path, 'lookDev/Published')
-    cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))
-    print 'Referenced SubAsset LookDev: {}'.format(fileName)
-    return True
+    nds = cmds.file(fileName, r=1, ns=newNameSpace(subAssetName), rnn=1)
+    # print 'Referenced SubAsset LookDev: {}'.format(fileName)
+    printToMaya('Referenced SubAsset LookDev: {}'.format(fileName))
+    return nds
 
 def mergeSubAssetAlembic(assetName=None, latest=True, prompt=False):
     assetName = assetNameSetup(assetName, prompt)
@@ -504,10 +546,11 @@ def publishAnimation(shotName=None, autoName=True, prompt=False):
         fileName = getLatestVersion(shotName, path, 'anim/Published', new=True)
     # playBackSlider = mel.eval('$tmpVar=$gPlayBackSlider')
     # frameRange = cmds.timeControl(playBackSlider, q=1, ra=1)
+    publishSnapshot(shot=shotName, typ='anim')
     frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
     abcExport(fileName, selection=True, frameRange=frameRange)
-    publishSnapshot(shot=shotName, typ='anim')
-    print 'Published Animation: {}'.format(fileName)
+    # print 'Published Animation: {}'.format(fileName)
+    printToMaya('Published Animation: {}'.format(fileName))
 
 def mergeAnimationAlembic(shotName=None, latest=True, prompt=False):
     shotName = assetNameSetup(shotName, prompt, typ='shot')
@@ -536,9 +579,9 @@ def loadWipLighting(shotName=None, latest=False, prompt=False):
     return True
 
 def publishLighting(shotName=None, autoName=True, prompt=False):
+    publishSnapshot(shot=shotName, typ='lighting')
     saveMayaFile(shotName, typ='lighting/Published', prompt=prompt, autoName=autoName,
                  removeRefs=False, shot=True)
-    publishSnapshot(shot=shotName, typ='lighting')
     return True
 
 def setupSceneForRender(shotName=None, latest=True, prompt=False):
@@ -549,7 +592,8 @@ def setupSceneForRender(shotName=None, latest=True, prompt=False):
     path = getShotDir()
     fileName = getLatestVersion(shotName, path, 'lighting/Published')
     cmds.file(fileName, r=1, ns=newNameSpace(shotName))
-    print 'Referenced Lighting: {}'.format(fileName)
+    # print 'Referenced Lighting: {}'.format(fileName)
+    printToMaya('Referenced Lighting: {}'.format(fileName))
     print '## DO OTHER STUFF FOR SETTING UP THE RENDER - aov\'s, render settings, etc.'
 
 
@@ -563,6 +607,7 @@ def publishSnapshot(asset=None, shot=None, typ=''):
     else:
         return False
 
+    oldSel = cmds.ls(sl=1, l=1)
     cmds.select(cl=True)
     ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')
     multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')
@@ -578,15 +623,30 @@ def publishSnapshot(asset=None, shot=None, typ=''):
     cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ssao)
     cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', multiSample)
 
+    cmds.select(oldSel)
+
     return True
 
 
 def removeReferences():
-    sel = cmds.ls()
-    for each in sel:
-        if cmds.objExists(each):
-            if cmds.nodeType(each) == 'reference':
-                cmds.file(rr=1, rfn=each)
+    refs = cmds.ls(typ='reference')
+    if refs:
+        for each in refs:
+            cmds.file(rr=1, rfn=each)
+
+def importReferences(sel=True):
+    refs = []
+    for each in cmds.ls(sl=sel):
+        if cmds.referenceQuery(each, inr=1) and cmds.referenceQuery(each, rfn=1) not in refs:
+            refs.append(cmds.referenceQuery(each, rfn=1))
+    oldSel = cmds.ls(sl=1)
+    if refs:
+        for each in refs:
+            if cmds.objExists(each):
+                refFile = cmds.referenceQuery(each, f=True)
+                cmds.file(refFile, importReference=True)
+    if sel:
+        cmds.select(oldSel)
 
 def fileDialogFilter(fileFormats):
     fileFilter = ''
@@ -616,7 +676,8 @@ def saveJson(data, defaultDir=None, caption='Save Json', fileFormats=[('JSON', '
             fileName = fileOverride
     with open(fileName, 'w') as f:
         json.dump(data, f, indent=4)
-    print 'File Saved to: {}'.format(fileName)
+    # print 'File Saved to: {}'.format(fileName)
+    printToMaya('File Saved: {}'.format(fileName))
     return True
 
 def loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json')],
@@ -656,7 +717,8 @@ def createNewPipelineAsset(assetName=None, prompt=False):
     assetDir = getAssetDir()
     newAssetDir = '{}{}'.format(assetDir, assetName)
     if os.path.isdir(newAssetDir):
-        print 'Asset directory already exists.'
+        # print 'Asset directory already exists.'
+        printToMaya('Asset directory already exists.')
         return False
     else:
         os.mkdir(newAssetDir)
@@ -694,7 +756,8 @@ def createNewPipelineAsset(assetName=None, prompt=False):
 
         for k, v in folderList.iteritems():
             createNewDirs(k, newAssetDir, v)
-        print 'Created Asset directories: {}'.format(newAssetDir)
+        # print 'Created Asset directories: {}'.format(newAssetDir)
+        printToMaya('Created Asset Directories: {}'.format(newAssetDir))
 
 def createNewPipelineSubAsset(subAssetName=None, prompt=False):
     subAssetName = assetNameSetup(subAssetName, prompt, textPrompt=True, typ='subAsset')
@@ -704,7 +767,8 @@ def createNewPipelineSubAsset(subAssetName=None, prompt=False):
     subAssetDir = getSubAssetDir()
     newSubAssetDir = '{}{}'.format(subAssetDir, subAssetName)
     if os.path.isdir(newSubAssetDir):
-        print 'SubAsset directory already exists.'
+        # print 'SubAsset directory already exists.'
+        printToMaya('SubAsset directory already exists.')
         return False
     else:
         os.mkdir(newSubAssetDir)
@@ -733,7 +797,8 @@ def createNewPipelineSubAsset(subAssetName=None, prompt=False):
 
         for k, v in folderList.iteritems():
             createNewDirs(k, newSubAssetDir, v)
-        print 'Created SubAsset directories: {}'.format(newSubAssetDir)
+        # print 'Created SubAsset directories: {}'.format(newSubAssetDir)
+        printToMaya('Created SubAsset Directories: {}'.format(newSubAssetDir))
 
 def createNewPipelineShot(shotName=None, prompt=False):
     shotName = assetNameSetup(shotName, prompt, textPrompt=True, typ='shot')
@@ -743,7 +808,8 @@ def createNewPipelineShot(shotName=None, prompt=False):
     shotDir = getShotDir()
     newShotDir = '{}{}'.format(shotDir, shotName)
     if os.path.isdir(newShotDir):
-        print 'Shot directory already exists.'
+        # print 'Shot directory already exists.'
+        printToMaya('Shot directory already exists.')
         return False
     else:
         os.mkdir(newShotDir)
@@ -770,7 +836,8 @@ def createNewPipelineShot(shotName=None, prompt=False):
 
         for k, v in folderList.iteritems():
             createNewDirs(k, newShotDir, v)
-        print 'Created Shot directories: {}'.format(newShotDir)
+        # print 'Created Shot directories: {}'.format(newShotDir)
+        printToMaya('Created Shot Directories: {}'.format(newShotDir))
 
 
 
@@ -809,7 +876,8 @@ def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
             cmds.file(fileName, open=1, force=1)
         else:
             cmds.file(fileName, i=1, dns=1, type='mayaAscii')
-        print 'Opened File: {}'.format(fileName)
+        # print 'Opened File: {}'.format(fileName)
+        printToMaya('Opened File: {}'.format(fileName))
         return True
     return False
 
@@ -847,7 +915,8 @@ def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=
         else:
             cmds.file(rename=fileName)
             cmds.file(save=True, type='mayaAscii')
-        print 'Saved File: {}'.format(fileName)
+        # print 'Saved File: {}'.format(fileName)
+        printToMaya('Saved File: {}'.format(fileName))
 
 def treeAssetNamePrompt(typ='asset'):
     if cmds.window('{}NamePrompt'.format(typ), exists=True):
@@ -905,6 +974,7 @@ def setAssetName(assetName=None):
         treeAssetNamePrompt()
     if assetName:
         mel.eval('putenv "assetName" {}'.format(assetName))
+        printToMaya('Asset Set To: {}'.format(assetName))
 
 def getAssetName(dialog=False):
     name = mel.eval('getenv "assetName"')
@@ -921,6 +991,7 @@ def setSubAssetName(subAssetName=None):
         treeAssetNamePrompt(typ='subAsset')
     if subAssetName:
         mel.eval('putenv "subAssetName" {}'.format(subAssetName))
+        printToMaya('SubAsset Set To: {}'.format(subAssetName))
 
 def getSubAssetName(dialog=False):
     assetName = assetNameSetup(None, False)
@@ -937,6 +1008,7 @@ def setShotName(shotName=None):
         treeAssetNamePrompt(typ='shot')
     if shotName:
         mel.eval('putenv "shotName" {}'.format(shotName))
+        printToMaya('Shot Set To: {}'.format(shotName))
 
 def getShotName(dialog=False):
     name = mel.eval('getenv "shotName"')
@@ -960,10 +1032,15 @@ def assetNameSetup(assetName, prompt, textPrompt=False, typ='asset'):
     if not assetName:
         assetName = treeAssetNamePrompt(typ)
     if not assetName:
-        print 'Asset Name not specified.'
+        # print 'Asset Name not specified.'
+        printToMaya('Asset Name not specified.')
     return assetName
 
 def reloadReferences():
     assets, refNd = utils.getAssetsInScene()
     for i, each in enumerate(assets):
         referenceRig(each, replace=True, refNd=refNd[i])
+
+
+def printToMaya(msg):
+    sys.stdout.write(msg)

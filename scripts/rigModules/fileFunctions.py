@@ -396,28 +396,28 @@ def setupLookDevScene(assetName=None, prompt=False):
         else:
             cmds.addAttr(setName, longName=k, attributeType=v[0], enumName=v[1])
 
-    a = cmds.listRelatives(geoGrp.name, c=1)
+    subAssets = cmds.listRelatives(geoGrp.name, c=1)
     saGrps = cmds.ls('*_sa_*', typ='transform')
     for each in saGrps:
-        if each in a:
+        if each in subAssets:
             if cmds.objExists(each):
-                saName = each[5:]
+                subAssetNameWithSuff = each[5:]
                 for suff in suffix.values():
-                    saName = saName.rpartition(suff)[0]
-                    if not saName == '':
+                    subAssetName = subAssetNameWithSuff.rpartition(suff)[0]
+                    if not subAssetName == '':
                         break
-                refNds = referenceSubAssetLookDev(saName)
+                refNds = referenceSubAssetLookDev(subAssetName)
                 saGeo = cmds.listRelatives(refNds, c=1, ad=1, typ='transform')
                 refGrp = cmds.listRelatives(saGeo, p=1)
                 cmds.sets(saGeo, e=1, include=setName)
                 cmds.parent(refGrp, geoGrp.name)
                 cmds.delete(each)
-                mergeSubAssetAlembic(saName)
+                mergeSubAssetAlembic(assetName)
                 cmds.select(refGrp)
                 importReferences()
-                a = getSubAssetName()
-                cmds.namespace(rm=a, mnr=1)
+                cmds.namespace(rm=subAssetName, mnr=1)
     cmds.select(cl=1)
+    printToMaya('LookDev Scene setup complete for {}.'.format(assetName))
 
 
 

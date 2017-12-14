@@ -163,6 +163,12 @@ def publishRig(assetName=None, autoName=True, prompt=False):
     if not assetName:
         return False
     removeReferences()
+    cmds.setAttr('C_global_CTRL.visGeo', 1)
+    cmds.setAttr('C_global_CTRL.visCtrls', 1)
+    cmds.setAttr('C_global_CTRL.visSkel', 0)
+    cmds.setAttr('C_global_CTRL.visMech', 0)
+    cmds.setAttr('C_global_CTRL.mdGeo', 2)
+    cmds.setAttr('C_global_CTRL.mdSkel', 2)
     cmds.select('_RIG__GRP')
     publishSnapshot(asset=assetName, typ='rig')
     saveMayaFile(assetName, typ='rig/Published', prompt=prompt, autoName=autoName,
@@ -325,6 +331,7 @@ def publishSubAssetGeo(subAssetName=None, autoName=True, prompt=False, abc=True)
     subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
     if not subAssetName:
         return False
+    publishSnapshot(subAsset=subAssetName, typ='model')
     path = getSubAssetDir()
     if abc:
         if not autoName:
@@ -597,13 +604,16 @@ def setupSceneForRender(shotName=None, latest=True, prompt=False):
     print '## DO OTHER STUFF FOR SETTING UP THE RENDER - aov\'s, render settings, etc.'
 
 
-def publishSnapshot(asset=None, shot=None, typ=''):
+def publishSnapshot(asset=None, shot=None, subAsset=None, typ=''):
     if asset:
         path = getAssetDir()
         fileName = getLatestVersion(asset, path, typ, new=True, img=True)
     elif shot:
         path = getShotDir()
         fileName = getLatestVersion(shot, path, typ, new=True, img=True)
+    elif subAsset:
+        path = getSubAssetDir()
+        fileName = getLatestVersion(subAsset, path, typ, new=True, img=True)
     else:
         return False
 

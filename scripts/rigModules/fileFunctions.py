@@ -450,6 +450,9 @@ def loadSubAssetWipLookDev(subAssetName=None, latest=False, prompt=False):
     return True
 
 def publishLookDev(assetName=None, autoName=True, prompt=False):
+    assetName = assetNameSetup(assetName, prompt)
+    if not assetName:
+        return False
     publishSnapshot(asset=assetName, typ='lookDev')
     setsToSave = []
     for each in cmds.listRelatives('C_geometry_GRP', c=1, ad=1):
@@ -1043,4 +1046,5 @@ def reloadReferences():
 
 
 def printToMaya(msg):
+    msg = '{}\n'.format(msg)
     sys.stdout.write(msg)

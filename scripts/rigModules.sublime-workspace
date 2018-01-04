@@ -4,6 +4,42 @@
 		"selected_items":
 		[
 			[
+				"up",
+				"upAxis\tparam"
+			],
+			[
+				"aim",
+				"aimAxis"
+			],
+			[
+				"C_sp",
+				"C_spine_06_JNT"
+			],
+			[
+				"C_spine",
+				"C_spine_01_JNT"
+			],
+			[
+				"C",
+				"C_spine_07_JNT"
+			],
+			[
+				"aimA",
+				"aimAxis\t(1, 0, 0)"
+			],
+			[
+				"ctrl",
+				"ctrlEnd\tstatement"
+			],
+			[
+				"clavicleIK",
+				"clavicleIKCtrl"
+			],
+			[
+				"setupM",
+				"setupBodyPartName"
+			],
+			[
 				"asset",
 				"assetName\tstatement"
 			],
@@ -210,10 +246,6 @@
 			[
 				"sof",
 				"softAttr"
-			],
-			[
-				"ctrl",
-				"ctrlLocMat"
 			],
 			[
 				"kD",
@@ -482,38 +514,6 @@
 			[
 				"baseLay",
 				"baseLayerLocs\tstatement"
-			],
-			[
-				"cros",
-				"crossProductResult\tstatement"
-			],
-			[
-				"up",
-				"upDirRecalculated\tstatement"
-			],
-			[
-				"extra",
-				"extraName\tstatement"
-			],
-			[
-				"mid",
-				"midCtrl\tstatement"
-			],
-			[
-				"pip",
-				"pipeMenuLoc"
-			],
-			[
-				"getAss",
-				"getAssetName\tfunction"
-			],
-			[
-				"Palm",
-				"PalmGuide"
-			],
-			[
-				"suffix",
-				"suffixOverride\t''"
 			]
 		]
 	},
@@ -523,28 +523,16 @@
 			"file": "rigModules/bodyFunctions.py",
 			"settings":
 			{
-				"buffer_size": 86499,
+				"buffer_size": 99547,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "import os\nimport json\nimport sys\nimport maya.cmds as cmds\nimport maya.mel as mel\n\nfrom Jenks.scripts.rigModules import utilityFunctions as utils\nfrom Jenks.scripts.rigModules import apiFunctions as api\nfrom Jenks.scripts.rigModules.suffixDictionary import suffix\n\ndef getLatestVersion(assetName, path, location, new=False, name=None, suffix=None, img=False):\n    if location == 'rig/Published':\n        suffix = 'ma'\n        name = assetName\n    elif location == 'rig/WIP/guides':\n        suffix = 'ma'\n        name = 'guides'\n    elif location == 'rig/WIP/skin':\n        suffix = 'skin'\n    elif location == 'rig/WIP/controlShapes':\n        suffix = 'shape'\n    elif location == 'model/Published':\n        suffix = 'abc'\n        name = assetName\n    elif location == 'model/WIP':\n        suffix = 'ma'\n        name = assetName\n    elif location == 'anim/Published':\n        suffix = 'abc'\n        name = assetName\n    else:\n        suffix = 'ma'\n        name = assetName\n    if img:\n        suffix = 'jpg'\n    fileDirectory = '{}{}/{}/'.format(path, assetName, location)\n    # ls = os.listdir(fileDirectory)\n    ls = [f for f in os.listdir(fileDirectory) if os.path.isfile('{}/{}'.format(fileDirectory, f))]\n    relevantFiles = []\n    for each in sorted(ls):\n        lsGeo = each.rsplit('_', 1 if not location == 'model/Published' else 2)[0]\n        if lsGeo == name:\n            relevantFiles.append(each)\n    if new:\n        if not relevantFiles:\n            newFile = '{}{}_v001.{}'.format(fileDirectory, name, suffix)\n        else:\n            nameWithoutSuffix = relevantFiles[-1].rsplit('.')[0]\n            latestNum = nameWithoutSuffix.rsplit('_', 1)[1].strip('v')\n            newNum = str(int(latestNum)+1).zfill(3)\n\n            newFile = '{}{}_v{}.{}'.format(fileDirectory, name, newNum, suffix)\n    else:\n        if not relevantFiles:\n            return False\n        else:\n            newFile = '{}{}'.format(fileDirectory, relevantFiles[-1])\n    return newFile\n\ndef newNameSpace(assetName):\n    ns = '{}'.format(assetName)\n    i = 1\n    while cmds.namespace(ex=ns):\n        i += 1\n        ns = '{}{}'.format(assetName, str(i).zfill(2))\n    return ns\n\ndef loadPlugin(nodeName, python=False):\n    if python:\n        fileType = '.py'\n    else:\n        if sys.platform == \"linux\" or sys.platform == \"linux2\":\n           # linux\n           fileType = '.so'\n        elif sys.platform == \"darwin\":\n           # MAC OS X\n           fileType = '.bundle'\n        elif sys.platform == \"win32\" or sys.platform == \"win64\":\n           # Windows\n           fileType = '.mll'\n    loadedPlugins = cmds.pluginInfo(q=1, listPlugins=1)\n    if nodeName in loadedPlugins:\n        cmds.unloadPlugin('{}{}'.format(nodeName, fileType))\n        cmds.flushUndo()\n    pluginPath = '{}/Jenks/scripts/nodes'.format(getScriptDir())\n    cmds.loadPlugin(r'{}/{}{}'.format(pluginPath, nodeName, fileType))\n    mel.eval(\"refreshEditorTemplates; refreshAE;\")\n\ndef loadAllPlugins():\n    loadPlugin('mjStretchArray')\n    loadPlugin('mjRivet')\n    loadPlugin('mjSoftIK', True)\n\n\ndef getScriptDir():\n    ## MIGHT NEED CHANGING - not sure if the path list will be\n    ## consistant between pcs (or even restarts)\n    homeDir = os.environ['HOME']\n    if os.path.isfile('C:\\\\Docs\\\\readMe.txt'):\n        ## on uni computers\n        scriptPath = 'C:\\\\Docs\\\\maya\\\\scripts'\n    elif os.path.isdir('{}\\\\maya'.format(homeDir)):\n        ## on other computers\n        scriptPath = '{}\\\\maya'.format(homeDir)\n    else:\n        scriptPath = sys.path[-1]\n    return scriptPath\n\ndef getAssetDir():\n    path = cmds.workspace(q=1, rd=1)\n    return '{}assets/'.format(path)\n\ndef getSubAssetDir():\n    assetNameSetup(None, False)\n    assetName = getAssetName()\n    path = cmds.workspace(q=1, rd=1)\n    return '{}assets/{}/subAssets/'.format(path, assetName)\n\ndef getShotDir():\n    path = cmds.workspace(q=1, rd=1)\n    return '{}shots/'.format(path)\n\ndef newScene():\n    if cmds.file(q=1, modified=1):\n        t = 'Opening New Scene'\n        m = 'This will override the current scene without saving. Save Now?'\n        confirm = cmds.confirmDialog(t=t, m=m, b=['Yes', 'No', 'Cancel'], db='Yes',\n                                     cb='Cancel', ds='Yes')\n        if confirm == 'Yes':\n            saveMayaFile()\n        elif confirm == 'Cancel':\n            return False\n    f = cmds.file(new=1, force=1)\n    return True\n\ndef abcExport(fileName, selection=True, frameRange=(1, 1), step=1.0):\n    if not frameRange == (1, 1):\n        frameRange = (frameRange[0]-3, frameRange[1]+3)\n    if selection:\n        sel = cmds.ls(sl=True)\n    else:\n        a = cmds.ls(dag=1, v=1)\n        b = cmds.ls(lights=1, cameras=1)\n        sel = list(set(a)-set(b))\n    args = '-f {0} -fr {1[0]} {1[1]} -uv -ws -wv -ef -wuvs -wc'.format(fileName, frameRange, sel)\n    if not frameRange ==  (1, 1):\n        args = '{} -s {}'.format(args, step)\n    for each in sel:\n        args = '{} -rt {}'.format(args, each)\n    cmds.AbcExport(j=args)\n\ndef loadGuides(assetName=None, prompt=False, new=False, latest=True):\n    loadMayaFile(assetName, typ='rig/WIP/guides', prompt=prompt, new=new, latest=latest)\n    return True\n\ndef saveGuides(assetName=None, autoName=False, prompt=False):\n    saveMayaFile(assetName, typ='rig/WIP/guides', prompt=prompt, autoName=autoName,\n                 removeRefs=True)\n    return True\n\ndef publishRig(assetName=None, autoName=True, prompt=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    removeReferences()\n    cmds.select('_RIG__GRP')\n    publishSnapshot(asset=assetName, typ='rig')\n    saveMayaFile(assetName, typ='rig/Published', prompt=prompt, autoName=autoName,\n                 selectionOnly=True)\n    return True\n\ndef referenceRig(assetName=None, prompt=False, replace=False, refNd=None):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    fileName = getLatestVersion(assetName, path, 'rig/Published')\n    if not replace:\n        cmds.file(fileName, r=1, ns=newNameSpace(assetName))\n    else:\n        cmds.file(fileName, lr=refNd)\n    # print 'Referenced Rig: {}'.format(fileName)\n    printToMaya('Referenced Rig: {}'.format(fileName))\n    return True\n\ndef loadWipRig(assetName=None, latest=False, prompt=False):\n    loadMayaFile(assetName, typ='rig/WIP', prompt=prompt, latest=latest)\n    return True\n\ndef saveWipRig(assetName=None, autoName=False, prompt=False):\n    saveMayaFile(assetName, typ='rig/WIP', prompt=prompt, autoName=autoName)\n    return True\n\ndef loadRigScript(assetName=None, prompt=False, build=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    fileName = '{}rigScripts/{}.py'.format(path, assetName)\n    # print 'Loading rig script: {}'.format(fileName)\n    printToMaya('Loading Rig Script: {}'.format(fileName))\n    f = open(fileName, 'r')\n    rigScriptTxt = f.read()\n    f.close()\n    cmds.ScriptEditor()\n    gCommandExecuterTabs = mel.eval('$v = $gCommandExecuterTabs')\n    tabLabels = cmds.tabLayout(gCommandExecuterTabs, q=1, tl=1)\n    tabIDs = cmds.tabLayout(gCommandExecuterTabs, q=1, ca=1)\n    create = True\n    for i, each in enumerate(tabLabels, start=1):\n        if '{}_rig'.format(assetName) == each:\n            create = False\n            cmds.tabLayout(gCommandExecuterTabs, e=1, sti=i)\n            rigTab = i\n    if create:\n        mel.eval('buildNewExecuterTab -1  \"{}_rig\"  \"python\" 1'.format(assetName))\n        numOfTabs = cmds.tabLayout(gCommandExecuterTabs, q=1, nch=1)\n        cmds.tabLayout(gCommandExecuterTabs, e=1,  selectTabIndex=numOfTabs)\n        rigTab = numOfTabs\n    executer = mel.eval('$a=$gCommandExecuter;')[rigTab-1]\n    cmds.cmdScrollFieldExecuter(executer, e=1, t=rigScriptTxt, exc=build, sla=1)\n\n\ndef loadGeo(assetName=None, group=None, prompt=False, abc=True):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    fileName = getLatestVersion(assetName, path, 'model/Published')\n    if abc:\n        if group:\n            cmds.AbcImport(fileName, mode='import', rpr=group)\n        else:\n            cmds.AbcImport(fileName, mode='import')\n    else:\n        nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)\n        mNodes = []\n        for each in nodes:\n            mNodes.append(api.getMObj(each))\n        if group:\n            for each in mNodes:\n                lN, sN = api.getPath(each)\n                if cmds.nodeType(lN) == 'transform':\n                    cmds.parent(lN, group)\n    # print 'Loaded geometry: {}'.format(fileName)\n    printToMaya('Loaded Geometry: {}'.format(fileName))\n    return True\n\ndef publishGeo(assetName=None, autoName=True, prompt=False, abc=True):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    publishSnapshot(asset=assetName, typ='model')\n    if abc:\n        if not autoName:\n            fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])\n            fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Geometry',\n                                        fileMode=0, fileFilter=fileFilter,\n                                        dir='{}{}/model/Published'.format(path, assetName))\n            if fileName:\n                fileName = fileName[0]\n            else:\n                return False\n        else:\n            fileName = getLatestVersion(assetName, path, 'model/Published', new=True)\n        # removeReferences()\n        importReferences()\n        abcExport(fileName, selection=True, frameRange=(1, 1))\n        # print 'Published Geometry: {}'.format(fileName)\n        printToMaya('Published Geometry: {}'.format(fileName))\n    else:\n        saveMayaFile(assetName, typ='model/Published', autoName=autoName, removeRefs=True,\n                     selectionOnly=True)\n        # print 'Saved as Maya File.'\n        printToMaya('Published Geometry as Maya File: {}'.format(fileName))\n    return True\n\ndef referenceGeo(assetName=None, prompt=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    fileName = getLatestVersion(assetName, path, 'model/Published')\n    cmds.file(fileName, r=1, ns=newNameSpace(assetName))\n    # print 'Referenced geometry: {}'.format(fileName)\n    printToMaya('Referenced Geometry: {}'.format(fileName))\n    return True\n\ndef saveWipGeo(assetName=None, autoName=False, prompt=False):\n    saveMayaFile(assetName, typ='model/WIP', prompt=prompt, autoName=autoName,\n                 removeRefs=False)\n    return True\n\ndef loadWipGeo(assetName=None, latest=False, prompt=False):\n    loadMayaFile(assetName, typ='model/WIP', prompt=prompt, latest=latest, new=True)\n    return True\n\ndef loadSubAssetGeo(subAssetName=None, group=None, prompt=False, abc=True):\n    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')\n    if not subAssetName:\n        return False\n    path = getSubAssetDir()\n    fileName = getLatestVersion(subAssetName, path, 'model/Published')\n    if abc:\n        if group:\n            cmds.AbcImport(fileName, mode='import', rpr=group)\n        else:\n            cmds.AbcImport(fileName, mode='import')\n    else:\n        nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)\n        if group:\n            mNodes = []\n            for each in nodes:\n                mNodes.append(api.getMObj(each))\n            for each in mNodes:\n                lN, sN = api.getPath(each)\n                if cmds.nodeType(lN) == 'transform':\n                    cmds.parent(lN, group)\n    # print 'Loaded SubAsset geometry: {}'.format(fileName)\n    printToMaya('Loaded SubAsset Geometry: {}'.format(fileName))\n    return True\n\ndef publishSubAssetGeo(subAssetName=None, autoName=True, prompt=False, abc=True):\n    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')\n    if not subAssetName:\n        return False\n    path = getSubAssetDir()\n    if abc:\n        if not autoName:\n            fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])\n            fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish SubAsset Geometry',\n                                        fileMode=0, fileFilter=fileFilter,\n                                        dir='{}{}/model/Published'.format(path, subAssetName))\n            if fileName:\n                fileName = fileName[0]\n            else:\n                return False\n        else:\n            fileName = getLatestVersion(subAssetName, path, 'model/Published', new=True)\n        removeReferences()\n        abcExport(fileName, selection=True, frameRange=(1, 1))\n        # print 'Published Geometry: {}'.format(fileName)\n        printToMaya('Published SubAsset Geometry: {}'.format(fileName))\n    # else:\n    #     saveMayaFile(subAssetName, typ='model/Published', autoName=autoName, removeRefs=True,\n    #                  selectionOnly=True)\n    #     print 'Saved as Maya File.'\n    # publishSnapshot(asset=assetName, typ='model')\n    return True\n\ndef referenceSubAssetGeo(subAssetName=None, prompt=False):\n    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')\n    if not subAssetName:\n        return False\n    path = getSubAssetDir()\n    fileName = getLatestVersion(subAssetName, path, 'model/Published')\n    cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))\n    # print 'Referenced geometry: {}'.format(fileName)\n    printToMaya('Referenced SubAsset Geometry: {}'.format(fileName))\n    return True\n\ndef saveSubAssetWipGeo(subAssetName=None, autoName=False, prompt=False):\n    saveMayaFile(subAssetName, typ='model/WIP', prompt=prompt, autoName=autoName,\n                 removeRefs=True, subAsset=True)\n    return True\n\ndef loadSubAssetWipGeo(subAssetName=None, latest=False, prompt=False):\n    loadMayaFile(subAssetName, typ='model/WIP', prompt=prompt, latest=latest, new=True,\n                 subAsset=True)\n    return True\n\ndef setupLookDevScene(assetName=None, prompt=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    geoGrp = utils.newNode('group', name='geometry', skipNum=True)\n    loadGeo(assetName, geoGrp.name)\n    print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'\n    geoSetName = 'geoSet_{}'.format(assetName)\n    i = 1\n    while cmds.objExists(geoSetName):\n        i += 1\n        geoSetName = '{}{}'.format(geoSetName, str(i).zfill(2))\n    geo = cmds.listRelatives(geoGrp.name, c=1)\n    setName = cmds.sets(geo, n=geoSetName)\n    geoSetAttrs = {\n        'aiMatte' : ('bool', None),\n        'primaryVisibility' : ('bool', None),\n        'aiSubdivIterations' : ('enum', '0:1:2:3:4:5:6:7'),\n        'aiSubdivType' : ('enum', 'None:Catclark:Linear'),\n    }\n    for k, v in geoSetAttrs.iteritems():\n        if not v[1]:\n            cmds.addAttr(setName, longName=k, attributeType=v[0])\n        else:\n            cmds.addAttr(setName, longName=k, attributeType=v[0], enumName=v[1])\n\n    subAssets = cmds.listRelatives(geoGrp.name, c=1)\n    saGrps = cmds.ls('*_sa_*', typ='transform')\n    for each in saGrps:\n        if each in subAssets:\n            if cmds.objExists(each):\n                subAssetNameWithSuff = each[5:]\n                for suff in suffix.values():\n                    subAssetName = subAssetNameWithSuff.rpartition(suff)[0]\n                    if not subAssetName == '':\n                        break\n                refNds = referenceSubAssetLookDev(subAssetName)\n                saGeo = cmds.listRelatives(refNds, c=1, ad=1, typ='transform')\n                refGrp = cmds.listRelatives(saGeo, p=1)\n                cmds.sets(saGeo, e=1, include=setName)\n                cmds.parent(refGrp, geoGrp.name)\n                cmds.delete(each)\n                mergeSubAssetAlembic(assetName)\n                cmds.select(refGrp)\n                importReferences()\n                cmds.namespace(rm=subAssetName, mnr=1)\n    cmds.select(cl=1)\n    printToMaya('LookDev Scene setup complete for {}.'.format(assetName))\n\n\n\n\ndef setupSubAssetLookDevScene(subAssetName=None, prompt=False):\n    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')\n    if not subAssetName:\n        return False\n    # geoGrp = utils.newNode('group', name=subAssetName, skipNum=True)\n    loadSubAssetGeo(subAssetName)\n\n\ndef saveWipLookDev(assetName=None, autoName=False, prompt=False):\n    saveMayaFile(assetName, typ='lookDev/WIP', prompt=prompt, autoName=autoName,\n                 removeRefs=True)\n    return True\n\ndef loadWipLookDev(assetName=None, latest=False, prompt=False):\n    loadMayaFile(assetName, typ='lookDev/WIP', prompt=prompt, latest=latest, new=True)\n    return True\n\ndef saveSubAssetWipLookDev(subAssetName=None, autoName=False, prompt=False):\n    saveMayaFile(subAssetName, typ='lookDev/WIP', prompt=prompt, autoName=autoName,\n                 removeRefs=True, subAsset=True)\n    return True\n\ndef loadSubAssetWipLookDev(subAssetName=None, latest=False, prompt=False):\n    loadMayaFile(subAssetName, typ='lookDev/WIP', prompt=prompt, latest=latest, new=True,\n                 subAsset=True)\n    return True\n\ndef publishLookDev(assetName=None, autoName=True, prompt=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    publishSnapshot(asset=assetName, typ='lookDev')\n    setsToSave = []\n    for each in cmds.listRelatives('C_geometry_GRP', c=1, ad=1):\n        sets = cmds.listSets(o=each)\n        if sets:\n            setsToSave.extend(cmds.listSets(o=each))\n    cmds.select(setsToSave, add=1, noExpand=1)\n    saveMayaFile(assetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,\n                 removeRefs=True, selectionOnly=True)\n    return True\n\ndef publishSubAssetLookDev(subAssetName=None, autoName=True, prompt=False):\n    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')\n    if not subAssetName:\n        return False\n    geo = cmds.listRelatives('C_sa_{}_GRP'.format(subAssetName), c=1)\n    cmds.select(geo)\n    saveMayaFile(subAssetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,\n                 removeRefs=True, selectionOnly=True, subAsset=True)\n    return True\n\ndef referenceLookDev(assetName=None, prompt=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    fileName = getLatestVersion(assetName, path, 'lookDev/Published')\n    cmds.file(fileName, r=1, ns=newNameSpace(assetName))\n    # print 'Referenced LookDev: {}'.format(fileName)\n    printToMaya('Referenced LookDev: {}'.format(fileName))\n    return True\n\ndef referenceSubAssetLookDev(subAssetName=None, prompt=False):\n    subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')\n    if not subAssetName:\n        return False\n    path = getSubAssetDir()\n    fileName = getLatestVersion(subAssetName, path, 'lookDev/Published')\n    nds = cmds.file(fileName, r=1, ns=newNameSpace(subAssetName), rnn=1)\n    # print 'Referenced SubAsset LookDev: {}'.format(fileName)\n    printToMaya('Referenced SubAsset LookDev: {}'.format(fileName))\n    return nds\n\ndef mergeSubAssetAlembic(assetName=None, latest=True, prompt=False):\n    assetName = assetNameSetup(assetName, prompt)\n    if not assetName:\n        return False\n    path = getAssetDir()\n    if latest:\n        fileName = getLatestVersion(assetName, path, 'model/Published')\n    else:\n        fileFilter = fileDialogFilter(['Alembic Cache', '*.abc'])\n        fileName = cmds.fileDialog2(dialogStyle=2,\n                                    caption='Merge SubAsset Alembic',\n                                    fileMode=1,\n                                    fileFilter=fileFilter,\n                                    dir='{}{}/model/Published'.format(path, assetName))\n        fileName = fileName[0] if fileName else False\n    mel.eval('AbcImport -mode import -connect \"/\" \"{}\"'.format(fileName))\n\n\ndef saveWipAnimation(shotName=None, autoName=False, prompt=False):\n    saveMayaFile(shotName, typ='anim/WIP', prompt=prompt, autoName=autoName,\n                 removeRefs=False, shot=True)\n    return True\n\ndef loadWipAnimation(shotName=None, latest=False, prompt=False):\n    loadMayaFile(shotName, typ='anim/WIP', prompt=prompt, latest=latest, new=True, shot=True)\n    return True\n\ndef publishAnimation(shotName=None, autoName=True, prompt=False):\n    rigs = cmds.ls('*:_RIG__GRP')\n    cmds.select(cl=True)\n    for each in rigs:\n        rigChilds = cmds.listRelatives(each, c=1, s=0)\n        for child in rigChilds:\n            if ':C_geometry_GRP' in child:\n                cmds.select(child, add=1)\n                continue\n    shotName = assetNameSetup(shotName, prompt, typ='shot')\n    if not shotName:\n        return False\n    path = getShotDir()\n    if not autoName:\n        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])\n        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Animation',\n                                    fileMode=0, fileFilter=fileFilter,\n                                    dir='{}{}/anim/Published'.format(path, shotName))\n        if fileName:\n            fileName = fileName[0]\n        else:\n            return False\n    else:\n        fileName = getLatestVersion(shotName, path, 'anim/Published', new=True)\n    # playBackSlider = mel.eval('$tmpVar=$gPlayBackSlider')\n    # frameRange = cmds.timeControl(playBackSlider, q=1, ra=1)\n    publishSnapshot(shot=shotName, typ='anim')\n    frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))\n    abcExport(fileName, selection=True, frameRange=frameRange)\n    # print 'Published Animation: {}'.format(fileName)\n    printToMaya('Published Animation: {}'.format(fileName))\n\ndef mergeAnimationAlembic(shotName=None, latest=True, prompt=False):\n    shotName = assetNameSetup(shotName, prompt, typ='shot')\n    if not shotName:\n        return False\n    path = getShotDir()\n    if latest:\n        fileName = getLatestVersion(shotName, path, 'anim/Published')\n    else:\n        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])\n        fileName = cmds.fileDialog2(dialogStyle=2,\n                                    caption='Merge Published Animation',\n                                    fileMode=1,\n                                    fileFilter=fileFilter,\n                                    dir='{}{}/anim/Published'.format(path, shotName))\n        fileName = fileName[0] if fileName else False\n    mel.eval('AbcImport -mode import -connect \"/\" \"{}\"'.format(fileName))\n\ndef saveWipLighting(shotName=None, autoName=False, prompt=False):\n    saveMayaFile(shotName, typ='lighting/WIP', prompt=prompt, autoName=autoName,\n                 removeRefs=False, shot=True)\n    return True\n\ndef loadWipLighting(shotName=None, latest=False, prompt=False):\n    loadMayaFile(shotName, typ='lighting/WIP', prompt=prompt, latest=latest, new=True, shot=True)\n    return True\n\ndef publishLighting(shotName=None, autoName=True, prompt=False):\n    publishSnapshot(shot=shotName, typ='lighting')\n    saveMayaFile(shotName, typ='lighting/Published', prompt=prompt, autoName=autoName,\n                 removeRefs=False, shot=True)\n    return True\n\ndef setupSceneForRender(shotName=None, latest=True, prompt=False):\n    newScene()\n    shotName = assetNameSetup(shotName, prompt, typ='shot')\n    if not shotName:\n        return False\n    path = getShotDir()\n    fileName = getLatestVersion(shotName, path, 'lighting/Published')\n    cmds.file(fileName, r=1, ns=newNameSpace(shotName))\n    # print 'Referenced Lighting: {}'.format(fileName)\n    printToMaya('Referenced Lighting: {}'.format(fileName))\n    print '## DO OTHER STUFF FOR SETTING UP THE RENDER - aov\\'s, render settings, etc.'\n\n\ndef publishSnapshot(asset=None, shot=None, typ=''):\n    if asset:\n        path = getAssetDir()\n        fileName = getLatestVersion(asset, path, typ, new=True, img=True)\n    elif shot:\n        path = getShotDir()\n        fileName = getLatestVersion(shot, path, typ, new=True, img=True)\n    else:\n        return False\n\n    oldSel = cmds.ls(sl=1, l=1)\n    cmds.select(cl=True)\n    ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')\n    multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\n    cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', 1)\n    cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)\n\n    cmds.playblast(format='image', cf=fileName,\n                   fr=1, percent=100, compression='jpg', quality=100, widthHeight=(1920, 1080),\n                   fp=False, orn=False, v=False)\n\n    print 'Snapshot image saved to: {}'.format(fileName)\n\n    cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ssao)\n    cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', multiSample)\n\n    cmds.select(oldSel)\n\n    return True\n\n\ndef removeReferences():\n    refs = cmds.ls(typ='reference')\n    if refs:\n        for each in refs:\n            cmds.file(rr=1, rfn=each)\n\ndef importReferences(sel=True):\n    refs = []\n    for each in cmds.ls(sl=sel):\n        if cmds.referenceQuery(each, inr=1) and cmds.referenceQuery(each, rfn=1) not in refs:\n            refs.append(cmds.referenceQuery(each, rfn=1))\n    oldSel = cmds.ls(sl=1)\n    if refs:\n        for each in refs:\n            if cmds.objExists(each):\n                refFile = cmds.referenceQuery(each, f=True)\n                cmds.file(refFile, importReference=True)\n    if sel:\n        cmds.select(oldSel)\n\ndef fileDialogFilter(fileFormats):\n    fileFilter = ''\n    fileFormats.append(('All', '*.*'))\n    for i, x in enumerate(fileFormats):\n        seperator = ';;' if i > 0 else ''\n        fileFilter += '{0}{1[0]} Files ({1[1]})'.format(seperator, x)\n    return fileFilter\n\ndef saveJson(data, defaultDir=None, caption='Save Json', fileFormats=[('JSON', '*.json')],\n             fileOverride=False):\n    if not fileOverride:\n        fileFilter = fileDialogFilter(fileFormats)\n        fileName = cmds.fileDialog2(dialogStyle=2,\n                                    caption=caption,\n                                    fileMode=0,\n                                    fileFilter=fileFilter,\n                                    dir=defaultDir)\n        if fileName:\n            fileName = fileName[0]\n        else:\n            return False\n    else:\n        if type(fileOverride) == list():\n            fileName = fileOverride[0]\n        else:\n            fileName = fileOverride\n    with open(fileName, 'w') as f:\n        json.dump(data, f, indent=4)\n    # print 'File Saved to: {}'.format(fileName)\n    printToMaya('File Saved: {}'.format(fileName))\n    return True\n\ndef loadJson(defaultDir=None, caption='Load Json', fileFormats=[('JSON', '*.json')],\n             fileOverride=False):\n    if not fileOverride:\n        fileFilter = fileDialogFilter(fileFormats)\n        fileName = cmds.fileDialog2(dialogStyle=1,\n                                    caption=caption,\n                                    fileMode=1,\n                                    fileFilter=fileFilter,\n                                    dir=defaultDir)\n        if fileName:\n            fileName = fileName[0]\n        else:\n            return False\n    else:\n        fileName = fileOverride\n    with open(fileName, 'r') as f:\n        data = json.load(f)\n    return data\n\ndef createNewDirs(folder, directory, subFolder=None):\n    if not os.path.isdir('{}/{}'.format(directory, folder)):\n        os.mkdir('{}/{}'.format(directory, folder))\n    if type(subFolder) == type(list()):\n        for each in subFolder:\n            createNewDirs(each, '{}/{}'.format(directory, folder))\n    elif type(subFolder) == type(dict()):\n        for f, sf in subFolder.iteritems():\n            createNewDirs(f, '{}/{}'.format(directory, folder), sf)\n\ndef createNewPipelineAsset(assetName=None, prompt=False):\n    assetName = assetNameSetup(assetName, prompt, textPrompt=True)\n    if not assetName:\n        return False\n    setAssetName(assetName)\n    assetDir = getAssetDir()\n    newAssetDir = '{}{}'.format(assetDir, assetName)\n    if os.path.isdir(newAssetDir):\n        # print 'Asset directory already exists.'\n        printToMaya('Asset directory already exists.')\n        return False\n    else:\n        os.mkdir(newAssetDir)\n        folderList = {\n            'lookDev' : [\n                'Published',\n                'WIP',\n            ],\n            'model' : [\n                'Published',\n                'WIP',\n            ],\n            'subAssets' : [],\n            'rig' : {\n                'Published' : [],\n                'WIP' : [\n                    'controlShapes',\n                    'guides',\n                    'skin',\n                ],\n            },\n            'texture' : {\n                'Published' : [\n                    'bump',\n                    'diff',\n                    'disp',\n                    'masks',\n                    'spc',\n                    'spcRough',\n                    'sss',\n                ],\n                'WIP' : [],\n            },\n        }\n\n        for k, v in folderList.iteritems():\n            createNewDirs(k, newAssetDir, v)\n        # print 'Created Asset directories: {}'.format(newAssetDir)\n        printToMaya('Created Asset Directories: {}'.format(newAssetDir))\n\ndef createNewPipelineSubAsset(subAssetName=None, prompt=False):\n    subAssetName = assetNameSetup(subAssetName, prompt, textPrompt=True, typ='subAsset')\n    if not subAssetName:\n        return False\n    setSubAssetName(subAssetName)\n    subAssetDir = getSubAssetDir()\n    newSubAssetDir = '{}{}'.format(subAssetDir, subAssetName)\n    if os.path.isdir(newSubAssetDir):\n        # print 'SubAsset directory already exists.'\n        printToMaya('SubAsset directory already exists.')\n        return False\n    else:\n        os.mkdir(newSubAssetDir)\n        folderList = {\n            'model' : [\n                'Published',\n                'WIP',\n            ],\n            'texture' : {\n                'Published' : [\n                    'bump',\n                    'diff',\n                    'disp',\n                    'masks',\n                    'spc',\n                    'spcRough',\n                    'sss',\n                ],\n                'WIP' : [],\n            },\n            'lookDev' : [\n                'Published',\n                'WIP',\n            ],\n        }\n\n        for k, v in folderList.iteritems():\n            createNewDirs(k, newSubAssetDir, v)\n        # print 'Created SubAsset directories: {}'.format(newSubAssetDir)\n        printToMaya('Created SubAsset Directories: {}'.format(newSubAssetDir))\n\ndef createNewPipelineShot(shotName=None, prompt=False):\n    shotName = assetNameSetup(shotName, prompt, textPrompt=True, typ='shot')\n    if not shotName:\n        return False\n    setShotName(shotName)\n    shotDir = getShotDir()\n    newShotDir = '{}{}'.format(shotDir, shotName)\n    if os.path.isdir(newShotDir):\n        # print 'Shot directory already exists.'\n        printToMaya('Shot directory already exists.')\n        return False\n    else:\n        os.mkdir(newShotDir)\n        folderList = {\n            'anim' : [\n                'Published',\n                'WIP',\n            ],\n            'lighting' : [\n                'Published',\n                'WIP',\n            ],\n            'nuke' : [],\n            'plates' : [\n                'misc',\n                'prep',\n                'raw',\n                'retime',\n                'roto',\n                'undistort',\n            ],\n            'renders' : [],\n        }\n\n        for k, v in folderList.iteritems():\n            createNewDirs(k, newShotDir, v)\n        # print 'Created Shot directories: {}'.format(newShotDir)\n        printToMaya('Created Shot Directories: {}'.format(newShotDir))\n\n\n\ndef loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,\n                 shot=False, subAsset=False):\n    if shot:\n        directory = getShotDir()\n        assetTyp = 'shot'\n    elif subAsset:\n        directory = getSubAssetDir()\n        assetTyp = 'subAsset'\n    else:\n        directory = getAssetDir()\n        assetTyp = 'asset'\n\n    assetName = assetNameSetup(assetName, prompt, typ=assetTyp)\n    if not assetName:\n        return False\n    subDir = '{}{}/{}/'.format(directory, assetName, typ)\n    if not os.path.isdir(subDir):\n        print '{} asset does not exist.'.format(assetName)\n        return False\n    if latest:\n        fileName = getLatestVersion(assetName, directory, typ)\n    else:\n        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])\n        fileName = cmds.fileDialog2(dialogStyle=2,\n                                    caption='Load {}'.format(typ),\n                                    fileMode=1,\n                                    fileFilter=fileFilter,\n                                    dir=subDir)\n        fileName = fileName[0] if fileName else False\n    if fileName:\n        if new:\n            newScene()\n            cmds.file(fileName, open=1, force=1)\n        else:\n            cmds.file(fileName, i=1, dns=1, type='mayaAscii')\n        # print 'Opened File: {}'.format(fileName)\n        printToMaya('Opened File: {}'.format(fileName))\n        return True\n    return False\n\ndef saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=False,\n                 selectionOnly=False, shot=False, subAsset=False):\n    if subAsset:\n        directory = getSubAssetDir()\n        assetTyp = 'subAsset'\n    elif shot:\n        directory = getShotDir()\n        assetTyp = 'shot'\n    else:\n        directory = getAssetDir()\n        assetTyp = 'asset'\n    assetName = assetNameSetup(assetName, prompt, typ=assetTyp)\n    if not assetName:\n        return False\n\n    subDir = '{}{}/{}/'.format(directory, assetName, typ)\n    if autoName:\n        fileName = getLatestVersion(assetName, directory, typ, new=1)\n    else:\n        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])\n        fileName = cmds.fileDialog2(dialogStyle=2,\n                                    caption='Save {}'.format(typ.capitalize()),\n                                    fileMode=0,\n                                    fileFilter=fileFilter,\n                                    dir=subDir)\n        fileName = fileName[0] if fileName else False\n    if fileName:\n        if removeRefs:\n            removeReferences()\n        if selectionOnly:\n            cmds.file(fileName, exportSelected=True, type='mayaAscii')\n        else:\n            cmds.file(rename=fileName)\n            cmds.file(save=True, type='mayaAscii')\n        # print 'Saved File: {}'.format(fileName)\n        printToMaya('Saved File: {}'.format(fileName))\n\ndef treeAssetNamePrompt(typ='asset'):\n    if cmds.window('{}NamePrompt'.format(typ), exists=True):\n        cmds.deleteUI('{}NamePrompt'.format(typ), window=True)\n    window = cmds.window('{}NamePrompt'.format(typ), title='Set {} Name'.format(typ.capitalize()),\n                         width=200)\n    form = cmds.formLayout()\n    treeLister = cmds.treeLister(rc='fileFn.treeAssetNamePrompt(\"{}\")'.format(typ))\n    btnCommand = 'fileFn.createNewPipeline{}{}(prompt=True) \\nfileFn.treeAssetNamePrompt(\"{}\")'.format(typ.capitalize()[0], typ[1:], typ)\n    btn = cmds.button(label='Create New', command=btnCommand)\n    cmds.formLayout(form, e=1, af=((treeLister, 'top', 0),\n                                   (treeLister, 'left', 0),\n                                   (treeLister, 'bottom', 30),\n                                   (treeLister, 'right', 0),\n                                   (btn, 'bottom', 10),\n                                   (btn, 'left', 10)))\n    cmds.showWindow(window)\n\n    if typ == 'shot':\n        directory = getShotDir()\n        icon = 'Camera.png'\n    elif typ == 'asset':\n        directory = getAssetDir()\n        icon = 'alignOnMin.png'\n    elif typ == 'subAsset':\n        directory = getSubAssetDir()\n        icon = 'subdivSphere.png'\n    if not os.path.isdir(directory):\n        return False\n    ls = [f for f in os.listdir(directory) if os.path.isdir('{}/{}'.format(directory, f))]\n    if 'rigScripts' in ls:\n        ls.remove('rigScripts')\n\n    for each in ls:\n        # command = 'fileFn.assetNamePromptCommand(\"{}\", \"{}\")'.format(each, window)\n        command = 'fileFn.set{}{}Name(\"{}\") \\ncmds.window(\"{}\", e=1, vis=False)'.format(typ.capitalize()[0], typ[1:], each, window)\n        cmds.treeLister(treeLister, e=1, add=[(each, icon, command)])\n\ndef textAssetNamePrompt(title='Asset'):\n    result = cmds.promptDialog(title='{} Name'.format(title),\n                               message='{} Name:'.format(title),\n                               button=['OK', 'Cancel'],\n                               defaultButton='OK',\n                               cancelButton='Cancel',\n                               dismissString='Cancel')\n    if result == 'OK':\n        assetName = cmds.promptDialog(query=True, text=True)\n    else:\n        assetName = None\n    return assetName\n\ndef setAssetName(assetName=None):\n    if not assetName:\n        # assetName = assetNamePrompt()\n        treeAssetNamePrompt()\n    if assetName:\n        mel.eval('putenv \"assetName\" {}'.format(assetName))\n        printToMaya('Asset Set To: {}'.format(assetName))\n\ndef getAssetName(dialog=False):\n    name = mel.eval('getenv \"assetName\"')\n    if dialog:\n        cmds.confirmDialog(m='Current Asset: {}'.format(name), button=['Ok'])\n    return name\n\ndef setSubAssetName(subAssetName=None):\n    assetName = assetNameSetup(None, False)\n    if not assetName:\n        return False\n    setAssetName(assetName)\n    if not subAssetName:\n        treeAssetNamePrompt(typ='subAsset')\n    if subAssetName:\n        mel.eval('putenv \"subAssetName\" {}'.format(subAssetName))\n        printToMaya('SubAsset Set To: {}'.format(subAssetName))\n\ndef getSubAssetName(dialog=False):\n    assetName = assetNameSetup(None, False)\n    if not assetName:\n        return False\n    setAssetName(assetName)\n    name = mel.eval('getenv \"subAssetName\"')\n    if dialog:\n        cmds.confirmDialog(m='Current SubAsset: {}'.format(name), button=['Ok'])\n    return name\n\ndef setShotName(shotName=None):\n    if not shotName:\n        treeAssetNamePrompt(typ='shot')\n    if shotName:\n        mel.eval('putenv \"shotName\" {}'.format(shotName))\n        printToMaya('Shot Set To: {}'.format(shotName))\n\ndef getShotName(dialog=False):\n    name = mel.eval('getenv \"shotName\"')\n    if dialog:\n        cmds.confirmDialog(m='Current Shot: {}'.format(name), button=['Ok'])\n    return name\n\ndef assetNameSetup(assetName, prompt, textPrompt=False, typ='asset'):\n    if prompt:\n        if textPrompt:\n            assetName = textAssetNamePrompt(typ.capitalize())\n        else:\n            treeAssetNamePrompt(typ)\n    if not assetName:\n        if typ == 'asset':\n            assetName = getAssetName()\n        elif typ == 'shot':\n            assetName = getShotName()\n        elif typ == 'subAsset':\n            assetName = getSubAssetName()\n    if not assetName:\n        assetName = treeAssetNamePrompt(typ)\n    if not assetName:\n        # print 'Asset Name not specified.'\n        printToMaya('Asset Name not specified.')\n    return assetName\n\ndef reloadReferences():\n    assets, refNd = utils.getAssetsInScene()\n    for i, each in enumerate(assets):\n        referenceRig(each, replace=True, refNd=refNd[i])\n\n\ndef printToMaya(msg):\n    msg = '{}\\n'.format(msg)\n    sys.stdout.write(msg)",
 			"file": "rigModules/fileFunctions.py",
-			"file_size": 39359,
-			"file_write_time": 131574689925065508,
 			"settings":
 			{
-				"buffer_size": 39359,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "rigModules/setupFn.py",
-			"settings":
-			{
-				"buffer_size": 3856,
-				"encoding": "UTF-8",
+				"buffer_size": 39825,
 				"line_ending": "Unix"
 			}
 		},
@@ -555,6 +543,23 @@
 				"buffer_size": 41132,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/runes/assets/rigScripts/treeDemonPrevis.py",
+			"settings":
+			{
+				"buffer_size": 2153,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rigModules/templateRig.py",
+			"settings":
+			{
+				"buffer_size": 1609,
+				"line_ending": "Unix"
 			}
 		},
 		{
@@ -569,7 +574,8 @@
 			"file": "rigModules/ctrlFunctions.py",
 			"settings":
 			{
-				"buffer_size": 18201,
+				"buffer_size": 18244,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
@@ -577,7 +583,8 @@
 			"file": "rigModules/utilityFunctions.py",
 			"settings":
 			{
-				"buffer_size": 30661,
+				"buffer_size": 31071,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
@@ -585,7 +592,7 @@
 			"file": "rigModules/mechFunctions.py",
 			"settings":
 			{
-				"buffer_size": 27233,
+				"buffer_size": 35672,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -598,10 +605,18 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 400.0,
-		"last_filter": "ssp",
+		"height": 220.0,
+		"last_filter": "remove",
 		"selected_items":
 		[
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
 			[
 				"ssp",
 				"Set Syntax: Python"
@@ -612,14 +627,6 @@
 			],
 			[
 				"package",
-				"Package Control: Install Package"
-			],
-			[
-				"remove",
-				"Package Control: Remove Package"
-			],
-			[
-				"install",
 				"Package Control: Install Package"
 			],
 			[
@@ -727,7 +734,7 @@
 				"Set Syntax: Shell Script (Bash)"
 			]
 		],
-		"width": 472.0
+		"width": 549.0
 	},
 	"console":
 	{
@@ -753,6 +760,7 @@
 	],
 	"file_history":
 	[
+		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/setupFn.py",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/finalProject/assets/rigScripts/treeTest.py",
 		"/C/Users/mj15aaf/Downloads/userSetup.mel",
 		"/E/Random/Maya/scripts/userSetup.mel",
@@ -830,7 +838,6 @@
 		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/defaultBodyOptions.py",
 		"/home/Jenks/maya/scripts/Jenks/scripts/modularRig/uiTest2.py",
 		"/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/TheResistance/assets/rigScripts/femalePeasant.py",
-		"/home/Jenks/maya/scripts/Jenks/scripts/rigModules/setupFn.py",
 		"/home/Jenks/Downloads/devkitBase/devkit/plug-ins/mjRivet/Makefile",
 		"/home/Jenks/Desktop/mayaNodes/devkit/plug-ins/mjRivet/mjRivet/mjRivet.cpp",
 		"/home/Jenks/Desktop/mayaNodes/devkit/plug-ins/mjRivet/mjRivet/mainPlugin.cpp",
@@ -884,7 +891,7 @@
 	],
 	"find":
 	{
-		"height": 46.0
+		"height": 66.0
 	},
 	"find_in_files":
 	{
@@ -898,6 +905,13 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"leg",
+			"fkCtrlGrp.name",
+			"clavicle",
+			"ikJnts",
+			"self",
+			"limb",
+			"leg",
 			"print ",
 			"print",
 			"cock",
@@ -936,7 +950,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 3,
 			"sheets":
 			[
 				{
@@ -945,127 +959,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 86499,
+						"buffer_size": 99547,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content"
-							],
-							"origPos":
-							[
-								0.0,
-								615.0
-							],
-							"show_definitions": false,
-							"syncScroll": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 615.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "rigModules/fileFunctions.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 39359,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								23582,
-								23588
+								77657,
+								77665
 							]
 						],
 						"settings":
@@ -1089,72 +991,87 @@
 							},
 							"bracket_highlighter.clone_regions":
 							[
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
 								"bh_square",
 								"bh_square_center",
 								"bh_square_open",
 								"bh_square_close",
 								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
 								"bh_unmatched_close",
 								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content"
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
 							],
 							"bracket_highlighter.locations":
 							{
 								"close":
 								{
+									"1":
+									[
+										77819,
+										77820
+									]
 								},
 								"icon":
 								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"region.yellowish"
+									]
 								},
 								"open":
 								{
+									"1":
+									[
+										77650,
+										77651
+									]
 								},
 								"unmatched":
 								{
@@ -1162,66 +1079,66 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
 								"bh_square",
 								"bh_square_center",
 								"bh_square_open",
 								"bh_square_close",
 								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
 								"bh_unmatched_close",
 								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content"
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
 							],
 							"origPos":
 							[
 								0.0,
-								7931.0
+								575.0
 							],
 							"show_definitions": false,
 							"syncScroll": false,
@@ -1230,32 +1147,106 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 7931.0,
+						"translation.y": 575.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "rigModules/setupFn.py",
+					"buffer": 1,
+					"file": "rigModules/fileFunctions.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3856,
+						"buffer_size": 39825,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								462,
-								462
+								25356,
+								25356
 							]
 						],
 						"settings":
 						{
 							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
 							"bracket_highlighter.locations":
 							{
 								"close":
@@ -1273,6 +1264,21 @@
 							},
 							"bracket_highlighter.regions":
 							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
 								"bh_round",
 								"bh_round_center",
 								"bh_round_open",
@@ -1283,56 +1289,41 @@
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
 								"bh_angle_close",
-								"bh_angle_content"
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
 							],
 							"origPos":
 							[
 								0.0,
-								0.0
+								8771.0
 							],
 							"show_definitions": false,
 							"syncScroll": false,
@@ -1341,14 +1332,14 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 8771.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 2,
 					"file": "pipelineMenu.mel",
 					"semi_transient": false,
 					"settings":
@@ -1458,36 +1449,26 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
 								"bh_square",
 								"bh_square_center",
 								"bh_square_open",
 								"bh_square_close",
 								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
 								"bh_c_define",
 								"bh_c_define_center",
 								"bh_c_define_open",
@@ -1498,6 +1479,117 @@
 								"bh_curly_open",
 								"bh_curly_close",
 								"bh_curly_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"origPos":
+							[
+								1023.0,
+								1806.0
+							],
+							"syncScroll": false,
+							"syntax": "Packages/MayaSublime/MEL.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 1023.0,
+						"translation.y": 1806.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/Jenks/Documents/USB/Uni_Tomfoolery/Year_3/runes/assets/rigScripts/treeDemonPrevis.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2153,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								559,
+								559
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
@@ -1508,27 +1600,311 @@
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
-								"bh_double_quote_content"
+								"bh_double_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
 							],
 							"origPos":
 							[
-								987.0,
-								1806.0
+								0.0,
+								0.0
 							],
+							"show_definitions": false,
 							"syncScroll": false,
-							"syntax": "Packages/MayaSublime/MEL.tmLanguage",
+							"syntax": "Packages/Python/Python.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 987.0,
-						"translation.y": 1806.0,
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "rigModules/templateRig.py",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 1609,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								885,
+								885
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										885,
+										886
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"region.yellowish"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										829,
+										830
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"origPos":
+							[
+								0.0,
+								0.0
+							],
+							"show_definitions": false,
+							"syncScroll": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -1538,7 +1914,7 @@
 			"sheets":
 			[
 				{
-					"buffer": 4,
+					"buffer": 5,
 					"file": "rigModules/ikFunctions.py",
 					"semi_transient": false,
 					"settings":
@@ -1646,92 +2022,102 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "rigModules/ctrlFunctions.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 18201,
+						"buffer_size": 18244,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								13882,
+								13891
 							]
 						],
 						"settings":
 						{
 							"bracket_highlighter.busy": false,
 							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.locations":
+							"bracket_highlighter.clone_locations":
 							{
 								"close":
 								{
+									"1":
+									[
+										13944,
+										13945
+									]
 								},
 								"icon":
 								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"region.yellowish"
+									]
 								},
 								"open":
 								{
+									"1":
+									[
+										13662,
+										13663
+									]
 								},
 								"unmatched":
 								{
 								}
 							},
-							"bracket_highlighter.regions":
+							"bracket_highlighter.clone_regions":
 							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
 								"bh_square",
 								"bh_square_center",
 								"bh_square_open",
 								"bh_square_close",
 								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
 								"bh_c_define",
 								"bh_c_define_center",
 								"bh_c_define_open",
 								"bh_c_define_close",
 								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
 								"bh_round",
 								"bh_round_center",
 								"bh_round_open",
@@ -1741,12 +2127,105 @@
 								"bh_single_quote_center",
 								"bh_single_quote_open",
 								"bh_single_quote_close",
-								"bh_single_quote_content"
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										13944,
+										13945
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"region.yellowish"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										13662,
+										13663
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
 							],
 							"origPos":
 							[
 								0.0,
-								2982.0
+								4326.0
 							],
 							"show_definitions": false,
 							"syncScroll": false,
@@ -1755,27 +2234,242 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2982.0,
+						"translation.y": 4326.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 7,
 					"file": "rigModules/utilityFunctions.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 30661,
+						"buffer_size": 31071,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								17320,
-								17320
+								19359,
+								19359
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.clone": -1,
+							"bracket_highlighter.clone_locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										19372,
+										19373
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"region.yellowish"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										19337,
+										19338
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.clone_regions":
+							[
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										19359,
+										19360
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"region.yellowish"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										19323,
+										19324
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"origPos":
+							[
+								0.0,
+								6884.0
+							],
+							"show_definitions": false,
+							"syncScroll": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6632.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "rigModules/mechFunctions.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 35672,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1323,
+								1323
 							]
 						],
 						"settings":
@@ -1799,61 +2493,61 @@
 							},
 							"bracket_highlighter.clone_regions":
 							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
 								"bh_double_quote_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
 								"bh_unmatched_close",
 								"bh_unmatched_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
 								"bh_round",
 								"bh_round_center",
 								"bh_round_open",
 								"bh_round_close",
 								"bh_round_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
 								"bh_single_quote",
 								"bh_single_quote_center",
 								"bh_single_quote_open",
 								"bh_single_quote_close",
-								"bh_single_quote_content"
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
 							],
 							"bracket_highlighter.locations":
 							{
@@ -1872,66 +2566,66 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
 								"bh_square",
 								"bh_square_center",
 								"bh_square_open",
 								"bh_square_close",
 								"bh_square_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
 								"bh_unmatched_close",
 								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
 								"bh_default_close",
 								"bh_default_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
 								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content"
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
 							],
 							"origPos":
 							[
 								0.0,
-								6468.0
+								168.0
 							],
 							"show_definitions": false,
 							"syncScroll": false,
@@ -1940,134 +2634,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6468.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "rigModules/mechFunctions.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 27233,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7110,
-								7110
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.clone": -1,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-									"1":
-									[
-										7110,
-										7111
-									]
-								},
-								"icon":
-								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/round_bracket.png",
-										"region.yellowish"
-									]
-								},
-								"open":
-								{
-									"1":
-									[
-										7069,
-										7070
-									]
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content"
-							],
-							"origPos":
-							[
-								0.0,
-								378.0
-							],
-							"show_definitions": false,
-							"syncScroll": false,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 378.0,
+						"translation.y": 630.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 5,
@@ -2122,11 +2689,19 @@
 	{
 		"height": 0.0
 	},
+	"output.stino_build_panel":
+	{
+		"height": 0.0
+	},
+	"output.stino_panel":
+	{
+		"height": 0.0
+	},
 	"pinned_build_system": "",
 	"project": "rigModules.sublime-project",
 	"replace":
 	{
-		"height": 74.0
+		"height": 56.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -2156,7 +2731,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},

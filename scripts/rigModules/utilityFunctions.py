@@ -514,6 +514,18 @@ def orientJoints(jnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
         cmds.makeIdentity(each, a=1, t=0, r=1, s=0, n=0)
         cmds.parent(child, each)
 
+        for t in 'xyz':
+            tVal = cmds.getAttr('{}.t{}'.format(each, t))
+            if tVal > -0.0001 and tVal < 0.0001:
+                cmds.setAttr('{}.t{}'.format(each, t), 0)
+
+def orientSelectedJoints(hierarchy=False, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
+    sel = cmds.ls(sl=1, typ='joint', l=1)
+    side = sel[0][0]
+    orientJoints(sel, aimAxis=aimAxis, upAxis=upAxis)
+    cmds.select(sel)
+
+
 def createJntsFromCrv(crv, numOfJnts, chain=True, name='curveJoints', side='C'):
     """ Create joints on a curve.
         [Args]:

@@ -79,6 +79,10 @@ class armModule:
             #                            worldUp=(0, 1, 0),
             #                            guessUp=1)
             utils.orientJoints(jnts[1:], aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
+
+        for jnt in jnts:
+            utils.addJntToSkinJnt(jnt, self.rig)
+
         ## ik/fk
         if options['IK'] and options['FK']:
             clavChild = armMechSkelGrp.name
@@ -525,6 +529,10 @@ class legModule:
             #                            worldUp=(0, 1 if not self.side == 'R' else -1, 0),
             #                            guessUp=1)
             utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
+
+        for jnt in jnts:
+            utils.addJntToSkinJnt(jnt, self.rig)
+
         ## ik/fk
         if options['IK'] and options['FK']:
             ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = mechFn.ikfkMechanics(self, extraName, jnts,
@@ -796,6 +804,202 @@ class legModule:
                                   '{}legFKCtrls{}'.format(self.moduleName, suffix['group']), mo=1)
             if options['IK'] and options['FK']:
                 cmds.parentConstraint(legParentLoc.name, legMechSkelGrp.name, mo=1)
+
+
+class quadripedLegModule:
+
+    """ Create a quadriped leg rig. """
+
+    def __init__(self, rig, extraName='', side='C'):
+        """ Setup the initial variables to use when creating the limb.
+        [Args]:
+        rig (class) - The rig class to use
+        extraName (string) - The extra name of the module
+        side (string) - The side of the module ('C', 'R' or 'L')
+        """
+        self.moduleName = utils.setupBodyPartName(extraName, side)
+        self.extraName = extraName
+        self.side = side
+        self.rig = rig
+
+    def create(self, options=None, autoOrient=False, customNodes=False, parent=None):
+        """ Create the leg rig.
+        [Args]:
+        options (dictionary) - A dictionary of options for the leg
+        autoOrient (bool) - Toggles auto orienting the joints
+        customNodes (bool) - Toggles the use of custom nodes
+        parent (string) - The name of the parent
+        """
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        jntSuffix = suffix['joint']
+        jnts = [
+            '{}clavicle{}'.format(self.moduleName, jntSuffix),
+            '{}hip{}'.format(self.moduleName, jntSuffix),
+            '{}knee{}'.format(self.moduleName, jntSuffix),
+            '{}backKnee{}'.format(self.moduleName, jntSuffix),
+            '{}ankle{}'.format(self.moduleName, jntSuffix),
+            '{}footBall{}'.format(self.moduleName, jntSuffix),
+            '{}footToes{}'.format(self.moduleName, jntSuffix),
+        ]
+        col = utils.getColors(self.side)
+        cmds.parent(jnts[0], self.rig.skelGrp.name)
+        legCtrlsGrp = utils.newNode('group', name='{}legCtrls'.format(extraName), side=self.side,
+                                     parent=self.rig.ctrlsGrp.name, skipNum=True)
+        legMechGrp = utils.newNode('group', name='{}legMech'.format(extraName), side=self.side,
+                                    parent=self.rig.mechGrp.name, skipNum=True)
+
+        if options['IK']:
+            legMechSkelGrp = utils.newNode('group', name='{}legMechSkel'.format(extraName),
+                                           side=self.side, parent=legMechGrp.name, skipNum=True)
+
+        if autoOrient:
+            utils.orientJoints(jnts[1:], aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
+
+        for jnt in jnts:
+            utils.addJntToSkinJnt(jnt, self.rig)
+
+        ## ik/fk
+        if options['IK'] and options['FK']:
+            ikJnts, fkJnts, jnts, ikCtrlGrp, fkCtrlGrp = mechFn.ikfkMechanics(self, extraName, jnts,
+                                                                              legMechSkelGrp,
+                                                                              legCtrlsGrp,
+                                                                              moduleType='leg',
+                                                                              rig=self.rig)
+        else:
+            ikJnts = jnts
+            fkJnts = jnts
+            ikCtrlGrp = legCtrlsGrp
+            fkCtrlGrp = legCtrlsGrp
+
+        self.footJnt = jnts[5]
+        self.ikCtrlGrp = ikCtrlGrp
+        self.fkCtrlGrp = fkCtrlGrp
+
+        if options['IK']:
+            ## mechanics
+            upperLegIK = ikFn.ik(ikJnts[0], ikJnts[2], name='{}upperLegIK'.format(extraName),
+                                 side=self.side)
+            upperLegIK.createIK(parent=legMechGrp.name)
+            legIK = ikFn.ik(ikJnts[2], ikJnts[4], name='{}lowerLegIK'.format(extraName),
+                            side=self.side)
+            legIK.createIK(parent=legMechGrp.name)
+            upperLegCtrls = utils.newNode('group', name='{}upperLegCtrls'.format(extraName),
+                                          side=self.side, parent=ikCtrlGrp.name, skipNum=True)
+            ## clav ctrl
+            self.clavicleIKCtrl = ctrlFn.ctrl(name='{}clavicleIK'.format(extraName), side=self.side,
+                                              guide=jnts[0], skipNum=True,
+                                              parent=upperLegCtrls.name,
+                                              scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            cmds.xform(self.clavicleIKCtrl.ctrl.name, piv=cmds.xform(parent, q=1, t=1, ws=1), ws=1)
+            self.clavicleIKCtrl.modifyShape(shape='pin', color=col['col2'], mirror=True)
+            self.clavicleIKCtrl.constrain(ikJnts[0])
+            ## hip ctrl
+            self.hipIKCtrl = ctrlFn.ctrl(name='{}hipIK'.format(extraName), side=self.side,
+                                         guide=jnts[1], skipNum=True,
+                                         parent=upperLegCtrls.name,
+                                         scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            self.hipIKCtrl.modifyShape(shape='pringle', color=col['col1'], mirror=True)
+            self.hipIKCtrl.constrain(upperLegIK.grp)
+
+            a = utils.newNode('transform', parent=self.hipIKCtrl.rootGrp.name)
+            cmds.pointConstraint(self.clavicleIKCtrl.ctrlEnd, a.name)
+            a.connect('t', '{}.rotatePivot'.format(self.hipIKCtrl.ctrl.name))
+
+            ## foot ctrl
+            footIKGuide = '{}footCtrlGuide{}'.format(self.moduleName, suffix['locator'])
+            useGuideLoc = cmds.objExists(footIKGuide)
+            if not useGuideLoc:
+                footIKGuide = ikJnts[4]
+            self.ikCtrl = ctrlFn.ctrl(name='{}footIK'.format(extraName), side=self.side,
+                                      guide=footIKGuide, skipNum=True, parent=ikCtrlGrp.name,
+                                      deleteGuide=True if useGuideLoc else False,
+                                      scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            self.ikCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
+            ## pole vector
+            pvGuide = '{}legPV{}'.format(self.moduleName, suffix['locator'])
+            mechFn.poleVector(pvGuide, jnts[3], self, extraName, 'leg', self.moduleName, legIK)
+            ## foot mech
+            mechFn.reverseFoot(self, extraName, legMechGrp, ikJnts[4:], legIK)
+
+            ## soft ik
+            print '## Add soft IK option to quad leg.'
+
+        if options['FK']:
+            ## controls
+            self.clavicleFKCtrl = ctrlFn.ctrl(name='{}clavicleFK'.format(extraName),
+                                              side=self.side, guide=fkJnts[0], skipNum=True,
+                                              parent=fkCtrlGrp.name,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig, gimbal=True)
+            self.clavicleFKCtrl.modifyShape(color=col['col1'], shape='circle',
+                                            scale=(0.6, 0.6, 0.6))
+            self.clavicleFKCtrl.lockAttr(attr=['s'])
+            self.clavicleFKCtrl.constrain(fkJnts[0], typ='parent')
+
+            self.hipFKCtrl = ctrlFn.ctrl(name='{}hipFK'.format(extraName),
+                                              side=self.side, guide=fkJnts[1], skipNum=True,
+                                              parent=self.clavicleFKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig, gimbal=True)
+            self.hipFKCtrl.modifyShape(color=col['col1'], shape='circle',
+                                            scale=(0.6, 0.6, 0.6))
+            self.hipFKCtrl.lockAttr(attr=['s'])
+            self.hipFKCtrl.constrain(fkJnts[1], typ='parent')
+
+            self.kneeFKCtrl = ctrlFn.ctrl(name='{}kneeFK'.format(extraName),
+                                              side=self.side, guide=fkJnts[2], skipNum=True,
+                                              parent=self.hipFKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig, gimbal=True)
+            self.kneeFKCtrl.modifyShape(color=col['col1'], shape='circle',
+                                            scale=(0.6, 0.6, 0.6))
+            self.kneeFKCtrl.lockAttr(attr=['s'])
+            self.kneeFKCtrl.constrain(fkJnts[2], typ='parent')
+
+            self.backKneeFKCtrl = ctrlFn.ctrl(name='{}backKneeFK'.format(extraName),
+                                              side=self.side, guide=fkJnts[3], skipNum=True,
+                                              parent=self.kneeFKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig, gimbal=True)
+            self.backKneeFKCtrl.modifyShape(color=col['col1'], shape='circle',
+                                            scale=(0.6, 0.6, 0.6))
+            self.backKneeFKCtrl.lockAttr(attr=['s'])
+            self.backKneeFKCtrl.constrain(fkJnts[3], typ='parent')
+
+            self.ankleFKCtrl = ctrlFn.ctrl(name='{}ankleFK'.format(extraName),
+                                              side=self.side, guide=fkJnts[4], skipNum=True,
+                                              parent=self.backKneeFKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig, gimbal=True)
+            self.ankleFKCtrl.modifyShape(color=col['col1'], shape='circle',
+                                            scale=(0.6, 0.6, 0.6))
+            self.ankleFKCtrl.lockAttr(attr=['s'])
+            self.ankleFKCtrl.constrain(fkJnts[4], typ='parent')
+
+            self.footBallFKCtrl = ctrlFn.ctrl(name='{}footBallFK'.format(extraName),
+                                              side=self.side, guide=fkJnts[5], skipNum=True,
+                                              parent=self.ankleFKCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset,
+                                              rig=self.rig, gimbal=True)
+            self.footBallFKCtrl.modifyShape(color=col['col1'], shape='circle',
+                                            scale=(0.6, 0.6, 0.6))
+            self.footBallFKCtrl.lockAttr(attr=['s'])
+            self.footBallFKCtrl.constrain(fkJnts[5], typ='parent')
+
+        ##stretchy
+        print '## Add stetch option to quad leg.'
+        ##ribbon
+        print '## Add ribbon option to quad leg.'
+
+        ## leg parent stuff
+        if parent:
+            legParentLoc = utils.newNode('locator', name='{}legParent'.format(extraName),
+                                         side=self.side, skipNum=True, parent=parent)
+            legParentLoc.matchTransforms(jnts[0])
+            if options['IK']:
+                cmds.parentConstraint(legParentLoc.name, upperLegCtrls.name, mo=1)
+            if options['FK']:
+                cmds.parentConstraint(legParentLoc.name, self.clavicleFKCtrl.rootGrp.name, mo=1)
 
 
 class headModule:
@@ -1391,47 +1595,90 @@ def renameLegGuides(side='C', extraName=''):
     if extraName:
         extraName = '{}_'.format(extraName)
     legGrp = '{}leg{}'.format(moduleName, suffix['group'])
-    jntNameList = [
-        '{}hip'.format(extraName),
-        '{}knee'.format(extraName),
-        '{}ankle'.format(extraName),
-        '{}footBall'.format(extraName),
-        '{}footToes'.format(extraName),
-        '{}toeBig_metacarpel'.format(extraName),
-        '{}toeBig_base'.format(extraName),
-        '{}toeBig_lowMid'.format(extraName),
-        '{}toeBig_highMid'.format(extraName),
-        '{}toeBig_tip'.format(extraName),
-        '{}toeIndex_metacarpel'.format(extraName),
-        '{}toeIndex_base'.format(extraName),
-        '{}toeIndex_lowMid'.format(extraName),
-        '{}toeIndex_highMid'.format(extraName),
-        '{}toeIndex_tip'.format(extraName),
-        '{}toeMiddle_metacarpel'.format(extraName),
-        '{}toeMiddle_base'.format(extraName),
-        '{}toeMiddle_lowMid'.format(extraName),
-        '{}toeMiddle_highMid'.format(extraName),
-        '{}toeMiddle_tip'.format(extraName),
-        '{}toeRing_metacarpel'.format(extraName),
-        '{}toeRing_base'.format(extraName),
-        '{}toeRing_lowMid'.format(extraName),
-        '{}toeRing_highMid'.format(extraName),
-        '{}toeRing_tip'.format(extraName),
-        '{}toePinky_metacarpel'.format(extraName),
-        '{}toePinky_base'.format(extraName),
-        '{}toePinky_lowMid'.format(extraName),
-        '{}toePinky_highMid'.format(extraName),
-        '{}toePinky_tip'.format(extraName),
-    ]
+    if cmds.objExists(legGrp):
+        quadLeg = False
+        jntNameList = [
+            '{}hip'.format(extraName),
+            '{}knee'.format(extraName),
+            '{}ankle'.format(extraName),
+            '{}footBall'.format(extraName),
+            '{}footToes'.format(extraName),
+            '{}toeBig_metacarpel'.format(extraName),
+            '{}toeBig_base'.format(extraName),
+            '{}toeBig_lowMid'.format(extraName),
+            '{}toeBig_highMid'.format(extraName),
+            '{}toeBig_tip'.format(extraName),
+            '{}toeIndex_metacarpel'.format(extraName),
+            '{}toeIndex_base'.format(extraName),
+            '{}toeIndex_lowMid'.format(extraName),
+            '{}toeIndex_highMid'.format(extraName),
+            '{}toeIndex_tip'.format(extraName),
+            '{}toeMiddle_metacarpel'.format(extraName),
+            '{}toeMiddle_base'.format(extraName),
+            '{}toeMiddle_lowMid'.format(extraName),
+            '{}toeMiddle_highMid'.format(extraName),
+            '{}toeMiddle_tip'.format(extraName),
+            '{}toeRing_metacarpel'.format(extraName),
+            '{}toeRing_base'.format(extraName),
+            '{}toeRing_lowMid'.format(extraName),
+            '{}toeRing_highMid'.format(extraName),
+            '{}toeRing_tip'.format(extraName),
+            '{}toePinky_metacarpel'.format(extraName),
+            '{}toePinky_base'.format(extraName),
+            '{}toePinky_lowMid'.format(extraName),
+            '{}toePinky_highMid'.format(extraName),
+            '{}toePinky_tip'.format(extraName),
+        ]
+    elif cmds.objExists('{}quadLeg{}'.format(moduleName, suffix['group'])):
+        legGrp = '{}quadLeg{}'.format(moduleName, suffix['group'])
+        quadLeg = True
+        jntNameList = [
+            '{}clavicle'.format(extraName),
+            '{}hip'.format(extraName),
+            '{}knee'.format(extraName),
+            '{}backKnee'.format(extraName),
+            '{}ankle'.format(extraName),
+            '{}footBall'.format(extraName),
+            '{}footToes'.format(extraName),
+            '{}toeBig_metacarpel'.format(extraName),
+            '{}toeBig_base'.format(extraName),
+            '{}toeBig_lowMid'.format(extraName),
+            '{}toeBig_highMid'.format(extraName),
+            '{}toeBig_tip'.format(extraName),
+            '{}toeIndex_metacarpel'.format(extraName),
+            '{}toeIndex_base'.format(extraName),
+            '{}toeIndex_lowMid'.format(extraName),
+            '{}toeIndex_highMid'.format(extraName),
+            '{}toeIndex_tip'.format(extraName),
+            '{}toeMiddle_metacarpel'.format(extraName),
+            '{}toeMiddle_base'.format(extraName),
+            '{}toeMiddle_lowMid'.format(extraName),
+            '{}toeMiddle_highMid'.format(extraName),
+            '{}toeMiddle_tip'.format(extraName),
+            '{}toeRing_metacarpel'.format(extraName),
+            '{}toeRing_base'.format(extraName),
+            '{}toeRing_lowMid'.format(extraName),
+            '{}toeRing_highMid'.format(extraName),
+            '{}toeRing_tip'.format(extraName),
+            '{}toePinky_metacarpel'.format(extraName),
+            '{}toePinky_base'.format(extraName),
+            '{}toePinky_lowMid'.format(extraName),
+            '{}toePinky_highMid'.format(extraName),
+            '{}toePinky_tip'.format(extraName),
+        ]
     locList = [
         '{}legPV'.format(extraName),
         '{}legSettings'.format(extraName),
     ]
+    if quadLeg:
+        legName = 'quadLeg'
+    else:
+        legName = 'leg'
     if len(cmds.listRelatives(legGrp)) > 4:
         locList.append('{}footPalmGuide'.format(extraName))
-    renameBodyPartJntGuides('leg', jntNameList, side, extraName)
+    renameBodyPartJntGuides(legName, jntNameList, side, extraName)
 
-    locators = renameBodyPartLocGuides('leg', locList, side, extraName)
+    locators = renameBodyPartLocGuides(legName, locList, side, extraName)
 
     footGuides = cmds.listRelatives(locators[-1])
     cmds.select(locators[-1])
@@ -1643,7 +1890,7 @@ def renameAllBodyPartGuides():
             extraName = sN.split('_', 2)[1]
         else:
             extraName = ''
-        if '_leg{}'.format(suffix['group']) in sN:
+        if '_leg{}'.format(suffix['group']) in sN or '_quadLeg{}'.format(suffix['group']) in sN:
             renameLegGuides(side, extraName)
         elif '_arm{}'.format(suffix['group']) in sN:
             renameArmGuides(side, extraName)

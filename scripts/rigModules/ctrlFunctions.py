@@ -212,6 +212,8 @@ def loadCtrls(assetName=None, prompt=False):
         return False
     path = fileFn.getAssetDir()
     allCtrls = getAllControls('C_global_CTRL')
+    if not allCtrls:
+        allCtrls = []
     allCtrls.append('C_global_CTRL')
     for ctrl in allCtrls:
         fo = fileFn.getLatestVersion(assetName, path, 'rig/WIP/controlShapes', name=ctrl)

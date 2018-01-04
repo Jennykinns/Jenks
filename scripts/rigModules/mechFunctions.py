@@ -37,7 +37,7 @@ def ikfkMechanics(module, extraName, jnts, mechSkelGrp, ctrlGrp, moduleType, rig
     for i, each in enumerate(jnts):
         newName = '{}_result{}'.format(each.rsplit('_', 1)[0], jntSuffix)
         jnts[i] = cmds.rename(each, newName)
-        utils.addJntToSkinJnt(jnts[i], rig=rig)
+        # utils.addJntToSkinJnt(jnts[i], rig=rig)
     ## settings control
     module.settingCtrl = ctrlFn.ctrl(name='{}{}Settings'.format(extraName, moduleType),
                                      guide='{}{}Settings{}'.format(module.moduleName,
@@ -130,6 +130,145 @@ def poleVector(pvGuide, jnt, module, extraName, limbType, moduleName, limbIK,
         cmds.poleVectorConstraint(pvGuide, limbIK.hdl)
         utils.setShapeColor(pvGuide, color=None)
 
+def reverseFoot(module, extraName, legMechGrp, footJnts, legIK):
+    col = utils.getColors(module.side)
+    footMechGrp = utils.newNode('group', name='{}footMech'.format(extraName),
+                                side=module.side, parent=legMechGrp.name)
+    ##- iks
+    footBallIK = ikFn.ik(footJnts[0], footJnts[1], side=module.side,
+                         name='{}footBallIK'.format(extraName))
+    footBallIK.createIK(parent=footMechGrp.name)
+    footToesIK = ikFn.ik(footJnts[1], footJnts[2], side=module.side,
+                         name='{}footToesIK'.format(extraName))
+    footToesIK.createIK(parent=footMechGrp.name)
+    ##- rf joints
+    rfMechGrp = utils.newNode('group', name='{}RFMech'.format(extraName),
+                              side=module.side, parent=footMechGrp.name)
+    rfJntGuides = [
+        '{}footHeelGuide{}'.format(module.moduleName, suffix['locator']),
+        '{}footToesGuide{}'.format(module.moduleName, suffix['locator']),
+        footJnts[1],
+        footJnts[0],
+    ]
+    rfJntNames = [
+        'footHeel',
+        'footToes',
+        'footBall',
+        'ankle',
+    ]
+    rfJnts = utils.createJntChainFromObjs(rfJntGuides, 'RF', side=module.side,
+                                          extraName=extraName, jntNames=rfJntNames,
+                                          parent=rfMechGrp.name)
+    ##- rf iks
+    rfToesIK = ikFn.ik(rfJnts[0], rfJnts[1], side=module.side,
+                       name='{}RF_footToesIK'.format(extraName))
+    rfToesIK.createIK(parent=rfMechGrp.name)
+    rfBallIK = ikFn.ik(rfJnts[1], rfJnts[2], side=module.side,
+                       name='{}RF_footBallIK'.format(extraName))
+    rfBallIK.createIK(parent=rfMechGrp.name)
+    rfAnkleIK = ikFn.ik(rfJnts[2], rfJnts[3], side=module.side,
+                       name='{}RF_ankleIK'.format(extraName))
+    rfAnkleIK.createIK(parent=rfMechGrp.name)
+    ##- foot side pivots
+    module.ikCtrl.addAttr('footRollsSep', nn='___   Foot Rolls', typ='enum',
+                            enumOptions=['___'])
+    innerPivGrp = utils.newNode('group', name='{}footInnerPivot'.format(extraName),
+                                parent=module.ikCtrl.ctrlEnd, side=module.side,
+                                skipNum=True)
+    innerPivGrp.matchTransforms('{}footInnerGuide{}'.format(module.moduleName, suffix['locator']))
+    outerPivGrp = utils.newNode('group', name='{}footOuterPivot'.format(extraName),
+                                parent=innerPivGrp.name, side=module.side, skipNum=True)
+    outerPivGrp.matchTransforms('{}footOuterGuide{}'.format(module.moduleName, suffix['locator']))
+    module.ikCtrl.addAttr('sidePiv', nn='Side Pivot')
+    sidePivNeg = utils.newNode('condition', name='{}footSidePivNeg'.format(extraName),
+                                side=module.side, operation=3)
+    sidePivNeg.connect('firstTerm', module.ikCtrl.ctrl.sidePiv, mode='to')
+    if module.side == 'R':
+        negFootPivAttr = utils.newNode('reverse',
+                                       name='{}footSidePivNeg'.format(extraName),
+                                       side=module.side)
+        negFootPivAttr.connect('inputX', module.ikCtrl.ctrl.sidePiv, mode='to')
+        negFootPivAttr = '{}.outputX'.format(negFootPivAttr.name)
+    else:
+        negFootPivAttr = module.ikCtrl.ctrl.sidePiv
+    sidePivNeg.connect('colorIfTrueR', negFootPivAttr, mode='to')
+    sidePivNeg.connect('outColorR', '{}.rz'.format(innerPivGrp.name), mode='from')
+
+    sidePivPos = utils.newNode('condition', name='{}footSidePivPos'.format(extraName),
+                                side=module.side, operation=4)
+    sidePivPos.connect('firstTerm', module.ikCtrl.ctrl.sidePiv, mode='to')
+    sidePivPos.connect('colorIfTrueR', module.ikCtrl.ctrl.sidePiv, mode='to')
+    sidePivPos.connect('outColorR', '{}.rz'.format(outerPivGrp.name), mode='from')
+    ##- controls
+    module.footHeelIKCtrl = ctrlFn.ctrl(name='{}footHeelIK'.format(extraName),
+                                      side=module.side, guide=rfJntGuides[0], skipNum=True,
+                                      parent=outerPivGrp.name,
+                                      scaleOffset=module.rig.scaleOffset,
+                                      rig=module.rig, offsetGrpNum=2)
+    module.footHeelIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
+                                    scale=(0.7, 0.7, 0.7), rotation=(-45, 0, 0))
+    module.footHeelIKCtrl.lockAttr(attr=['t', 's'])
+    module.footHeelIKCtrl.constrain(rfJnts[0])
+    module.footToesFKCtrl = ctrlFn.ctrl(name='{}footToesFK'.format(extraName),
+                                      side=module.side, guide=footJnts[1], skipNum=True,
+                                      parent=module.footHeelIKCtrl.ctrlEnd,
+                                      scaleOffset=module.rig.scaleOffset,
+                                      rig=module.rig)
+    module.footToesFKCtrl.modifyShape(color=col['col3'], shape='arc', mirror=True,
+                                    scale=(0.2, 0.2, 0.2),
+                                    translation=(3, 1, 0),
+                                    rotation=(90, 0, 0))
+    module.footToesFKCtrl.constrain(footToesIK.grp)
+    module.footToesFKCtrl.lockAttr(['t', 's'])
+    module.footToesIKCtrl = ctrlFn.ctrl(name='{}footToesIK'.format(extraName),
+                                      side=module.side, guide=rfJntGuides[1], skipNum=True,
+                                      parent=module.footHeelIKCtrl.ctrlEnd,
+                                      scaleOffset=module.rig.scaleOffset,
+                                      rig=module.rig, offsetGrpNum=2)
+    module.footToesIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
+                                    scale=(0.7, 0.7, 0.7), rotation=(90, 0, 0),
+                                    translation=(0, -1, 0))
+    module.footToesIKCtrl.lockAttr(attr=['t', 's'])
+    module.footToesIKCtrl.constrain(rfBallIK.grp)
+
+    module.footBallIKCtrl = ctrlFn.ctrl(name='{}footBallIK'.format(extraName),
+                                      side=module.side, guide=rfJntGuides[2], skipNum=True,
+                                      parent=module.footToesIKCtrl.ctrlEnd,
+                                      scaleOffset=module.rig.scaleOffset,
+                                      rig=module.rig, offsetGrpNum=2)
+    module.footBallIKCtrl.modifyShape(color=col['col2'], shape='pringle', mirror=True,
+                                    scale=(0.7, 0.7, 0.7), translation=(0, 1.5, 0))
+    module.footBallIKCtrl.lockAttr(attr=['t', 's'])
+    cmds.xform(module.footBallIKCtrl.offsetGrps[0].name, ro=(-90, 0, 90))
+    module.footBallIKCtrl.constrain(rfAnkleIK.grp)
+    ##-- control attributes
+    module.ikCtrl.addAttr('footCtrlTog', nn='Fine Foot Controls', typ='enum',
+                            defaultVal=1, enumOptions=['Hide', 'Show'])
+    cmds.connectAttr(module.ikCtrl.ctrl.footCtrlTog,
+                     '{}.v'.format(module.footHeelIKCtrl.rootGrp.name))
+    module.ikCtrl.addAttr('heelRoll', nn='Heel Roll')
+    cmds.connectAttr(module.ikCtrl.ctrl.heelRoll,
+                     '{}.rx'.format(module.footHeelIKCtrl.offsetGrps[1].name))
+    module.ikCtrl.addAttr('heelTwist', nn='Heel Twist')
+    cmds.connectAttr(module.ikCtrl.ctrl.heelTwist,
+                     '{}.ry'.format(module.footHeelIKCtrl.offsetGrps[1].name))
+    module.ikCtrl.addAttr('ballRoll', nn='Ball Roll')
+    cmds.connectAttr(module.ikCtrl.ctrl.ballRoll,
+                     '{}.rx'.format(module.footBallIKCtrl.offsetGrps[1].name))
+    module.ikCtrl.addAttr('toeRoll', nn='Toe Roll')
+    cmds.connectAttr(module.ikCtrl.ctrl.toeRoll,
+                     '{}.rx'.format(module.footToesIKCtrl.offsetGrps[1].name))
+    module.ikCtrl.addAttr('toeTwist', nn='Toe Twist')
+    cmds.connectAttr(module.ikCtrl.ctrl.toeTwist,
+                     '{}.ry'.format(module.footToesIKCtrl.offsetGrps[1].name))
+    ##- constraints
+    # cmds.parentConstraint(rfJnts[1], footToesIK.grp, mo=1)
+    cmds.parentConstraint(module.footHeelIKCtrl.ctrlEnd, rfToesIK.grp, mo=1)
+    cmds.parentConstraint(rfJnts[1], module.footToesFKCtrl.offsetGrps[0].name, mo=1)
+    cmds.parentConstraint(rfJnts[2], footBallIK.grp, mo=1)
+    cmds.parentConstraint(rfJnts[3], legIK.grp, mo=1)
+    if cmds.objExists('{}footGuides{}'.format(module.moduleName, suffix['group'])):
+        cmds.delete('{}footGuides{}'.format(module.moduleName, suffix['group']))
 
 class strapModule:
 

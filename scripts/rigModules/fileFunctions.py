@@ -917,21 +917,43 @@ def createNewPipelineShot(shotName=None, prompt=False):
             'anim' : [
                 'Published',
                 'WIP',
+                'Playblasts',
             ],
-            'layout' : [],
+            'layout' : [
+                'Published',
+                'WIP',
+            ],
             'lighting' : [
                 'Published',
                 'WIP',
             ],
             'nuke' : [],
-            'plates' : [
-                'misc',
-                'prep',
-                'raw',
-                'retime',
-                'roto',
-                'undistort',
-            ],
+            'plates' : {
+                'misc' : [
+                    '4608',
+                    '1080',
+                ],
+                'prep' : [
+                    '4608',
+                    '1080',
+                ],
+                'raw' : [
+                    '4608',
+                    '1080',
+                ],
+                'retime' : [
+                    '4608',
+                    '1080',
+                ],
+                'roto' : [
+                    '4608',
+                    '1080',
+                ],
+                'undistort' : [
+                    '4608',
+                    '1080',
+                ],
+            },
             'renders' : [],
         }
 

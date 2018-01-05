@@ -355,7 +355,7 @@ class spineModule:
         self.side = side
         self.rig = rig
 
-    def createFromJnts(self, autoOrient=False):
+    def createFromJnts(self, autoOrient=False, extraCtrl=False):
         """ Create the spine from joints.
         [Args]:
         autoOrient (bool) - Toggles auto orienting the joints
@@ -365,10 +365,10 @@ class spineModule:
                                                                         jntSuffix),
                                                  '{}spine_end{}'.format(self.moduleName,
                                                                        jntSuffix))
-        self.spineMech(autoOrient, spineJnts)
+        self.spineMech(autoOrient, spineJnts, extraCtrl=extraCtrl)
 
 
-    def createFromCrv(self, crv, numOfJnts=7):
+    def createFromCrv(self, crv, numOfJnts=7, extraCtrl=False):
         """ Create the spine from a curve.
         [Args]:
         crv (string) - The name of the curve to create from
@@ -391,10 +391,10 @@ class spineModule:
                                            utils.setupName('spine', extraName=self.extraName,
                                                            side=self.side, obj='joint'))
         ## spine mech
-        self.spineMech(autoOrient=False, spineJnts=spineJnts, crv=crv)
+        self.spineMech(autoOrient=False, spineJnts=spineJnts, crv=crv, extraCtrl=extraCtrl)
 
 
-    def spineMech(self, autoOrient, spineJnts, crv=None):
+    def spineMech(self, autoOrient, spineJnts, crv=None, extraCtrl=False):
         """ Create the mechanics for the spine.
         [Args]:
         autoOrient (bool) - Toggles auto orienting the joints
@@ -422,15 +422,6 @@ class spineModule:
         self.armJnt = spineJnts[int(len(spineJnts)-(len(spineJnts)/3.5))]
         self.baseJnt = spineJnts[0]
         self.endJnt = spineJnts[-1]
-        ## bind jnts
-        hipBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
-                                    name='{}spineIK_hipsBind'.format(extraName))
-        hipBindJnt.matchTransforms(spineJnts[0])
-        chestBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
-                                     name='{}spineIK_chestBind'.format(extraName))
-        chestBindJnt.matchTransforms(chestJnt)
-        tmpEndBindJnt = utils.newNode('joint', parent=chestBindJnt.name)
-        tmpEndBindJnt.matchTransforms(self.endJnt)
         ## splineIK
         spineIK = ikFn.ik(spineJnts[0], spineJnts[-1], name='spineIK', side=self.side)
         if crv:
@@ -438,10 +429,19 @@ class spineModule:
         else:
             spineIK.createSplineIK(parent=spineMechGrp.name)
         spineIK.addStretch(globalScaleAttr=self.rig.scaleAttr, mode='length', operation='both')
+        ## bind jnts
+        hipBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
+                                    name='{}spineIK_hipsBind'.format(extraName))
+        hipBindJnt.matchTransforms(spineJnts[0])
+        chestBindJnt = utils.newNode('joint', side=self.side, parent=spineMechGrp.name,
+                                     name='{}spineIK_chestBind'.format(extraName))
+        chestBindJnt.matchTransforms(chestJnt)
+        upperChestPar = chestBindJnt.name if not extraCtrl else spineMechGrp.name
+        upperChestBindJnt = utils.newNode('joint', side=self.side, parent=upperChestPar,
+                                          name='{}spineIK_upperChestBind'.format(extraName))
+        upperChestBindJnt.matchTransforms(self.endJnt)
         ## skin bindJnts to crv
-        spineSkin = cmds.skinCluster(hipBindJnt.name, chestBindJnt.name, tmpEndBindJnt.name, spineIK.crv)
-        cmds.skinCluster(spineSkin, e=1, ri=tmpEndBindJnt.name)
-        cmds.delete(tmpEndBindJnt.name)
+        spineSkin = cmds.skinCluster(hipBindJnt.name, chestBindJnt.name, upperChestBindJnt.name, spineIK.crv)
         ## ctrls
         self.bodyCtrl = ctrlFn.ctrl(name='{}body'.format(extraName), side=self.side,
                                     guide=hipBindJnt.name, deleteGuide=False,
@@ -467,13 +467,34 @@ class spineModule:
         self.chestCtrl.modifyShape(shape='sphere', color=col['col2'])
         self.chestCtrl.lockAttr(['s'])
         self.chestCtrl.constrain(chestBindJnt.name)
+        if not extraCtrl:
+            cmds.skinCluster(spineSkin, e=1, ri=upperChestBindJnt.name)
+            cmds.delete(upperChestBindJnt.name)
+            self.upperChestCtrl = None
+            endSpineLocPar = chestBindJnt.name
+        else:
+            self.upperChestCtrl = ctrlFn.ctrl(name='{}upperChest'.format(extraName),
+                                              side=self.side, guide=upperChestBindJnt.name,
+                                              skipNum=True, parent=self.bodyCtrl.ctrlEnd,
+                                              scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            self.upperChestCtrl.modifyShape(shape='sphere', color=col['col1'])
+            self.upperChestCtrl.spaceSwitching([self.chestCtrl.ctrlEnd, self.bodyCtrl.ctrlEnd],
+                                               ['Chest', 'Body'])
+            self.upperChestCtrl.lockAttr(['s'])
+            self.upperChestCtrl.constrain(upperChestBindJnt.name)
+            endSpineLocPar = upperChestBindJnt.name
         ## IK Adv twist
         spineIKStartLoc = utils.newNode('locator', name='{}spineStart'.format(extraName),
                                       side=self.side, parent=hipBindJnt.name)
         spineIKStartLoc.matchTransforms(spineJnts[0])
         spineIKEndLoc = utils.newNode('locator', name='{}spineEnd'.format(extraName),
-                                      side=self.side, parent=chestBindJnt.name)
+                                      side=self.side, parent=upperChestBindJnt.name)
         spineIKEndLoc.matchTransforms(spineJnts[-1])
+        if extraCtrl:
+            orient = cmds.orientConstraint(upperChestBindJnt.name, chestBindJnt.name,
+                                           spineIKEndLoc.name, mo=1)
+            cmds.setAttr('{}.{}W1'.format(orient[0], chestBindJnt.name), 0.5)
+            cmds.setAttr('{}.interpType'.format(orient[0]), 2)
         spineIK.advancedTwist(spineIKStartLoc.name, spineIKEndLoc.name, wuType=4)
         print '## add world switching to spine ctrls?'
 
@@ -915,6 +936,8 @@ class quadripedLegModule:
                                       deleteGuide=True if useGuideLoc else False,
                                       scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.ikCtrl.modifyShape(shape='foot', color=col['col1'], scale=(2, 2, 2))
+            self.hipIKCtrl.spaceSwitching([upperLegCtrls.name, self.ikCtrl.ctrlEnd],
+                                          [parent, 'Foot'])
             ## pole vector
             pvGuide = '{}legPV{}'.format(self.moduleName, suffix['locator'])
             mechFn.poleVector(pvGuide, jnts[3], self, extraName, 'leg', self.moduleName, legIK)

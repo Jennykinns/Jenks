@@ -646,20 +646,21 @@ def getAllChildren(obj):
             jnts.extend(getAllChildren(each))
     return jnts
 
-def getAssetsInScene():
+def getAssetsInScene(location='rig/Published'):
     """ Return current assets in the scene.
         [Returns]:
         assets (list)(string) - The names of the assets in the scene
         refNds (list)(string) - The reference nodes of the assets in
                                 the scene
     """
+    location = '_{}'.format(location)
     assets = []
     refNds = cmds.ls(type='reference')
     if 'sharedReferenceNode' in refNds:
         refNds.remove('sharedReferenceNode')
     for each in refNds:
         filePath = cmds.referenceQuery(each, f=True)
-        if '/rig/Published/' in filePath:
+        if location in filePath:
             if filePath.endswith('}'):
                 filePath = filePath[:-3]
             fileName = filePath.rpartition('/')[-1]

@@ -8,48 +8,59 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFunctions as api
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 
-def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None, img=False):
+def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None,
+                     img=False, directory=False):
     if location == 'rig/Published':
-        suffix = 'ma'
+        suffix = '.ma'
         name = assetName
     elif location == 'rig/WIP/guides':
-        suffix = 'ma'
+        suffix = '.ma'
         name = 'guides'
     elif location == 'rig/WIP/skin':
-        suffix = 'skin'
+        suffix = '.skin'
     elif location == 'rig/WIP/controlShapes':
-        suffix = 'shape'
+        suffix = '.shape'
     elif location == 'model/Published':
-        suffix = 'abc'
+        suffix = '.abc'
         name = assetName
     elif location == 'model/WIP':
-        suffix = 'ma'
+        suffix = '.ma'
         name = assetName
     elif location == 'anim/Published':
-        suffix = 'abc'
+        suffix = '.abc'
+        name = assetName
+    elif location == 'layout/Published':
+        suffix = '.abc'
         name = assetName
     else:
-        suffix = 'ma'
+        suffix = '.ma'
         name = assetName
     if img:
-        suffix = 'jpg'
+        suffix = '.jpg'
     fileDirectory = '{}{}/{}/'.format(path, assetName, location)
-    # ls = os.listdir(fileDirectory)
-    ls = [f for f in os.listdir(fileDirectory) if os.path.isfile('{}/{}'.format(fileDirectory, f))]
-    relevantFiles = []
-    for each in sorted(ls):
-        lsGeo = each.rsplit('_', 1 if not location == 'model/Published' else 2)[0]
-        if lsGeo == name:
-            relevantFiles.append(each)
+    if not directory:
+        ls = [f for f in os.listdir(fileDirectory) if os.path.isfile('{}/{}'.format(fileDirectory, f))]
+        relevantFiles = []
+        for each in sorted(ls):
+            lsGeo = each.rsplit('_', 1 if not location == 'model/Published' else 2)[0]
+            if lsGeo == name:
+                relevantFiles.append(each)
+    else:
+        suffix = ''
+        ls = [f for f in os.listdir(fileDirectory) if os.path.isdir('{}/{}'.format(fileDirectory, f))]
+        relevantFiles = ls
+
     if new:
+        if name:
+            name += '_'
         if not relevantFiles:
-            newFile = '{}{}_v001.{}'.format(fileDirectory, name, suffix)
+            newFile = '{}{}v001{}'.format(fileDirectory, name, suffix)
         else:
             nameWithoutSuffix = relevantFiles[-1].rsplit('.')[0]
             latestNum = nameWithoutSuffix.rsplit('_', 1)[1].strip('v')
             newNum = str(int(latestNum)+1).zfill(3)
 
-            newFile = '{}{}_v{}.{}'.format(fileDirectory, name, newNum, suffix)
+            newFile = '{}{}v{}{}'.format(fileDirectory, name, newNum, suffix)
     else:
         if not relevantFiles:
             return False
@@ -520,6 +531,60 @@ def mergeSubAssetAlembic(assetName=None, latest=True, prompt=False):
         fileName = fileName[0] if fileName else False
     mel.eval('AbcImport -mode import -connect "/" "{}"'.format(fileName))
 
+def saveWipLayout(shotName=None, autoName=False, prompt=False):
+    pass
+
+def loadWipLayout(shotName=None, latest=False, prompt=False):
+    pass
+
+def publishLayout(shotName=None, autoName=False, prompt=False):
+    if not cmds.objExists('renderCam'):
+        cmds.warning('Cannot publish, no renderCam exists in the scene.')
+        return False
+    if not cmds.objExists('C_layout{}'.format(suffix['group'])):
+        cmds.group(cmds.ls(sl=1), n='C_layout{}'.format(suffix['group']))
+        cmds.parent('renderCam', w=1)
+    shotName = assetNameSetup(shotName, prompt, typ='shot')
+    if not shotName:
+        return False
+    path = getShotDir()
+    if not autoName:
+        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+        fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Shot Layout',
+                                        fileMode=0, fileFilter=fileFilter,
+                                        dir='{}{}/layout/Published'.format(path, shotName))
+        if fileName:
+            fileName = fileName[0]
+        else:
+            return False
+    else:
+        fileName = getLatestVersion(shotName, path, 'layout/Published', new=True)
+    cmds.select(['renderCam', 'C_layout{}'.format(suffix['group'])])
+    frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
+    abcExport(fileName, selection=True, frameRange=frameRange)
+    printToMaya('Published Layout: {}'.format(fileName))
+
+def referenceLayout(shotName=None, prompt=False, replace=False, refNd=None):
+    shotName = assetNameSetup(shotName, prompt, typ='shot')
+    fileName = referenceFile(shotName, typ='shot', location='layout/Published',
+                             replace=replace, refNd=refNd)
+    printToMaya('Referenced Shot Layout: {}'.format(fileName))
+
+def createAnimationImagePlane(shotName=None):
+    shotName = assetNameSetup(shotName, False, typ='shot')
+    if not shotName:
+        return False
+    path = getShotDir()
+    versionFolder = getLatestVersion(shotName, path, 'plates/undistort', directory=True)
+    img = '{}/{}'.format(versionFolder, os.listdir(versionFolder)[0])
+    if img:
+        print img
+        imgPlane = cmds.imagePlane(fileName=img, c='renderCam',
+                                   name='footageImagePlane', sia=False)[0]
+        cmds.setAttr('{}.useFrameExtension'.format(imgPlane), 1)
+        printToMaya('Created Image Plane: {}'.format(img))
+    else:
+        return False
 
 def saveWipAnimation(shotName=None, autoName=False, prompt=False):
     saveMayaFile(shotName, typ='anim/WIP', prompt=prompt, autoName=autoName,
@@ -831,6 +896,7 @@ def createNewPipelineShot(shotName=None, prompt=False):
                 'Published',
                 'WIP',
             ],
+            'layout' : [],
             'lighting' : [
                 'Published',
                 'WIP',
@@ -930,6 +996,23 @@ def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=
             cmds.file(save=True, type='mayaAscii')
         # print 'Saved File: {}'.format(fileName)
         printToMaya('Saved File: {}'.format(fileName))
+
+def referenceFile(assetName, typ='', location='', replace=False, refNd=None):
+    if not assetName:
+        return False
+    if typ == 'subAsset':
+        path = getSubAssetDir()
+        location = 'subAsset'
+    elif typ == 'shot':
+        path = getShotDir()
+    else:
+        path = getAssetDir()
+    fileName = getLatestVersion(assetName, path, location)
+    if not replace:
+        cmds.file(fileName, r=1, ns=newNameSpace(assetName))
+    else:
+        cmds.file(fileName, lr=refNd)
+    return fileName
 
 def treeAssetNamePrompt(typ='asset'):
     if cmds.window('{}NamePrompt'.format(typ), exists=True):
@@ -1053,7 +1136,9 @@ def reloadReferences():
     assets, refNd = utils.getAssetsInScene()
     for i, each in enumerate(assets):
         referenceRig(each, replace=True, refNd=refNd[i])
-
+    layouts, refNd = utils.getAssetsInScene('layout/Published')
+    for i, each in enumerate(layouts):
+        referenceFile(each, typ='shot', location='layout/Published', replace=True, refNd=refNd[i])
 
 def printToMaya(msg):
     msg = '{}\n'.format(msg)

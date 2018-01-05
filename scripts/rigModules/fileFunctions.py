@@ -8,6 +8,8 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import apiFunctions as api
 from Jenks.scripts.rigModules.suffixDictionary import suffix
 
+reload(utils)
+
 def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None,
                      img=False, directory=False):
     if location == 'rig/Published':
@@ -371,12 +373,20 @@ def referenceSubAssetGeo(subAssetName=None, prompt=False):
     subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
     if not subAssetName:
         return False
-    path = getSubAssetDir()
-    fileName = getLatestVersion(subAssetName, path, 'model/Published')
-    cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))
-    # print 'Referenced geometry: {}'.format(fileName)
+    fileName = referenceFile(subAssetName, typ='subAsset', location='model/Published')
     printToMaya('Referenced SubAsset Geometry: {}'.format(fileName))
     return True
+
+
+    # subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')
+    # if not subAssetName:
+    #     return False
+    # path = getSubAssetDir()
+    # fileName = getLatestVersion(subAssetName, path, 'model/Published')
+    # cmds.file(fileName, r=1, ns=newNameSpace(subAssetName))
+    # # print 'Referenced geometry: {}'.format(fileName)
+    # printToMaya('Referenced SubAsset Geometry: {}'.format(fileName))
+    # return True
 
 def saveSubAssetWipGeo(subAssetName=None, autoName=False, prompt=False):
     saveMayaFile(subAssetName, typ='model/WIP', prompt=prompt, autoName=autoName,
@@ -532,18 +542,22 @@ def mergeSubAssetAlembic(assetName=None, latest=True, prompt=False):
     mel.eval('AbcImport -mode import -connect "/" "{}"'.format(fileName))
 
 def saveWipLayout(shotName=None, autoName=False, prompt=False):
-    pass
+    saveMayaFile(shotName, typ='layout/WIP', prompt=prompt, autoName=autoName,
+                 removeRefs=False, shot=True)
+    return True
 
 def loadWipLayout(shotName=None, latest=False, prompt=False):
-    pass
+    loadMayaFile(shotName, typ='layout/WIP', prompt=prompt, latest=latest, new=True, shot=True)
+    return True
 
-def publishLayout(shotName=None, autoName=False, prompt=False):
+def publishLayout(shotName=None, autoName=True, prompt=False):
     if not cmds.objExists('renderCam'):
         cmds.warning('Cannot publish, no renderCam exists in the scene.')
         return False
     if not cmds.objExists('C_layout{}'.format(suffix['group'])):
         cmds.group(cmds.ls(sl=1), n='C_layout{}'.format(suffix['group']))
-        cmds.parent('renderCam', w=1)
+        if cmds.listRelatives('renderCam', p=1):
+            cmds.parent('renderCam', w=1)
     shotName = assetNameSetup(shotName, prompt, typ='shot')
     if not shotName:
         return False
@@ -570,7 +584,7 @@ def referenceLayout(shotName=None, prompt=False, replace=False, refNd=None):
                              replace=replace, refNd=refNd)
     printToMaya('Referenced Shot Layout: {}'.format(fileName))
 
-def createAnimationImagePlane(shotName=None):
+def createAnimationImagePlane(shotName=None, cam='renderCam'):
     shotName = assetNameSetup(shotName, False, typ='shot')
     if not shotName:
         return False
@@ -578,8 +592,16 @@ def createAnimationImagePlane(shotName=None):
     versionFolder = getLatestVersion(shotName, path, 'plates/undistort', directory=True)
     img = '{}/{}'.format(versionFolder, os.listdir(versionFolder)[0])
     if img:
-        print img
-        imgPlane = cmds.imagePlane(fileName=img, c='renderCam',
+        if cmds.objExists('{}:{}'.format(shotName, cam)):
+            camName = '{}:{}'.format(shotName, cam)
+        elif cmds.objExists(cam):
+            camName = cam
+        elif cmds.objExists('*{}'.format(cam)):
+            camName = '*:{}'.format(cam)
+        else:
+            cmds.warning('Camera does not exist or is not valid.' )
+            return False
+        imgPlane = cmds.imagePlane(fileName=img, c=camName,
                                    name='footageImagePlane', sia=False)[0]
         cmds.setAttr('{}.useFrameExtension'.format(imgPlane), 1)
         printToMaya('Created Image Plane: {}'.format(img))
@@ -1002,7 +1024,7 @@ def referenceFile(assetName, typ='', location='', replace=False, refNd=None):
         return False
     if typ == 'subAsset':
         path = getSubAssetDir()
-        location = 'subAsset'
+        # location = 'subAsset'
     elif typ == 'shot':
         path = getShotDir()
     else:
@@ -1139,6 +1161,9 @@ def reloadReferences():
     layouts, refNd = utils.getAssetsInScene('layout/Published')
     for i, each in enumerate(layouts):
         referenceFile(each, typ='shot', location='layout/Published', replace=True, refNd=refNd[i])
+    subAssets, refNd = utils.getAssetsInScene('subAssets')
+    for i, each in enumerate(subAssets):
+        referenceFile(each, typ='subAsset', location='model/Published', replace=True, refNd=refNd[i])
 
 def printToMaya(msg):
     msg = '{}\n'.format(msg)

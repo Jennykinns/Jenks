@@ -653,7 +653,7 @@ def getAssetsInScene(location='rig/Published'):
         refNds (list)(string) - The reference nodes of the assets in
                                 the scene
     """
-    location = '_{}'.format(location)
+    location = '/{}'.format(location)
     assets = []
     refNds = cmds.ls(type='reference')
     if 'sharedReferenceNode' in refNds:
@@ -666,6 +666,8 @@ def getAssetsInScene(location='rig/Published'):
             fileName = filePath.rpartition('/')[-1]
             assetName = fileName.rpartition('_')[0]
             assets.append(assetName)
+        else:
+            refNds.remove(each)
     return assets, refNds
 
 class newNode:

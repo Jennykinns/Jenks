@@ -10,7 +10,7 @@ from Jenks.scripts.rigModules.suffixDictionary import suffix
 
 reload(utils)
 
-def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None,
+def getLatestVersion(assetName, path, location, new=False, name=None, suffix=None, prefix=None,
                      img=False, directory=False):
     if location == 'rig/Published':
         suffix = '.ma'
@@ -39,6 +39,8 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
         name = assetName
     if img:
         suffix = '.jpg'
+    if prefix:
+        name = '{}_{}'.format(prefix, name)
     fileDirectory = '{}{}/{}/'.format(path, assetName, location)
     if not directory:
         ls = [f for f in os.listdir(fileDirectory) if os.path.isfile('{}/{}'.format(fileDirectory, f))]
@@ -132,6 +134,11 @@ def getSubAssetDir():
 def getShotDir():
     path = cmds.workspace(q=1, rd=1)
     return '{}shots/'.format(path)
+
+def getProjectName():
+    path = cmds.workspace(q=1, rd=1)
+    projName = path.rsplit('/', 2)[1]
+    return projName
 
 def newScene():
     if cmds.file(q=1, modified=1):
@@ -668,17 +675,18 @@ def mergeAnimationAlembic(shotName=None, latest=True, prompt=False):
 
 def saveWipLighting(shotName=None, autoName=False, prompt=False):
     saveMayaFile(shotName, typ='lighting/WIP', prompt=prompt, autoName=autoName,
-                 removeRefs=False, shot=True)
+                 removeRefs=False, shot=True, prefix=getProjectName())
     return True
 
 def loadWipLighting(shotName=None, latest=False, prompt=False):
-    loadMayaFile(shotName, typ='lighting/WIP', prompt=prompt, latest=latest, new=True, shot=True)
+    loadMayaFile(shotName, typ='lighting/WIP', prompt=prompt, latest=latest, new=True, shot=True,
+                 prefix=getProjectName())
     return True
 
 def publishLighting(shotName=None, autoName=True, prompt=False):
     publishSnapshot(shot=shotName, typ='lighting')
     saveMayaFile(shotName, typ='lighting/Published', prompt=prompt, autoName=autoName,
-                 removeRefs=False, shot=True)
+                 removeRefs=False, shot=True, prefix=getProjectName())
     return True
 
 def setupSceneForRender(shotName=None, latest=True, prompt=False):
@@ -965,7 +973,7 @@ def createNewPipelineShot(shotName=None, prompt=False):
 
 
 def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
-                 shot=False, subAsset=False):
+                 shot=False, subAsset=False, prefix=None):
     if shot:
         directory = getShotDir()
         assetTyp = 'shot'
@@ -984,7 +992,7 @@ def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
         print '{} asset does not exist.'.format(assetName)
         return False
     if latest:
-        fileName = getLatestVersion(assetName, directory, typ)
+        fileName = getLatestVersion(assetName, directory, typ, prefix=prefix)
     else:
         fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
         fileName = cmds.fileDialog2(dialogStyle=2,
@@ -1005,7 +1013,7 @@ def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
     return False
 
 def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=False,
-                 selectionOnly=False, shot=False, subAsset=False):
+                 selectionOnly=False, shot=False, subAsset=False, prefix=None):
     if subAsset:
         directory = getSubAssetDir()
         assetTyp = 'subAsset'
@@ -1021,7 +1029,7 @@ def saveMayaFile(assetName='', typ='', prompt=False, autoName=False, removeRefs=
 
     subDir = '{}{}/{}/'.format(directory, assetName, typ)
     if autoName:
-        fileName = getLatestVersion(assetName, directory, typ, new=1)
+        fileName = getLatestVersion(assetName, directory, typ, new=1, prefix=prefix)
     else:
         fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
         fileName = cmds.fileDialog2(dialogStyle=2,

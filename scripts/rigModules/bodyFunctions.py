@@ -1010,7 +1010,20 @@ class quadripedLegModule:
             self.footBallFKCtrl.constrain(fkJnts[5], typ='parent')
 
         ##stretchy
-        print '## Add stetch option to quad leg.'
+        if options['stretchy']:
+            if options['IK']:
+                upperLegIK.addStretch(customStretchNode=customNodes,
+                                      globalScaleAttr=self.rig.scaleAttr)
+                legIK.addStretch(customStretchNode=customNodes,
+                                 globalScaleAttr=self.rig.scaleAttr)
+                self.ikCtrl.addAttr('stretchSep', nn='___   Stretch',
+                                    typ='enum', enumOptions=['___'])
+                self.ikCtrl.addAttr('stretchySwitch', nn='Stretch Switch',
+                                    minVal=0, maxVal=1, defaultVal=1)
+                cmds.connectAttr(self.ikCtrl.ctrl.stretchySwitch, upperLegIK.stretchToggleAttr)
+                cmds.connectAttr(self.ikCtrl.ctrl.stretchySwitch, legIK.stretchToggleAttr)
+            if options['FK']:
+                print '## add proper stretch to quad leg FK.'
         ##ribbon
         print '## Add ribbon option to quad leg.'
 

@@ -563,8 +563,6 @@ def publishLayout(shotName=None, autoName=True, prompt=False):
         return False
     if not cmds.objExists('C_layout{}'.format(suffix['group'])):
         cmds.group(cmds.ls(sl=1), n='C_layout{}'.format(suffix['group']))
-        if cmds.listRelatives('renderCam', p=1):
-            cmds.parent('renderCam', w=1)
     shotName = assetNameSetup(shotName, prompt, typ='shot')
     if not shotName:
         return False
@@ -580,8 +578,25 @@ def publishLayout(shotName=None, autoName=True, prompt=False):
             return False
     else:
         fileName = getLatestVersion(shotName, path, 'layout/Published', new=True)
-    cmds.select(['renderCam', 'C_layout{}'.format(suffix['group'])])
     frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
+    ## remove img plane
+    plane = cmds.imagePlane('renderCam', q=1, n=1)
+    cmds.delete(plane)
+    ## duplicate cam
+    oldCam = cmds.rename('renderCam', 'oldRenderCam')
+    newCam = cmds.duplicate(oldCam, n='renderCam')[0]
+    if cmds.listRelatives(newCam, p=1):
+        cmds.parent(newCam, w=1)
+    ## unlock attrs
+    utils.lockAttr(newCam, attr=['t', 'r'], hide=False, unlock=True)
+    ## parent constraint
+    constr = cmds.parentConstraint(oldCam, newCam)
+    ## bake camera
+    cmds.bakeResults(newCam, at=['t', 'r'], dic=True, mr=True, pok=True, sm=False, t=frameRange)
+    ## del constraints
+    cmds.delete(constr)
+
+    cmds.select(['renderCam', 'C_layout{}'.format(suffix['group'])])
     abcExport(fileName, selection=True, frameRange=frameRange)
     printToMaya('Published Layout: {}'.format(fileName))
 

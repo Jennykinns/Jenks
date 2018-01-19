@@ -488,7 +488,7 @@ class spineModule:
                                       side=self.side, parent=hipBindJnt.name)
         spineIKStartLoc.matchTransforms(spineJnts[0])
         spineIKEndLoc = utils.newNode('locator', name='{}spineEnd'.format(extraName),
-                                      side=self.side, parent=upperChestBindJnt.name)
+                                      side=self.side, parent=endSpineLocPar)
         spineIKEndLoc.matchTransforms(spineJnts[-1])
         if extraCtrl:
             orient = cmds.orientConstraint(upperChestBindJnt.name, chestBindJnt.name,

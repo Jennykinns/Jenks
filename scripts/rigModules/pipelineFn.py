@@ -1,3 +1,4 @@
+import maya.cmds as cmds
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
@@ -51,4 +52,13 @@ def createNewShader(bump=False, sss=False, disp=True):
                                           side='ai', skipNum=True, shaderNode='texture')
         displacementImgNd.connect('outColorR', '{}.displacement'.format(displacementNd.name))
 
+    return True
+
+def changeKeyframePosition(amount=996):
+    if cmds.objExists('renderCam'):
+        utils.lockAttr('renderCam', attr=['t', 'r'], unlock=True, hide=False)
+    nds = cmds.ls()
+    frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
+    cmds.keyframe(nds, edit=True, relative=True, timeChange=amount, time=frameRange)
+    cmds.playbackOptions(e=1, min=frameRange[0]+amount, max=frameRange[1]+amount)
     return True

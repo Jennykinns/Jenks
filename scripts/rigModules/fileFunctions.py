@@ -154,6 +154,7 @@ def newScene():
     return True
 
 def abcExport(fileName, selection=True, frameRange=(1, 1), step=1.0):
+    cmds.loadPlugin('AbcExport.so')
     if not frameRange == (1, 1):
         frameRange = (frameRange[0]-3, frameRange[1]+3)
     if selection:
@@ -299,7 +300,7 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
         saveMayaFile(assetName, typ='model/Published', autoName=autoName, removeRefs=True,
                      selectionOnly=True)
         # print 'Saved as Maya File.'
-        printToMaya('Published Geometry as Maya File: {}'.format(fileName))
+        # printToMaya('Published Geometry as Maya File: {}'.format(fileName))
     return True
 
 def referenceGeo(assetName=None, prompt=False):
@@ -591,10 +592,11 @@ def publishLayout(shotName=None, autoName=True, prompt=False):
     utils.lockAttr(newCam, attr=['t', 'r'], hide=False, unlock=True)
     ## parent constraint
     constr = cmds.parentConstraint(oldCam, newCam)
+    scConstr = cmds.scaleConstraint(oldCam, newCam)
     ## bake camera
     cmds.bakeResults(newCam, at=['t', 'r'], dic=True, mr=True, pok=True, sm=False, t=frameRange)
     ## del constraints
-    cmds.delete(constr)
+    cmds.delete(constr, scConstr)
 
     cmds.select(['renderCam', 'C_layout{}'.format(suffix['group'])])
     abcExport(fileName, selection=True, frameRange=frameRange)
@@ -611,7 +613,7 @@ def createAnimationImagePlane(shotName=None, cam='renderCam'):
     if not shotName:
         return False
     path = getShotDir()
-    versionFolder = getLatestVersion(shotName, path, 'plates/undistort', directory=True)
+    versionFolder = getLatestVersion(shotName, path, 'plates/undistort/4608', directory=True)
     img = '{}/{}'.format(versionFolder, os.listdir(versionFolder)[0])
     if img:
         if cmds.objExists('{}:{}'.format(shotName, cam)):

@@ -274,6 +274,10 @@ def loadGeo(assetName=None, group=None, prompt=False, abc=True):
     return True
 
 def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
+    if cmds.ls(sl=1) == list():
+        cmds.warning('{}{}{}'.format('Nothing Selected.', ' Cancelling publish',
+                                     ' - Select the asset geometry and try again'))
+        return False
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False

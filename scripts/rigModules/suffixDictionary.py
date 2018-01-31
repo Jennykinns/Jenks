@@ -45,4 +45,12 @@ suffix = {
     'displacementShader' : '_DISP',
     'bump2d' : '_BUMP',
     'cluster' : '_CLU',
+    'aiSkyDomeLight' : '_LIT',
+    'aiAreaLight' : '_LIT',
+    'aiPhotometricLight' : '_LIT',
+    'directionalLight' : '_LIT',
+    'spotLight' : '_LIT',
+    'pointLight' : '_LIT',
+    'areaLight' : '_LIT',
+    'aiLightPortal' : '_LIT',
 }

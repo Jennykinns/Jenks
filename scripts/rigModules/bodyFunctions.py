@@ -34,7 +34,7 @@ class armModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.arm, autoOrient=False,
+    def create(self, options={}, autoOrient=False,
                customNodes=False, parent=None):
         """ Create the arm rig.
         [Args]:
@@ -45,6 +45,9 @@ class armModule:
         [Returns]
         True
         """
+        overrideOptions = options
+        options = defaultBodyOptions.arm
+        options.update(overrideOptions)
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [

@@ -617,7 +617,7 @@ def createAnimationImagePlane(shotName=None, cam='renderCam'):
     if not shotName:
         return False
     path = getShotDir()
-    versionFolder = getLatestVersion(shotName, path, 'plates/undistort/4608', directory=True)
+    versionFolder = getLatestVersion(shotName, path, 'plates/undistort/1080', directory=True)
     img = '{}/{}'.format(versionFolder, os.listdir(versionFolder)[0])
     if img:
         if cmds.objExists('{}:{}'.format(shotName, cam)):
@@ -1024,7 +1024,8 @@ def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
         fileName = fileName[0] if fileName else False
     if fileName:
         if new:
-            newScene()
+            if not newScene():
+                return False
             cmds.file(fileName, open=1, force=1)
         else:
             cmds.file(fileName, i=1, dns=1, type='mayaAscii')

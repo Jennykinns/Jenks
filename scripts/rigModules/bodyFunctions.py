@@ -48,6 +48,7 @@ class armModule:
         overrideOptions = options
         options = defaultBodyOptions.arm
         options.update(overrideOptions)
+
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -518,7 +519,7 @@ class legModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.leg, autoOrient=False, customNodes=False,
+    def create(self, options={}, autoOrient=False, customNodes=False,
                parent=None):
         """ Create the leg rig.
         [Args]:
@@ -527,6 +528,10 @@ class legModule:
         customNodes (bool) - Toggles the use of custom nodes
         parent (string) - The name of the parent
         """
+        overrideOptions = options
+        options = defaultBodyOptions.leg
+        options.update(overrideOptions)
+
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -846,7 +851,7 @@ class quadripedLegModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=None, autoOrient=False, customNodes=False, parent=None):
+    def create(self, options={}, autoOrient=False, customNodes=False, parent=None):
         """ Create the leg rig.
         [Args]:
         options (dictionary) - A dictionary of options for the leg
@@ -854,6 +859,10 @@ class quadripedLegModule:
         customNodes (bool) - Toggles the use of custom nodes
         parent (string) - The name of the parent
         """
+        overrideOptions = options
+        options = defaultBodyOptions.leg
+        options.update(overrideOptions)
+
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = [
@@ -1057,7 +1066,7 @@ class headModule:
         self.side = side
         self.rig = rig
 
-    def create(self, options=defaultBodyOptions.head, autoOrient=True,
+    def create(self, options={}, autoOrient=True,
                parent=None, extraSpaces=''):
         """ Create the head rig.
         [Args]:
@@ -1067,6 +1076,10 @@ class headModule:
         extraSpaces (list)(string) - A list of the names of the extra
                                      spaces of the control
         """
+        overrideOptions = options
+        options = defaultBodyOptions.head
+        options.update(overrideOptions)
+
         ctrlSpaceSwitches = [self.rig.globalCtrl.ctrlEnd]
         if parent:
             if cmds.listRelatives(parent, p=1):
@@ -1362,7 +1375,7 @@ class tailModule:
         self.side = side
         self.rig = rig
 
-    def create(self, crv=False, jntNum=16, options=defaultBodyOptions.tail,
+    def create(self, crv=False, jntNum=16, options={},
                autoOrient=False, parent=None):
         """ Create the tail rig.
         [Args]:
@@ -1373,6 +1386,10 @@ class tailModule:
         autoOrient (bool) - Toggles auto orienting the joints
         parent (string) - The name of the parent
         """
+        overrideOptions = options
+        options = defaultBodyOptions.tail
+        options.update(overrideOptions)
+
         jntSuffix = suffix['joint']
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         col = utils.getColors(self.side)
@@ -1428,7 +1445,7 @@ class simpleLimbModule:
         self.side = side
         self.rig = rig
 
-    def create(self, jntNames, options=defaultBodyOptions.limb, autoOrient=False, customNodes=False,
+    def create(self, jntNames, options={}, autoOrient=False, customNodes=False,
                parent=None, limbType='limb', ikStartID=0, ikEndID=2, arrowPV=False):
         """ Create the limb rig.
         [Args]:
@@ -1442,6 +1459,10 @@ class simpleLimbModule:
         arrowPV (bool) - Toggles creating an arrow control for the
                          poleVector instead
         """
+        overrideOptions = options
+        options = defaultBodyOptions.limb
+        options.update(overrideOptions)
+
         extraName = '{}_'.format(self.extraName) if self.extraName else ''
         jntSuffix = suffix['joint']
         jnts = []

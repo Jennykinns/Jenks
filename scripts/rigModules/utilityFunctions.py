@@ -351,6 +351,21 @@ def setOutlinerColor(obj, color=None):
     cmds.setAttr('{}.useOutlinerColor'.format(obj), 1 if color else 0)
     cmds.setAttr('{}.outlinerColor'.format(obj), color[0], color[1], color[2])
 
+def getRigInSelection():
+    """ Return a list of rig global groups associated with the current
+    selection.
+    [Returns]:
+    rigNodes (list)(string) - A list of the associated rigs.
+    """
+    sel = cmds.ls(sl=1)
+    rigNodes = []
+    for each in sel:
+        if each.endswith('global_CTRL'):
+            rigNodes.append(each)
+        elif 'rigConnection' in cmds.listAttr(each):
+            rigNodes.append(cmds.listConnections('{}.rigConnection'.format(each), d=0, s=1)[0])
+    return rigNodes
+
 def matchTransforms(objs, targetObj, skipTrans=False, skipRot=False):
     """ Match the transforms of one object to another.
         [Args]:

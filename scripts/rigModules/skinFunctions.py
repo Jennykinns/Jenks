@@ -4,6 +4,7 @@ import maya.api.OpenMayaAnim as oma
 
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules import apiFunctions as apiFn
+from Jenks.scripts.rigModules import utilityFunctions as utils
 
 import xml.etree.cElementTree
 
@@ -18,22 +19,44 @@ def getAllSkinJnts(rigNode):
     jnts = cmds.listConnections('{}.rigSkinJnts'.format(rigNode), d=1, s=0)
     return jnts
 
-def selectSkinJnts():
-    """ Select the all the skinning joints of the selected rig. """
-    sel = cmds.ls(sl=1)
-    rigNodes = []
-    for each in sel:
-        if each.endswith('global_CTRL'):
-            rigNodes.append(each)
-        elif 'rigConnection' in cmds.listAttr(each):
-            rigNodes.append(cmds.listConnections('{}.rigConnection'.format(each), d=0, s=1)[0])
-    jnts = []
+def selectSkinJnts(add=False):
+    """ Select all the skinning joints of the selected rig. """
+    rigNodes = utils.getRigInSelection()
+    # sel = cmds.ls(sl=1)
+    # rigNodes = []
+    # for each in sel:
+    #     if each.endswith('global_CTRL'):
+    #         rigNodes.append(each)
+    #     elif 'rigConnection' in cmds.listAttr(each):
+    #         rigNodes.append(cmds.listConnections('{}.rigConnection'.format(each), d=0, s=1)[0])
     if rigNodes == list():
         return False
+    jnts = []
     for rigNode in rigNodes:
         jnts.extend(getAllSkinJnts(rigNode))
-    cmds.select(jnts)
+    cmds.select(jnts, add=add)
     return True
+
+def selectRigGeo(add=False):
+    """ Select all the geometry in the selected rig. """
+    rigNodes = utils.getRigInSelection()
+    if rigNodes == list():
+        return False
+    geo = []
+    for rig in rigNodes:
+        parent = cmds.listRelatives(rig, p=1, f=1)
+        while parent:
+            rigGrp = parent
+            parent = cmds.listRelatives(parent, p=1, f=1)
+        sceneGeo = cmds.ls('*_GEO')
+        for each in sceneGeo:
+            parent = cmds.listRelatives(each, p=1, f=1)
+            while parent:
+                rootParent = parent
+                parent = cmds.listRelatives(parent, p=1, f=1)
+            if rootParent == rigGrp:
+                geo.append(each)
+    cmds.select(geo, add=add)
 
 def getSkinInfo(obj):
     """ Return skin cluster node of specified object.

@@ -31,6 +31,9 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
     elif location == 'anim/Published':
         suffix = '.abc'
         name = assetName
+    elif location == 'anim/Playblasts':
+        suffix = '.mov'
+        name = assetName
     elif location == 'layout/Published':
         suffix = '.abc'
         name = assetName
@@ -617,7 +620,8 @@ def createAnimationImagePlane(shotName=None, cam='renderCam'):
     if not shotName:
         return False
     path = getShotDir()
-    versionFolder = getLatestVersion(shotName, path, 'plates/undistort/1080', directory=True)
+    # versionFolder = getLatestVersion(shotName, path, 'plates/undistort/1080', directory=True)
+    versionFolder = '{}{}/plates/undistort/1080'.format(path, shotName)
     img = '{}/{}'.format(versionFolder, os.listdir(versionFolder)[0])
     if img:
         if cmds.objExists('{}:{}'.format(shotName, cam)):
@@ -632,6 +636,7 @@ def createAnimationImagePlane(shotName=None, cam='renderCam'):
         imgPlane = cmds.imagePlane(fileName=img, c=camName,
                                    name='footageImagePlane', sia=False)[0]
         cmds.setAttr('{}.useFrameExtension'.format(imgPlane), 1)
+        cmds.setAttr('{}.depth'.format(imgPlane), 10000)
         printToMaya('Created Image Plane: {}'.format(img))
     else:
         return False
@@ -755,6 +760,31 @@ def publishSnapshot(asset=None, shot=None, subAsset=None, typ=''):
     cmds.select(oldSel)
 
     return True
+
+def publishAnimationPlayblast():
+    shot = getShotName()
+    if not shot:
+        return False
+    path = getShotDir()
+    fileName = getLatestVersion(shot, path, 'anim/Playblasts')
+    # oldSel = cmds.ls(sl=1, l=1)
+    # cmds.select(cl=True)
+    # ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')
+    # multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')
+    # cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', 1)
+    # cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
+
+    # cmds.playblast(format='image', cf=fileName,
+    #                fr=1, percent=100, compression='jpg', quality=100, widthHeight=(1920, 1080),
+    #                fp=False, orn=False, v=False)
+
+    # print 'Snapshot image saved to: {}'.format(fileName)
+
+    # cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ssao)
+    # cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', multiSample)
+
+    # cmds.select(oldSel)
+
 
 
 def removeReferences():
@@ -1177,6 +1207,15 @@ def setShotName(shotName=None):
     if not shotName:
         treeAssetNamePrompt(typ='shot')
     if shotName:
+        cmds.currentUnit(time='pal')
+        path = getShotDir()
+        with open('{}shotRanges'.format(path), 'r') as f:
+            data = json.load(f)
+        if shotName in data.keys():
+            frameRange = data[shotName]
+            cmds.playbackOptions(e=1, ast=frameRange[0], min=frameRange[0],
+                                 aet=frameRange[1], max=frameRange[1])
+            cmds.currentTime(frameRange[0])
         mel.eval('putenv "shotName" {}'.format(shotName))
         printToMaya('Shot Set To: {}'.format(shotName))
 
@@ -1212,6 +1251,7 @@ def reloadReferences():
         referenceRig(each, replace=True, refNd=refNd[i])
     layouts, refNd = utils.getAssetsInScene('layout/Published')
     for i, each in enumerate(layouts):
+        print each
         referenceFile(each, typ='shot', location='layout/Published', replace=True, refNd=refNd[i])
     subAssets, refNd = utils.getAssetsInScene('subAssets')
     for i, each in enumerate(subAssets):

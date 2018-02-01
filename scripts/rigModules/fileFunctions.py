@@ -32,7 +32,7 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
         suffix = '.abc'
         name = assetName
     elif location == 'anim/Playblasts':
-        suffix = '.mov'
+        suffix = ''
         name = assetName
     elif location == 'layout/Published':
         suffix = '.abc'
@@ -56,7 +56,6 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
         suffix = ''
         ls = [f for f in os.listdir(fileDirectory) if os.path.isdir('{}/{}'.format(fileDirectory, f))]
         relevantFiles = ls
-
     if new:
         if name:
             name += '_'
@@ -761,29 +760,41 @@ def publishSnapshot(asset=None, shot=None, subAsset=None, typ=''):
 
     return True
 
-def publishAnimationPlayblast():
+def publishAnimationPlayblast(highQuality=False):
     shot = getShotName()
     if not shot:
         return False
     path = getShotDir()
-    fileName = getLatestVersion(shot, path, 'anim/Playblasts')
-    # oldSel = cmds.ls(sl=1, l=1)
-    # cmds.select(cl=True)
-    # ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')
-    # multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')
-    # cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', 1)
-    # cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
+    fileName = getLatestVersion(shot, path, 'anim/Playblasts', new=True)
+    frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
+    if 'qt' in cmds.playblast(q=1, format=1):
+        playblastFormat = 'qt'
+    else:
+        playblastFormat = 'avi'
+    res = cmds.confirmDialog(m='Resolution?', button=['Full', 'Half', 'Cancel'], cancelButton='Cancel')
+    if res == 'Full':
+        percent = 100
+    elif res == 'Half':
+        percent = 50
+    else:
+        return False
+    oldSel = cmds.ls(sl=1, l=1)
+    cmds.select(cl=True)
+    ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')
+    multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')
+    if highQuality:
+        cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', 1)
+        cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
 
-    # cmds.playblast(format='image', cf=fileName,
-    #                fr=1, percent=100, compression='jpg', quality=100, widthHeight=(1920, 1080),
-    #                fp=False, orn=False, v=False)
+    cmds.playblast(format=playblastFormat, f=fileName, st=frameRange[0], et=frameRange[1],
+                   percent=percent, widthHeight=(1920, 1080), v=False, orn=False, quality=70)
 
-    # print 'Snapshot image saved to: {}'.format(fileName)
+    print 'Snapshot image saved to: {}'.format(fileName)
 
-    # cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ssao)
-    # cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', multiSample)
+    cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ssao)
+    cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', multiSample)
 
-    # cmds.select(oldSel)
+    cmds.select(oldSel)
 
 
 

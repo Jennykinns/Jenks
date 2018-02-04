@@ -1024,7 +1024,7 @@ class quadripedLegModule:
         ##stretchy
         if options['stretchy']:
             if options['IK']:
-                upperLegIK.addStretch(customStretchNode=customNodes,
+                upperLegIK.addStretch(customStretchNode=customNodes, sjPar=parent,
                                       globalScaleAttr=self.rig.scaleAttr)
                 legIK.addStretch(customStretchNode=customNodes,
                                  globalScaleAttr=self.rig.scaleAttr)

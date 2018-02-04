@@ -86,7 +86,7 @@ class ik:
 
 
     def addStretch(self, operation='greater', customStretchNode=False,
-                   globalScaleAttr=None, mode='distance'):
+                   globalScaleAttr=None, mode='distance', sjPar=None):
         if customStretchNode:
             if operation == 'greater':
                 op=1
@@ -136,9 +136,9 @@ class ik:
                 startLoc = utils.newNode('locator', name='{}Start'.format(self.name),
                                          side=self.side)
                 cmds.delete(cmds.parentConstraint(self.sj, startLoc.name))
-                sjPar = cmds.listRelatives(self.jnts[0], p=1)
-                if sjPar:
-                    cmds.parent(startLoc.name, sjPar)
+                if not sjPar:
+                    sjPar = cmds.listRelatives(self.jnts[0], p=1)
+                cmds.parent(startLoc.name, sjPar)
                 endLoc = utils.newNode('locator', name='{}End'.format(self.name), side=self.side)
                 cmds.delete(cmds.parentConstraint(self.ej, endLoc.name))
                 cmds.parent(endLoc.name, self.grp)

@@ -121,7 +121,7 @@ def saveSkin(geo, assetName=None, prompt=False):
                 cmds.deformerWeights(fileName, path='', deformer=each, ex=1, wp=5, wt=0.00001)
     return True
 
-def saveAllSkin(assetName=None, prompt=False):
+def saveAllSkin(assetName=None, prompt=False, selection=False):
     """ Save skin values for all the skin of a rig.
     [Args]:
     assetName (string) - The name of the rig
@@ -130,7 +130,10 @@ def saveAllSkin(assetName=None, prompt=False):
     True if rig has geometry, else False
     """
     assetName = fileFn.assetNameSetup(assetName, prompt)
-    geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
+    if not selection:
+        # geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
+        selectRigGeo()
+    geo = cmds.ls(sl=True)
     if geo:
         for each in geo:
             saveSkin(each, assetName)

@@ -412,11 +412,21 @@ def loadSubAssetWipGeo(subAssetName=None, latest=False, prompt=False):
                  subAsset=True)
     return True
 
+def importLookdevSpheres():
+    d = cmds.workspace(q=1, rd=1)
+    loadMayaFile(overridePath='{}/mayaProj/scenes/lookDev_SphereChart.ma'.format(d))
+
+def importSkydomeLight():
+    d = cmds.workspace(q=1, rd=1)
+    loadMayaFile(overridePath='{}/mayaProj/scenes/skyDome_light.ma'.format(d))
+
 def setupLookDevScene(assetName=None, prompt=False):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
     geoGrp = utils.newNode('group', name='geometry', skipNum=True)
+    importLookdevSpheres()
+    importSkydomeLight()
     loadGeo(assetName, geoGrp.name)
     print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
     geoSetName = 'geoSet_{}'.format(assetName)
@@ -470,6 +480,8 @@ def setupSubAssetLookDevScene(subAssetName=None, prompt=False):
         return False
     # geoGrp = utils.newNode('group', name=subAssetName, skipNum=True)
     loadSubAssetGeo(subAssetName)
+    importLookdevSpheres()
+    importSkydomeLight()
 
 
 def saveWipLookDev(assetName=None, autoName=False, prompt=False):
@@ -1035,34 +1047,37 @@ def createNewPipelineShot(shotName=None, prompt=False):
 
 
 def loadMayaFile(assetName='', typ='', prompt=False, new=False, latest=True,
-                 shot=False, subAsset=False, prefix=None):
-    if shot:
-        directory = getShotDir()
-        assetTyp = 'shot'
-    elif subAsset:
-        directory = getSubAssetDir()
-        assetTyp = 'subAsset'
+                 shot=False, subAsset=False, prefix=None, overridePath=None):
+    if overridePath:
+        fileName = overridePath
     else:
-        directory = getAssetDir()
-        assetTyp = 'asset'
+        if shot:
+            directory = getShotDir()
+            assetTyp = 'shot'
+        elif subAsset:
+            directory = getSubAssetDir()
+            assetTyp = 'subAsset'
+        else:
+            directory = getAssetDir()
+            assetTyp = 'asset'
 
-    assetName = assetNameSetup(assetName, prompt, typ=assetTyp)
-    if not assetName:
-        return False
-    subDir = '{}{}/{}/'.format(directory, assetName, typ)
-    if not os.path.isdir(subDir):
-        print '{} asset does not exist.'.format(assetName)
-        return False
-    if latest:
-        fileName = getLatestVersion(assetName, directory, typ, prefix=prefix)
-    else:
-        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
-        fileName = cmds.fileDialog2(dialogStyle=2,
-                                    caption='Load {}'.format(typ),
-                                    fileMode=1,
-                                    fileFilter=fileFilter,
-                                    dir=subDir)
-        fileName = fileName[0] if fileName else False
+        assetName = assetNameSetup(assetName, prompt, typ=assetTyp)
+        if not assetName:
+            return False
+        subDir = '{}{}/{}/'.format(directory, assetName, typ)
+        if not os.path.isdir(subDir):
+            print '{} asset does not exist.'.format(assetName)
+            return False
+        if latest:
+            fileName = getLatestVersion(assetName, directory, typ, prefix=prefix)
+        else:
+            fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+            fileName = cmds.fileDialog2(dialogStyle=2,
+                                        caption='Load {}'.format(typ),
+                                        fileMode=1,
+                                        fileFilter=fileFilter,
+                                        dir=subDir)
+            fileName = fileName[0] if fileName else False
     if fileName:
         if new:
             if not newScene():

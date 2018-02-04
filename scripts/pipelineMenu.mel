@@ -73,7 +73,10 @@ $i_publishLayout = "file.svg";
 $i_saveLayout = "saveGeneric.png";
 $i_loadLayout = "openLoadGeneric.png";
 $i_adjustKeyframes = "directKeySmall.png";
+<<<<<<< Updated upstream
 $i_playblastAnim = "playblast.png";
+=======
+>>>>>>> Stashed changes
 $i_importSpheres = "envBall.svg";
 $i_importSkyDome = "envSky.svg";
 $i_selRigGeo = "";

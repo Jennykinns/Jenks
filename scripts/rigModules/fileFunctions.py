@@ -781,8 +781,10 @@ def publishAnimationPlayblast(highQuality=False):
     frameRange = (cmds.playbackOptions(q=1, min=1), cmds.playbackOptions(q=1, max=1))
     if 'qt' in cmds.playblast(q=1, format=1):
         playblastFormat = 'qt'
+        fileExt = '.mov'
     else:
         playblastFormat = 'avi'
+        fileExt = '.avi'
     res = cmds.confirmDialog(m='Resolution?', button=['Full', 'Half', 'Cancel'], cancelButton='Cancel')
     if res == 'Full':
         percent = 100
@@ -800,6 +802,11 @@ def publishAnimationPlayblast(highQuality=False):
 
     cmds.playblast(format=playblastFormat, f=fileName, st=frameRange[0], et=frameRange[1],
                    percent=percent, widthHeight=(1920, 1080), v=False, orn=False, quality=70)
+
+    if os.name == 'posix':
+        os.system('xdg-open {}{}'.format(fileName, fileExt))
+    else:
+        os.system('{}{}'.format(fileName, fileExt))
 
     print 'Snapshot image saved to: {}'.format(fileName)
 

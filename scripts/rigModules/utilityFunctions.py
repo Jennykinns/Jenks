@@ -262,7 +262,10 @@ def addJntToSkinJnt(jnt, rig):
                                 nn='Rig Connection', typ='message')
     else:
         rigConnection = '{}.rigConnection'.format(jnt)
-    cmds.connectAttr(rig.skinJntsAttr, rigConnection)
+    existingConnections = cmds.listConnections(rigConnection, p=1)
+    if not existingConnections or rig.skinJntsAttr not in existingConnections:
+        cmds.connectAttr(rig.skinJntsAttr, rigConnection)
+
 
 def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
     """ Get the children DAGs between two objects.

@@ -46,6 +46,7 @@ def create():
 
     skinFn.loadAllSkin(rigName)
     ctrlFn.loadCtrls(rigName)
+    cmds.viewFit()
 
 rigName = 'testRigStuff'
 

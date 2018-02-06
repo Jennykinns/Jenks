@@ -1206,8 +1206,9 @@ class digitsModule:
 
         digitCtrls = {}
         palmMults = []
+
         utils.matchTransforms('{}{}PalmGuide{}'.format(self.moduleName, mode, suffix['locator']),
-                              '{}{}Pinky_base{}'.format(self.moduleName, typ, jntSuffix),
+                              '{}{}{}_base{}'.format(self.moduleName, typ, digitsList[-1], jntSuffix),
                               skipTrans=True)
         palmCtrl = ctrlFn.ctrl(name='{}{}Palm'.format(extraName, typ),
                                side=self.side,
@@ -1218,6 +1219,7 @@ class digitsModule:
                                rig=self.rig)
         palmCtrl.modifyShape(shape='sphere', color=col['col2'], scale=(0.3, 0.2, 0.2))
         palmCtrl.lockAttr(['s'])
+        digitJnts = []
         for each in digitsList:
             if each == 'Thumb':
                 segments = ['metacarpel', 'base', 'lowMid','tip']
@@ -1239,11 +1241,10 @@ class digitsModule:
             for jnt in jnts:
                 utils.addJntToSkinJnt(jnt, self.rig)
             ctrlParent = handCtrlGrp.name
-            if each == 'Pinky':
-                pinkyBaseJnt = jnts[0]
+            digitJnts.append(jnts[0])
+            # if each == 'Pinky':
+            if each == digitsList[-1]:
                 ctrlParent = palmCtrl.ctrlEnd
-            elif each == 'Index':
-                indexBaseJnt = jnts[0]
             prevJnt = None
             segmentCtrls = []
             for i, seg in enumerate(segments):
@@ -1337,7 +1338,7 @@ class digitsModule:
                                       side=self.side, parent=parent)
         palmLoc = utils.newNode('locator', name='{}{}Palm'.format(extraName, mode),
                                 side=self.side, parent=palmLocParGrp.name)
-        palmLocParGrp.matchTransforms(pinkyBaseJnt)
+        palmLocParGrp.matchTransforms(digitJnts[-1])
         cmds.makeIdentity(palmLoc.name, a=1, t=1, r=1)
         oConstr = palmCtrl.constrain(palmLoc.name, typ='orient', mo=True)
         palmCtrl.constrain(palmLoc.name, typ='point', mo=True)

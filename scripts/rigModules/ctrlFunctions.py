@@ -379,7 +379,7 @@ class ctrl:
         exec('self.ctrl.{} = "{}"'.format(name, attr))
         return True
 
-    def spaceSwitching(self, parents, niceNames=None, constraint='parent', dv=0):
+    def spaceSwitching(self, parents, niceNames=None, constraint='parent', dv=0, skip={}):
         target = self.offsetGrps[0].name
         if not niceNames:
             niceNames=[]
@@ -405,7 +405,22 @@ class ctrl:
         spSwAttr = self.addAttr('spaceSwitch', '{} Switch'.format(attrNiceName), typ='enum',
                                 defaultVal=dv, enumOptions=niceNames)
         # constraint
-        exec('constr = cmds.{}Constraint(parents, target, mo=1)[0]'.format(constraint))
+        skipArgs = ''
+        if 'rot' in skip.keys():
+            if constraint == 'orient':
+                s = 'k'
+            else:
+                s = 'r'
+            skipArgs = '{}, s{}={}'.format(skipArgs, s, skip['rot'])
+        if 'trans' in skip.keys():
+            if constraint == 'point':
+                s = 'k'
+            else:
+                s = 't'
+            skipArgs = '{}, s{}={}'.format(skipArgs, s, skip['trans'])
+
+        exec('constr = cmds.{}Constraint(parents, target, mo=1{})[0]'.format(constraint,
+                                                                             skipArgs))
         # connect attrs
         for i, each in enumerate(parents):
             # create condition node

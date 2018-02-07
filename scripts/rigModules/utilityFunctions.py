@@ -539,7 +539,9 @@ def orientJoints(jnts, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
 
 def orientSelectedJoints(hierarchy=False, aimAxis=(1, 0, 0), upAxis=(0, 1, 0)):
     sel = cmds.ls(sl=1, typ='joint', l=1)
-    side = sel[0][0]
+    c = cmds.confirmDialog(m='Aim', button=['X', '-X'])
+    if c == '-X':
+        aimAxis = (-aimAxis[0], aimAxis[1], aimAxis[2])
     orientJoints(sel, aimAxis=aimAxis, upAxis=upAxis)
     cmds.select(sel)
 

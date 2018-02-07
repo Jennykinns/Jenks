@@ -1133,7 +1133,9 @@ class headModule:
                                       translation=(2, 0, 0))
             self.headCtrl.lockAttr(['s'])
             self.headCtrl.constrain(headIKsGrp.name)
-            self.headCtrl.spaceSwitching(ctrlSpaceSwitches, dv=1)
+            cmds.parentConstraint(gParent, self.headCtrl.rootGrp.name, mo=1, sr=['x', 'y', 'z'])
+            self.headCtrl.spaceSwitching(ctrlSpaceSwitches, dv=1, constraint='parent',
+                                         skip={'trans':['x', 'y', 'z']})
         else:
             self.neckCtrl = ctrlFn.ctrl(name='{}neck'.format(extraName), side=self.side,
                                         guide=jnts[0], skipNum=True, parent=headCtrlsGrp.name,

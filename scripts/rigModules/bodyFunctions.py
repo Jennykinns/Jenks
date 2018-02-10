@@ -905,6 +905,7 @@ class quadripedLegModule:
             fkCtrlGrp = legCtrlsGrp
 
         self.footJnt = jnts[5]
+        self.ankleJnt = jnts[4]
         self.ikCtrlGrp = ikCtrlGrp
         self.fkCtrlGrp = fkCtrlGrp
 

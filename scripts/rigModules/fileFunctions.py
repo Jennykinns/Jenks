@@ -486,7 +486,7 @@ def setupSubAssetLookDevScene(subAssetName=None, prompt=False):
 
 def saveWipLookDev(assetName=None, autoName=False, prompt=False):
     saveMayaFile(assetName, typ='lookDev/WIP', prompt=prompt, autoName=autoName,
-                 removeRefs=True)
+                 removeRefs=False)
     return True
 
 def loadWipLookDev(assetName=None, latest=False, prompt=False):

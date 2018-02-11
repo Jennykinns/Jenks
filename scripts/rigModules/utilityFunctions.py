@@ -123,7 +123,10 @@ def rename(mObj, newName, side=None, startNum=1, skipSuff=False):
     if cmds.nodeType(lN) == 'aiImage':
         fileName = cmds.getAttr('{}.filename'.format(lN))
         fileName = fileName.rsplit('/', 1)[-1]
-        newName = '{}_{}'.format(newName, fileName.rsplit('.', 1)[0])
+        if newName:
+            newName = '{}_{}'.format(newName, fileName.rsplit('.', 1)[0])
+        else:
+            newName = fileName.rsplit('.', 1)[0]
     if newName.endswith(suffix) or skipSuff:
         nameNoDigits = newName
         while nameNoDigits[-1].isdigit():

@@ -1,3 +1,4 @@
+import json
 import maya.cmds as cmds
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import fileFunctions as fileFn
@@ -54,7 +55,18 @@ def createNewShader(bump=False, sss=False, disp=True):
 
     return True
 
-def changeKeyframePosition(amount=996):
+def changeKeyframePosition():
+    shotName = fileFn.getShotName()
+    if not shotName:
+        amount = 996
+    else:
+        path = fileFn.getShotDir()
+        with open('{}shotRanges'.format(path), 'r') as f:
+            data = json.load(f)
+        if shotName in data.keys():
+            amount = data[shotName][0]
+        else:
+            amount = 996
     if cmds.objExists('renderCam'):
         utils.lockAttr('renderCam', attr=['t', 'r'], unlock=True, hide=False)
     nds = cmds.ls()

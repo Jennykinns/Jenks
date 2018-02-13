@@ -801,7 +801,7 @@ def publishAnimationPlayblast(highQuality=False):
         cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
 
     cmds.playblast(format=playblastFormat, f=fileName, st=frameRange[0], et=frameRange[1],
-                   percent=percent, widthHeight=(1920, 1080), v=False, orn=False, quality=70)
+                   percent=percent, widthHeight=(1920, 1080), v=False, orn=True, quality=70)
 
     if os.name == 'posix':
         os.system('xdg-open {}{}'.format(fileName, fileExt))
@@ -1242,13 +1242,15 @@ def setShotName(shotName=None):
     if shotName:
         cmds.currentUnit(time='pal')
         path = getShotDir()
-        with open('{}shotRanges'.format(path), 'r') as f:
-            data = json.load(f)
-        if shotName in data.keys():
-            frameRange = data[shotName]
-            cmds.playbackOptions(e=1, ast=frameRange[0], min=frameRange[0],
-                                 aet=frameRange[1], max=frameRange[1])
-            cmds.currentTime(frameRange[0])
+        shotRangesFile = '{}shotRanges'.format(path)
+        if os.path.isfile(shotRangesFile):
+            with open('{}shotRanges'.format(path), 'r') as f:
+                data = json.load(f)
+            if shotName in data.keys():
+                frameRange = data[shotName]
+                cmds.playbackOptions(e=1, ast=frameRange[0], min=frameRange[0],
+                                     aet=frameRange[1], max=frameRange[1])
+                cmds.currentTime(frameRange[0])
         mel.eval('putenv "shotName" {}'.format(shotName))
         printToMaya('Shot Set To: {}'.format(shotName))
 

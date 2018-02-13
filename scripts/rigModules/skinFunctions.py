@@ -42,20 +42,28 @@ def selectRigGeo(add=False):
     rigNodes = utils.getRigInSelection()
     if rigNodes == list():
         return False
-    geo = []
     for rig in rigNodes:
         parent = cmds.listRelatives(rig, p=1, f=1)
         while parent:
             rigGrp = parent
             parent = cmds.listRelatives(parent, p=1, f=1)
-        sceneGeo = cmds.ls('*_GEO')
-        for each in sceneGeo:
-            parent = cmds.listRelatives(each, p=1, f=1)
-            while parent:
-                rootParent = parent
-                parent = cmds.listRelatives(parent, p=1, f=1)
-            if rootParent == rigGrp:
-                geo.append(each)
+        geoGrp = cmds.listRelatives(rigGrp)[1]
+        geo = cmds.listRelatives(geoGrp, ad=1, typ='mesh')
+
+    # geo = []
+    # for rig in rigNodes:
+    #     parent = cmds.listRelatives(rig, p=1, f=1)
+    #     while parent:
+    #         rigGrp = parent
+    #         parent = cmds.listRelatives(parent, p=1, f=1)
+    #     sceneGeo = cmds.ls('*_GEO')
+    #     for each in sceneGeo:
+    #         parent = cmds.listRelatives(each, p=1, f=1)
+    #         while parent:
+    #             rootParent = parent
+    #             parent = cmds.listRelatives(parent, p=1, f=1)
+    #         if rootParent == rigGrp:
+    #             geo.append(each)
     cmds.select(geo, add=add)
 
 def getSkinInfo(obj):

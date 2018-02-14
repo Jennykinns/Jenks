@@ -309,14 +309,24 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
         # printToMaya('Published Geometry as Maya File: {}'.format(fileName))
     return True
 
-def referenceGeo(assetName=None, prompt=False):
+def referenceGeo(assetName=None, prompt=False, parent=None):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
-    cmds.file(fileName, r=1, ns=newNameSpace(assetName))
-    # print 'Referenced geometry: {}'.format(fileName)
+    nodes = cmds.file(fileName, r=1, ns=newNameSpace(assetName), rnn=1)
+    if parent:
+        mNodes = []
+        for each in nodes:
+            mNodes.append(api.getMObj(each))
+        for mObj in mNodes:
+            lN, sN = api.getPath(mObj)
+            if cmds.nodeType(lN) == 'transform':
+                try:
+                    cmds.parent(lN, parent)
+                except:
+                    continue
     printToMaya('Referenced Geometry: {}'.format(fileName))
     return True
 
@@ -414,11 +424,17 @@ def loadSubAssetWipGeo(subAssetName=None, latest=False, prompt=False):
 
 def importLookdevSpheres():
     d = cmds.workspace(q=1, rd=1)
-    loadMayaFile(overridePath='{}/mayaProj/scenes/lookDev_SphereChart.ma'.format(d))
+    try:
+        loadMayaFile(overridePath='{}/mayaProj/scenes/lookDev_SphereChart.ma'.format(d))
+    except:
+        return False
 
 def importSkydomeLight():
     d = cmds.workspace(q=1, rd=1)
-    loadMayaFile(overridePath='{}/mayaProj/scenes/skyDome_light.ma'.format(d))
+    try:
+        loadMayaFile(overridePath='{}/mayaProj/scenes/skyDome_light.ma'.format(d))
+    except:
+        return False
 
 def setupLookDevScene(assetName=None, prompt=False):
     assetName = assetNameSetup(assetName, prompt)
@@ -427,7 +443,8 @@ def setupLookDevScene(assetName=None, prompt=False):
     geoGrp = utils.newNode('group', name='geometry', skipNum=True)
     importLookdevSpheres()
     importSkydomeLight()
-    loadGeo(assetName, geoGrp.name)
+    # loadGeo(assetName, geoGrp.name)
+    referenceGeo(assetName, parent=geoGrp.name)
     print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
     geoSetName = 'geoSet_{}'.format(assetName)
     i = 1
@@ -507,6 +524,7 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
+    importReferences(sel=False)
     publishSnapshot(asset=assetName, typ='lookDev')
     setsToSave = []
     for each in cmds.listRelatives('C_geometry_GRP', c=1, ad=1):
@@ -515,7 +533,7 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
             setsToSave.extend(cmds.listSets(o=each))
     cmds.select(setsToSave, add=1, noExpand=1)
     saveMayaFile(assetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
-                 removeRefs=True, selectionOnly=True)
+                 removeRefs=False, selectionOnly=True)
     return True
 
 def publishSubAssetLookDev(subAssetName=None, autoName=True, prompt=False):

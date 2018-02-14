@@ -104,7 +104,11 @@ def loadSkin(geo, assetName=None, prompt=False):
         skinInfo = {}
         xmlRoot = xml.etree.cElementTree.parse(fileName).getroot()
         skinInfo['joints'] = [each.get('source') for each in xmlRoot.findall('weights')]
-        skinCls = cmds.skinCluster(geo, skinInfo['joints'], tsb=1)[0]
+        try:
+            skinCls = cmds.skinCluster(geo, skinInfo['joints'], tsb=1)[0]
+        except ValueError:
+            print 'Errored whilst skinning {}, Skipping.'.format(geo)
+            return False
         cmds.select(cl=1)
     cmds.deformerWeights(fileName, path='', deformer=skinCls, im=1, wp=5, wt=0.00001)
     cmds.skinCluster(skinCls, e=1, fnw=1)

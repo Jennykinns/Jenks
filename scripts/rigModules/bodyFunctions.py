@@ -1038,7 +1038,9 @@ class quadripedLegModule:
             if options['FK']:
                 print '## add proper stretch to quad leg FK.'
         ##ribbon
-        print '## Add ribbon option to quad leg.'
+        if options['ribbon']:
+            # mechFn.bendyJoints(jnts[0], jnts[1], jnts[2], 'leg', self)
+            mechFn.bendyJoints(jnts[2], jnts[3], jnts[4], 'leg', self)
 
         ## leg parent stuff
         if parent:

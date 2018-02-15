@@ -445,6 +445,7 @@ def bendyJoints(sj, mj, ej, moduleType, module):
     mechGrp = utils.newNode('group', name='{}BendyMech'.format(extraName),
                             side=module.side, skipNum=True,
                             parent='{}{}Mech{}'.format(moduleName, moduleType, suffix['group']))
+    mechGrp.setAttr('it', 0)
     midBendCtrl = ribbonJoints(sj, mj, 'Upper', module, extraName=extraName,
                  moduleType=moduleType, par=mechGrp.name, endCtrl=True)
     ribbonJoints(mj, ej, 'Lower', module, extraName=extraName,

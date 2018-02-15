@@ -788,6 +788,14 @@ class newNode:
         exec('self.{} = "{}"'.format(name, attr))
         return True
 
+    def setAttr(self, attr, value):
+        """ Sets attribute of the node.
+        [Args]:
+        attr (string) - Attribute to set
+        value (float) - Value to set the attribute
+        """
+        cmds.setAttr('{}.{}'.format(self.name, attr), value)
+
     def lockAttr(self, attr='', hide=True, unlock=False):
         """ Lock attrubutes on node.
         [Args]:

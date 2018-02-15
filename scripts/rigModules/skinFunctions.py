@@ -101,10 +101,15 @@ def loadSkin(geo, assetName=None, prompt=False):
         return False
     skinCls = getSkinInfo(geo)
     if not skinCls:
-        skinInfo = {}
+        skinInfo = {'joints':[]}
         xmlRoot = xml.etree.cElementTree.parse(fileName).getroot()
-        skinInfo['joints'] = [each.get('source') for each in xmlRoot.findall('weights')]
+        # skinInfo['joints'] = [each.get('source') for each in xmlRoot.findall('weights')]
+        # skinInfo['joints'] = [each.get('source') for each in xmlRoot.findall('weights')]
+        for each in xmlRoot.findall('weights'):
+            if int(each.get('size')) > 1:
+                skinInfo['joints'].append(each.get('source'))
         try:
+            # skinCls = cmds.skinCluster(geo, skinInfo['joints'], tsb=1, rui=1)[0]
             skinCls = cmds.skinCluster(geo, skinInfo['joints'], tsb=1)[0]
         except ValueError:
             print 'Errored whilst skinning {}, Skipping.'.format(geo)
@@ -131,7 +136,10 @@ def saveSkin(geo, assetName=None, prompt=False):
             if each:
                 truncateWeights(each, geo)
                 cmds.deformerWeights(fileName, path='', deformer=each, ex=1, wp=5, wt=0.00001)
-    return True
+
+        return True
+    else:
+        return False
 
 def saveAllSkin(assetName=None, prompt=False, selection=False):
     """ Save skin values for all the skin of a rig.
@@ -146,9 +154,16 @@ def saveAllSkin(assetName=None, prompt=False, selection=False):
         # geo = cmds.listRelatives('C_geometry_GRP', ad=1, type='transform')
         selectRigGeo()
     geo = cmds.ls(sl=True)
+    exportedGeo = []
     if geo:
         for each in geo:
+            if cmds.nodeType(each) == 'mesh':
+                parGeo = cmds.listRelatives(each, parent=1)[0]
+                if parGeo not in exportedGeo:
+                    each = parGeo
+                    exportedGeo.append(parGeo)
             saveSkin(each, assetName)
+        fileFn.printToMaya('Finished Exporting Weights')
         return True
     else:
         return False
@@ -180,6 +195,15 @@ def truncateWeights(skinCls, geo):
     skinCls (string) - The name of the skin cluster to truncate
     geo (string) - The geometry the skin cluster is connected to
     """
+    # ## remove inused influences
+    # allInfs = cmds.skinCluster(skinCls, q=1, inf=1)
+    # nonZInfs = cmds.skinCluster(skinCls, q=1, wi=1)
+
+    # for each in allInfs:
+    #     if each not in nonZInfs:
+    #         cmds.skinCluster(skinCls, e=1, ri=each)
+
+
     normVal = cmds.getAttr('{}.normalizeWeights'.format(skinCls))
     cmds.setAttr('{}.normalizeWeights'.format(skinCls), 0)
     cmds.skinPercent(skinCls, geo, prw=0.001, nrm=1)
@@ -198,7 +222,7 @@ def truncateWeights(skinCls, geo):
     weightListAttr = weightListPlug.attribute()
     weightsAttr = weightsPlug.attribute()
 
-    for vertId in range(weightListPlug.numElements()):
+    for i, vertId in enumerate(range(weightListPlug.numElements())):
         vertWeights = {}
         weightsPlug.selectAncestorLogicalIndex(vertId, weightListAttr)
         weightInfluenceIds = weightsPlug.getExistingArrayAttributeIndices()

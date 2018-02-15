@@ -102,6 +102,7 @@ def loadPlugin(nodeName, python=False):
     pluginPath = '{}/Jenks/scripts/nodes'.format(getScriptDir())
     cmds.loadPlugin(r'{}/{}{}'.format(pluginPath, nodeName, fileType))
     mel.eval("refreshEditorTemplates; refreshAE;")
+    printToMaya('Loaded Plugin: {}.'.format(nodeName))
 
 def loadAllPlugins():
     loadPlugin('mjStretchArray')

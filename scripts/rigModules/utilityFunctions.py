@@ -123,10 +123,9 @@ def rename(mObj, newName, side=None, startNum=1, skipSuff=False):
     if cmds.nodeType(lN) == 'aiImage':
         fileName = cmds.getAttr('{}.filename'.format(lN))
         fileName = fileName.rsplit('/', 1)[-1]
-        if newName:
-            newName = '{}_{}'.format(newName, fileName.rsplit('.', 1)[0])
-        else:
-            newName = fileName.rsplit('.', 1)[0]
+        if not newName[-1] == '_':
+            newName += '_'
+        newName = '{}{}'.format(newName, fileName.rsplit('.')[0])
     if newName.endswith(suffix) or skipSuff:
         nameNoDigits = newName
         while nameNoDigits[-1].isdigit():
@@ -696,6 +695,42 @@ def getAssetsInScene(location='rig/Published'):
         else:
             refNds.remove(each)
     return assets, refNds
+
+def shiftAttr(attrs, node, mode='up', amnt=1):
+    if cmds.objExists(node):
+        udAttr = cmds.listAttr(node, ud=1)
+        if not type(attrs) == type(list()):
+            attrs = [attrs]
+        for attr in attrs:
+            if attr not in udAttr:
+                cmds.warning('Attribute is static and connot be shifted.')
+                return False
+            attrL = cmds.listAttr(node, ud=1, l=1)
+        if attrL:
+            for each in attrL:
+                cmds.setAttr('{}.{}'.format(node, each), lock=0)
+        for x in range(amnt):
+            udAttr = cmds.listAttr(node, ud=1)
+            if mode == 'down':
+                if len(attrs) > 1:
+                    attrs.reverse()
+                for each in attrs:
+                    attrPos = udAttr.index(each)
+                    cmds.undo(cmds.deleteAttr(node, at=udAttr[attrPos]))
+                    for i in range(attrPos+2, len(udAttr), 1):
+                        cmds.undo(cmds.deleteAttr(node, at=udAttr[i]))
+            elif mode == 'up':
+                for each in attrs:
+                    attrPos = udAttr.index(each)
+                    if udAttr[attrPos-1]:
+                        cmds.undo(cmds.deleteAttr(node, at=udAttr[attrPos-1]))
+                    for i in range(attrPos+1, len(udAttr), 1):
+                        cmds.undo(cmds.deleteAttr(node, at=udAttr[i]))
+
+
+        if attrL:
+            for each in attrL:
+                cmds.setAttr('{}.{}'.format(node, each), lock=1)
 
 class newNode:
     """ Create new nodes."""

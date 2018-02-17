@@ -142,6 +142,7 @@ setParent -menu jenksPipeMenu;
         menuItem -label "Save Rig Skin" -i $i_saveRigSkin -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.saveAllSkin()\");";
         menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.saveAllSkin(selection=True)\");";
         menuItem -label "Load Rig Skin" -i $i_loadRigSkin -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.loadAllSkin()\");";
+        menuItem -ob true -c "python(\"from Jenks.scripts.rigModules import skinFunctions as skinFn\"); python(\"reload(skinFn)\"); python(\"skinFn.loadAllSkin(selection=True)\");";
         menuItem -label "Save Rig Controls" -i $i_saveRigCtrls -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.saveCtrls()\");";
         menuItem -label "Save Selected Rig Controls" -i $i_saveSelRigCtrls -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.saveCtrls(selectedOnly=True)\");";
         menuItem -label "Load Rig Controls" -i $i_loadRigCtrls -c "python(\"from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn\"); python(\"reload(ctrlFn)\"); python(\"ctrlFn.loadCtrls()\");";

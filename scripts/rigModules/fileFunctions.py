@@ -174,6 +174,9 @@ def abcExport(fileName, selection=True, frameRange=(1, 1), step=1.0):
     cmds.AbcExport(j=args)
 
 def loadGuides(assetName=None, prompt=False, new=False, latest=True):
+    if cmds.progressWindow(q=1, isCancelled=True):
+        return False
+    cmds.progressWindow(e=1, s='Loading Guides.')
     loadMayaFile(assetName, typ='rig/WIP/guides', prompt=prompt, new=new, latest=latest)
     return True
 
@@ -252,6 +255,9 @@ def loadRigScript(assetName=None, prompt=False, build=False):
 
 
 def loadGeo(assetName=None, group=None, prompt=False, abc=True):
+    if cmds.progressWindow(q=1, isCancelled=True):
+        return False
+    cmds.progressWindow(e=1, s='Loading Geometry.')
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
@@ -310,13 +316,16 @@ def publishGeo(assetName=None, autoName=True, prompt=False, abc=True):
         # printToMaya('Published Geometry as Maya File: {}'.format(fileName))
     return True
 
-def referenceGeo(assetName=None, prompt=False, parent=None):
+def referenceGeo(assetName=None, prompt=False, parent=None, remNS=False):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'model/Published')
-    nodes = cmds.file(fileName, r=1, ns=newNameSpace(assetName), rnn=1)
+    if not remNS:
+        nodes = cmds.file(fileName, r=1, ns=newNameSpace(assetName), rnn=1)
+    else:
+        nodes = cmds.file(fileName, r=1, dns=1, rnn=1)
     if parent:
         mNodes = []
         for each in nodes:
@@ -445,7 +454,7 @@ def setupLookDevScene(assetName=None, prompt=False):
     importLookdevSpheres()
     importSkydomeLight()
     # loadGeo(assetName, geoGrp.name)
-    referenceGeo(assetName, parent=geoGrp.name)
+    referenceGeo(assetName, parent=geoGrp.name, remNS=True)
     print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
     geoSetName = 'geoSet_{}'.format(assetName)
     i = 1
@@ -525,7 +534,9 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
+    sel = cmds.ls(sl=1)
     importReferences(sel=False)
+    cmds.select(sel)
     publishSnapshot(asset=assetName, typ='lookDev')
     setsToSave = []
     for each in cmds.listRelatives('C_geometry_GRP', c=1, ad=1):
@@ -772,6 +783,7 @@ def publishSnapshot(asset=None, shot=None, subAsset=None, typ=''):
         return False
 
     oldSel = cmds.ls(sl=1, l=1)
+    print oldSel
     cmds.select(cl=True)
     ssao = cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')
     multiSample = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')
@@ -1314,3 +1326,7 @@ def reloadReferences():
 def printToMaya(msg):
     msg = '{}\n'.format(msg)
     sys.stdout.write(msg)
+
+def suppressWarnings(val):
+    reporter = mel.eval('$c=$gCommandReporter;')
+    cmds.cmdScrollFieldReporter(reporter, e=1, sw=val)

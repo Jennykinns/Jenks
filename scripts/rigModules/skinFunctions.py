@@ -94,6 +94,9 @@ def loadSkin(geo, assetName=None, prompt=False):
     [Returns]:
     True
     """
+    cmds.progressWindow(e=1, s='Skinning Rig')
+    if cmds.progressWindow(q=1, isCancelled=True):
+        return False
     assetName = fileFn.assetNameSetup(assetName, prompt)
     path = fileFn.getAssetDir()
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', name=geo)
@@ -109,7 +112,6 @@ def loadSkin(geo, assetName=None, prompt=False):
             if int(each.get('size')) > 1:
                 skinInfo['joints'].append(each.get('source'))
         try:
-            # skinCls = cmds.skinCluster(geo, skinInfo['joints'], tsb=1, rui=1)[0]
             skinCls = cmds.skinCluster(geo, skinInfo['joints'], tsb=1)[0]
         except ValueError:
             print 'Errored whilst skinning {}, Skipping.'.format(geo)
@@ -168,7 +170,7 @@ def saveAllSkin(assetName=None, prompt=False, selection=False):
     else:
         return False
 
-def loadAllSkin(assetName=None, prompt=False):
+def loadAllSkin(assetName=None, prompt=False, selection=False):
     """ Load skin values for all the skin of a rig.
     [Args]:
     assetName (string) - The name of the rig
@@ -176,16 +178,28 @@ def loadAllSkin(assetName=None, prompt=False):
     [Returns]:
     True if rig has geometry, else False
     """
+    fileFn.suppressWarnings(1)
     assetName = fileFn.assetNameSetup(assetName, prompt)
     print 'Starting Skinning From Saved Files.'
-    geo = cmds.ls(type='transform')
+    if not selection:
+        cmds.select('*_GEO')
+    geo = cmds.ls(sl=True)
+    importedGeo = []
     if geo:
         for each in geo:
+            if cmds.nodeType(each) == 'mesh':
+                parGeo = cmds.listRelatives(each, parent=1)[0]
+                if parGeo not in importedGeo:
+                    each = parGeo
+                    importedGeo.append(parGeo)
+            fileFn.printToMaya('Currently Skinning: {}'.format(each))
             loadSkin(each, assetName)
         print 'Finished Skinning From Saved Files.'
+        fileFn.suppressWarnings(0)
         return True
     else:
         print 'Skinning From Saved Files FAILED.'
+        fileFn.suppressWarnings(0)
         return False
 
 def truncateWeights(skinCls, geo):

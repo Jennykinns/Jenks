@@ -201,6 +201,9 @@ def loadCtrls(assetName=None, prompt=False):
     assetName (string) - The name of the asset
     prompt (bool) - Toggles a window prompt for asset name
     """
+    if cmds.progressWindow(q=1, isCancelled=True):
+        return False
+    cmds.progressWindow(e=1, s='Loading Rig Controls.')
     if prompt:
         assetName = fileFn.assetNamePrompt()
     if not assetName:

@@ -614,7 +614,8 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', parent=N
     ##
 
 
-def createRivet(rivName, extraName, module, nrb, pv=0.5, pu=0.5, parent=None, rivJntPar=None):
+def createRivet(rivName, extraName='', module=None, side='C', nrb=None, loftComponents=None,
+                pv=0.5, pu=0.5, parent=None, rivJntPar=None, jnt=True):
     """ Create a rivet.
     [Args]:
     rivName (string) - The name of the rivet
@@ -628,18 +629,34 @@ def createRivet(rivName, extraName, module, nrb, pv=0.5, pu=0.5, parent=None, ri
     [Returns]:
     rivJnt.name (string) - The name of the rivet joint
     """
-    rivJnt = utils.newNode('joint', name='{}{}Riv'.format(extraName, rivName),
-                           side=module.side, parent=rivJntPar)
-    utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)
-    cmds.setAttr('{}.jointOrient'.format(rivJnt.name), 0, 0, 0)
+    if extraName:
+        extraName += '_'
+    if not nrb and loftComponents:
+        nrb = cmds.loft(loftComponents, ch=1, u=1, d=3, ss=1, rn=0, po=0,
+                        n='{}_{}{}Riv{}'.format(module.side if module else side, extraName,
+                                               rivName, suffix['nurbsSurface']))[0]
+        if parent:
+            cmds.parent(nrb, parent)
     rivLoc = utils.newNode('locator', name='{}{}Riv'.format(extraName, rivName),
-                           side=module.side, parent=parent)
-    cmds.parentConstraint(rivLoc.name, rivJnt.name)
+                           side=module.side if module else side, parent=parent)
+    if jnt:
+        rivJnt = utils.newNode('joint', name='{}{}Riv'.format(extraName, rivName),
+                               side=module.side if module else side, parent=rivJntPar)
+        if module:
+            utils.addJntToSkinJnt(rivJnt.name, rig=module.rig)
+        cmds.setAttr('{}.jointOrient'.format(rivJnt.name), 0, 0, 0)
+        cmds.parentConstraint(rivLoc.name, rivJnt.name)
     rivNd = utils.newNode('mjRivet', name='{}{}Riv'.format(extraName, rivName),
-                          side=module.side)
+                          side=module.side if module else side)
     rivNd.connect('is', '{}.ws'.format(nrb), 'to')
     rivNd.connect('ot', '{}.t'.format(rivLoc.name), 'from')
     rivNd.connect('or', '{}.r'.format(rivLoc.name), 'from')
     cmds.setAttr('{}.pv'.format(rivNd.name), pv)
     cmds.setAttr('{}.pu'.format(rivNd.name), pu)
-    return rivJnt.name
+    return rivJnt.name if jnt else rivLoc.name
+
+def createRivetFromSelected(rivName, extraName='', module=None, side='C',
+                            pv=1.5, pu=0.5, parent=None, rivJntPar=None, jnt=True):
+    sel = cmds.ls(sl=1)
+    if sel:
+        createRivet(rivName, extraName, module, side, None, sel, pv, pu, parent, rivJntPar, jnt)

@@ -119,7 +119,7 @@ def getScriptDir():
         scriptPath = 'C:\\Docs\\maya\\scripts'
     elif os.path.isdir('{}\\maya'.format(homeDir)):
         ## on other computers
-        scriptPath = '{}\\maya'.format(homeDir)
+        scriptPath = '{}\\maya\\scripts'.format(homeDir)
     else:
         scriptPath = sys.path[-1]
     return scriptPath

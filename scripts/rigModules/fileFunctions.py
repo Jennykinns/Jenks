@@ -455,7 +455,7 @@ def setupLookDevScene(assetName=None, prompt=False):
     importSkydomeLight()
     # loadGeo(assetName, geoGrp.name)
     referenceGeo(assetName, parent=geoGrp.name, remNS=True)
-    print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
+    # print '## ADD A QUICK FUNCTION TO AVOID NAMING CONFLICTS FOR LOOKDEV MESH SET NAMES'
     geoSetName = 'geoSet_{}'.format(assetName)
     i = 1
     while cmds.objExists(geoSetName):
@@ -535,6 +535,10 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
     if not assetName:
         return False
     sel = cmds.ls(sl=1)
+    popup = cmds.confirmDialog(m='Save WIP LookDev Scene Before Publishing?', button=['Yes', 'No'],
+                               cancelButton='No', db='Yes')
+    if popup:
+        saveWipLookDev(autoName=True)
     importReferences(sel=False)
     cmds.select(sel)
     publishSnapshot(asset=assetName, typ='lookDev')
@@ -546,6 +550,9 @@ def publishLookDev(assetName=None, autoName=True, prompt=False):
     cmds.select(setsToSave, add=1, noExpand=1)
     saveMayaFile(assetName, typ='lookDev/Published', prompt=prompt, autoName=autoName,
                  removeRefs=False, selectionOnly=True)
+    if popup:
+        cmds.file(new=1, force=1)
+        loadWipLookDev(latest=True)
     return True
 
 def publishSubAssetLookDev(subAssetName=None, autoName=True, prompt=False):

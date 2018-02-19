@@ -614,7 +614,7 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', parent=N
     ##
 
 
-def createRivet(rivName, extraName='', module=None, side='C', nrb=None, loftComponents=None,
+def createRivet(rivName, extraName='', module=None, nrb=None, side='C', loftComponents=None,
                 pv=0.5, pu=0.5, parent=None, rivJntPar=None, jnt=True):
     """ Create a rivet.
     [Args]:

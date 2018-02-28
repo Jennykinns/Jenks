@@ -1070,7 +1070,7 @@ class headModule:
         self.rig = rig
 
     def create(self, options={}, autoOrient=True,
-               parent=None, extraSpaces=''):
+               parent=None, extraSpaces='', customNodes=False):
         """ Create the head rig.
         [Args]:
         options (dictionary) - A dictionary of options for the arm
@@ -1082,18 +1082,22 @@ class headModule:
         overrideOptions = options
         options = defaultBodyOptions.head
         options.update(overrideOptions)
+        extraName = '{}_'.format(self.extraName) if self.extraName else ''
+        jntSuffix = suffix['joint']
 
         ctrlSpaceSwitches = [self.rig.globalCtrl.ctrlEnd]
+        parJnt = utils.newNode('joint', name='{}headParent'.format(extraName), side=self.side,
+                               parent=parent, skipNum=True)
         if parent:
+            parJnt.matchTransforms(parent)
             if cmds.listRelatives(parent, p=1):
                 gParent = cmds.listRelatives(parent, p=1)[0]
                 ctrlSpaceSwitches.append(gParent)
-        else:
-            cmds.error('FUCK, I DON\'T KNOW WHAT TO DO WITHOUT A PARENT FOR THE HEAD YET.')
-        extraName = '{}_'.format(self.extraName) if self.extraName else ''
-        jntSuffix = suffix['joint']
+        utils.orientJoints([parJnt.name], aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
+        # else:
+        #     cmds.error('FUCK, I DON\'T KNOW WHAT TO DO WITHOUT A PARENT FOR THE HEAD YET.')
         jnts = [
-            parent,
+            parJnt.name,
             '{}head{}'.format(self.moduleName, jntSuffix),
             '{}headEnd{}'.format(self.moduleName, jntSuffix),
         ]
@@ -1125,6 +1129,9 @@ class headModule:
                                        side=self.side, parent=headMechGrp.name, skipNum=True)
             neckIK = ikFn.ik(jnts[0], jnts[1], name='{}neckIK'.format(extraName), side=self.side)
             neckIK.createIK(parent=headIKsGrp.name)
+            if options['stretchy']:
+                neckIK.addStretch(operation='both', customStretchNode=customNodes,
+                                  globalScaleAttr=self.rig.scaleAttr, sjPar=parJnt.name)
             headIK = ikFn.ik(jnts[1], jnts[2], name='{}headIK'.format(extraName), side=self.side)
             headIK.createIK(parent=headIKsGrp.name)
             ## IK Control

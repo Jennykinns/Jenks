@@ -225,6 +225,70 @@ def loadCtrls(assetName=None, prompt=False):
             if crvData:
                 applyShapeData(ctrl, crvData)
 
+class ctrlChain:
+
+    def __init__(self, ctrlInfo=None, name='controlChain', rig=None, parent=None,
+                 side='C', scaleOffset=1.0):
+        self.rig = rig
+        self.side = side
+        self.name = name
+        self.scaleOffset = scaleOffset
+        self.ctrls = []
+
+        defCtrlOptions = {
+            'gimbal' : False,
+            'offsetGrpNum' : 1,
+            'deleteGuide' : False,
+            'parent' : 0,
+            'constrainGuide' : 'parent',
+        }
+
+        # for guide, info in ctrlInfo.iteritems():
+        for info in ctrlInfo:
+            opt = defCtrlOptions
+            opt.update(info)
+            if opt['parent'] is 0:
+                ctrlPar = parent
+            else:
+                ctrlPar = self.ctrls[opt['parent']-1].ctrlEnd
+            c = ctrl(name=name, gimbal=opt['gimbal'], offsetGrpNum=opt['offsetGrpNum'],
+                     guide=opt['guide'], rig=rig, side=side, parent=ctrlPar,
+                     scaleOffset=scaleOffset, constrainGuide=opt['constrainGuide'])
+            self.ctrls.append(c)
+
+    def modifyShapes(self, info):
+        defInfo = {
+            'shape' : None,
+            'color' : False,
+            'rotation' : (0, 0, 0),
+            'translation' : (0, 0, 0),
+            'scale' : (1, 1, 1),
+            'mirror' : False,
+        }
+        for i, each in enumerate(self.ctrls):
+            v = defInfo
+            if len(info) > 1:
+                v.update(info[i])
+            else:
+                v.update(info[0])
+            each.modifyShape(shape=v['shape'], color=v['color'], rotation=v['rotation'],
+                             translation=v['translation'], scale=v['scale'], mirror=v['mirror'])
+
+            # (self, attr='', hide=True, unlock=False)
+
+    def lockAttrs(self, info):
+        defInfo = {
+            'attr' : '',
+            'hide' : True,
+            'unlock' : False,
+        }
+        for i, each in enumerate(self.ctrls):
+            v = defInfo
+            v.update(info[i])
+            each.lockAttrs(attr=v['attr'], hide=v['hide'], unlock=v['unlock'])
+
+
+
 class ctrl:
 
     """ Create and manipulate a control. """

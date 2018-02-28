@@ -285,13 +285,28 @@ def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
     """
     sChilds = cmds.listRelatives(startObj, ad=1, type=typ)
     eChilds = cmds.listRelatives(endObj, ad=1, type=typ)
+    # if eChilds:
+    #     # objs = list(set(sChilds) - set(eChilds))
+    #     for each in eChilds:
+    #         if each in sChilds:
+    #             sChilds.remove(each)
+    #     sChilds.remove(endObj)
+    #     sChilds.reverse()
+    #     # sChilds.append(endObj)
+    #     objs = sChilds
+    # else:
+    #   objs = sChilds
+    #   objs.reverse()
+    # objs.insert(0, startObj)
     if eChilds:
-        objs = list(set(sChilds) - set(eChilds))
-    else:
-      objs = sChilds
-      objs.reverse()
-    objs.insert(0, startObj)
-    return objs
+        for each in eChilds:
+            if each in sChilds:
+                sChilds.remove(each)
+    sChilds.remove(endObj)
+    sChilds.reverse()
+    sChilds.insert(0, startObj)
+    sChilds.append(endObj)
+    return sChilds
 
 def getColors(typ):
     """ Get the specified colours depending on the position

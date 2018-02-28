@@ -441,7 +441,7 @@ def bendyJoints(sj, mj, ej, moduleType, module):
     module (class) - The class of the body part module
     """
     moduleName = utils.setupBodyPartName(module.extraName, module.side)
-    extraName = '{}_'.format(module.extraName) if module.extraName else ''
+    extraName = module.extraName
     mechGrp = utils.newNode('group', name='{}BendyMech'.format(extraName),
                             side=module.side, skipNum=True,
                             parent='{}{}Mech{}'.format(moduleName, moduleType, suffix['group']))
@@ -465,7 +465,6 @@ def createLayeredSplineIK(jnts, name, rig=None, side='C', extraName='', parent=N
     dyn (bool) - Toggles dynamics on the spline IK
     """
     moduleName = utils.setupBodyPartName(extraName, side)
-    extraName = '{}_'.format(extraName) if extraName else ''
     col = utils.getColors(side)
     ## create base layer jnts
     tmpCrv = utils.createCrvFromObjs(jnts, crvName='tmpCrv')

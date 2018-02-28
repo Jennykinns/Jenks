@@ -25,6 +25,7 @@ limb = {
 
 head = {
     'IK' : True,
+    'stretchy' : False,
 }
 
 tail = {

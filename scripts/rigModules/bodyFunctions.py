@@ -933,11 +933,20 @@ class quadripedLegModule:
                                          parent=upperLegCtrls.name,
                                          scaleOffset=self.rig.scaleOffset, rig=self.rig)
             self.hipIKCtrl.modifyShape(shape='pringle', color=col['col1'], mirror=True)
-            self.hipIKCtrl.constrain(upperLegIK.grp)
+            # self.hipIKCtrl.constrain(upperLegIK.grp)
 
             a = utils.newNode('transform', parent=self.hipIKCtrl.rootGrp.name)
             cmds.pointConstraint(self.clavicleIKCtrl.ctrlEnd, a.name)
             a.connect('t', '{}.rotatePivot'.format(self.hipIKCtrl.ctrl.name))
+
+            ## hipAim ctrl
+            self.hipAimIKCtrl = ctrlFn.ctrl(name='{}hipAimIK'.format(extraName), side=self.side,
+                                            guide=jnts[1], skipNum=True,
+                                            parent=self.hipIKCtrl.ctrlEnd,
+                                            scaleOffset=self.rig.scaleOffset, rig=self.rig)
+            self.hipAimIKCtrl.modifyShape(shape='arrowRev', color=col['col2'], mirror=True,
+                                          scale=(0.1, 0.1, 0.4), rotation=(90, 0, 0))
+            self.hipAimIKCtrl.constrain(upperLegIK.grp)
 
             ## foot ctrl
             footIKGuide = '{}footCtrlGuide{}'.format(self.moduleName, suffix['locator'])

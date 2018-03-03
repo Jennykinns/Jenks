@@ -84,6 +84,18 @@ def getSkinInfo(obj):
             skinCls.extend(cls)
     return skinCls
 
+def copySkinToSelectedGeo():
+    """ Copy skin weights to multiple destinations. Uses the last
+    selected as the source.
+    """
+    sel = cmds.ls(sl=1)
+    for each in sel[:-1]:
+        dest = skinFn.getSkinInfo(each)[0]
+        source = skinFn.getSkinInfo(sel[-1])[0]
+        cmds.copySkinWeights(ds=dest, ss=source, noMirror=1, surfaceAssociation='closestPoint',
+                             influenceAssociation='closestJoint')
+    return True
+
 def loadSkin(geo, assetName=None, prompt=False):
     """ Load skin values for the specified geometry from a file.
     [Args]:

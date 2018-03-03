@@ -795,6 +795,7 @@ class newNode:
             elif node == 'cluster':
                 clu, cluHdl = cmds.cluster(n=nodeName)
                 self.name = cmds.rename(cluHdl, '{}H'.format(nodeName))
+                self.clu = clu
             elif node == 'shadingEngine':
                 self.name = cmds.sets(renderable=True, noSurfaceShader=True,
                                       empty=True, name=nodeName)

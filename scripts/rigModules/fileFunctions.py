@@ -108,6 +108,7 @@ def loadAllPlugins():
     loadPlugin('mjStretchArray')
     loadPlugin('mjRivet')
     loadPlugin('mjSoftIK', True)
+    mel.eval('ikSpringSolver')
 
 
 def getScriptDir():

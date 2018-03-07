@@ -4,6 +4,7 @@ from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 
 reload(utils)
+reload(fileFn)
 
 def createNewShader(bump=False, sss=False, disp=True):
     """ Create a new aiStandardSurface shader with colour corrects
@@ -73,3 +74,33 @@ def changeKeyframePosition():
     cmds.keyframe(nds, edit=True, relative=True, timeChange=amount)
     # cmds.playbackOptions(e=1, min=frameRange[0]+amount, max=frameRange[1]+amount)
     return True
+
+
+def replaceShaders():
+    ## Reference Lookdev > Transfer Shaders > Import Used Shaders > Remove Reference
+    assetName = fileFn.getAssetName()
+    if not assetName:
+        return False
+    f = fileFn.referenceLookDev(assetName)
+    refNd = cmds.file(f, q=1, rfn=1)
+    nds = cmds.referenceQuery(refNd, n=1)
+    for each in nds:
+        if(not cmds.nodeType(each) == 'shadingEngine'
+                or each in ['initialShadingGroup', 'initialParticleSE']):
+            continue
+        shader = cmds.listConnections('{}.surfaceShader'.format(each), d=False)[0]
+        geoList = cmds.listConnections('{}.dagSetMembers'.format(each), d=False)
+        ## dupe shader
+        newShader = cmds.duplicate(each, un=1, ic=1)
+        for geo in geoList:
+            oldSel = cmds.ls(sl=1)
+            geoName = geo.rpartition(':')[-1]
+            cmds.select('*:{}'.format(geo.rpartition(':')[-1]), geoName)
+            sameNameGeo = cmds.ls(sl=1)
+            cmds.select(oldSel)
+            sameNameGeo.remove(geo)
+            cmds.sets(sameNameGeo, e=True, forceElement=newShader[0])
+
+    cmds.file(f, rr=1)
+
+

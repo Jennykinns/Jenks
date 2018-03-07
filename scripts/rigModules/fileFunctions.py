@@ -566,16 +566,28 @@ def publishSubAssetLookDev(subAssetName=None, autoName=True, prompt=False):
                  removeRefs=True, selectionOnly=True, subAsset=True)
     return True
 
-def referenceLookDev(assetName=None, prompt=False):
+def referenceLookDev(assetName=None, prompt=False, returnNodes=False, latest=False):
     assetName = assetNameSetup(assetName, prompt)
     if not assetName:
         return False
     path = getAssetDir()
-    fileName = getLatestVersion(assetName, path, 'lookDev/Published')
-    cmds.file(fileName, r=1, ns=newNameSpace(assetName))
+    if latest:
+        fileName = getLatestVersion(assetName, path, 'lookDev/Published')
+    else:
+        fileFilter = fileDialogFilter([('Maya Ascii', '*.ma')])
+        fileName = cmds.fileDialog2(dialogStyle=2,
+                                    caption='Reference LookDev',
+                                    fileMode=1,
+                                    fileFilter=fileFilter,
+                                    dir='{}{}/lookDev/Published'.format(path, assetName))
+        # fileName = fileName[0] if fileName else False
+        if not fileName:
+            return False
+        fileName = fileName[0]
+    nds = cmds.file(fileName, r=1, ns=newNameSpace(assetName), rnn=returnNodes)
     # print 'Referenced LookDev: {}'.format(fileName)
     printToMaya('Referenced LookDev: {}'.format(fileName))
-    return True
+    return nds
 
 def referenceSubAssetLookDev(subAssetName=None, prompt=False):
     subAssetName = assetNameSetup(subAssetName, prompt, typ='subAsset')

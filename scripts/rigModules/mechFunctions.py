@@ -658,4 +658,6 @@ def createRivetFromSelected(rivName, extraName='', module=None, side='C',
                             pv=1.5, pu=0.5, parent=None, rivJntPar=None, jnt=True):
     sel = cmds.ls(sl=1)
     if sel:
-        createRivet(rivName, extraName, module, side, None, sel, pv, pu, parent, rivJntPar, jnt)
+        createRivet(rivName=rivName, extraName=extraName, module=module, side=side,
+                    loftComponents=sel, pv=pv, pu=pu, parent=parent, rivJntPar=rivJntPar,
+                    jnt=jnt)

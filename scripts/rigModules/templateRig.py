@@ -1,11 +1,13 @@
 import maya.cmds as cmds
 
+from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules import ctrlFunctions as ctrlFn
 from Jenks.scripts.rigModules import skinFunctions as skinFn
 from Jenks.scripts.rigModules import bodyFunctions as bodyFn
 from Jenks.scripts.rigModules import mechFunctions as mechFn
 from Jenks.scripts.rigModules import faceFunctions as faceFn
+from Jenks.scripts.rigModules import ikFunctions as ikFn
 from Jenks.scripts.rigModules import setupFn
 
 reload(fileFn)
@@ -18,9 +20,14 @@ reload(setupFn)
 
 def create():
 
-    rig = setupFn.rig(rigName, debug=True)
+    cmds.progressWindow(t='Creating Rig', progress=0, status='Setting Up.', isInterruptable=1)
+
+    rig = setupFn.rig(rigName, debug=True, scaleOffset=1)
     fileFn.loadGuides(rigName)
     fileFn.loadGeo(rigName, rig.geoGrp.name)
+
+    if cmds.progressWindow(q=1, isCancelled=1):
+        return False
 
     ## DO STUFF
 
@@ -44,10 +51,11 @@ def create():
 
     ##
 
-    skinFn.loadAllSkin(rigName)
     ctrlFn.loadCtrls(rigName)
-    cmds.viewFit()
+    skinFn.loadAllSkin(rigName)
 
 rigName = 'testRigStuff'
 
 create()
+cmds.viewFit()
+cmds.progressWindow(e=1, ep=1)

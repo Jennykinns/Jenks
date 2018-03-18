@@ -5,6 +5,7 @@ import maya.api.OpenMayaAnim as oma
 from Jenks.scripts.rigModules import fileFunctions as fileFn
 from Jenks.scripts.rigModules import apiFunctions as apiFn
 from Jenks.scripts.rigModules import utilityFunctions as utils
+from Jenks.scripts.rigModules.suffixDictionary import suffix
 
 import xml.etree.cElementTree
 
@@ -201,8 +202,11 @@ def loadAllSkin(assetName=None, prompt=False, selection=False):
     assetName = fileFn.assetNameSetup(assetName, prompt)
     print 'Starting Skinning From Saved Files.'
     if not selection:
-        cmds.select('*_GEO')
+        cmds.select('C_global{}'.format(suffix['control']))
+        selectRigGeo()
+        # cmds.select('*_GEO')
     geo = cmds.ls(sl=True)
+    cmds.select(cl=1)
     importedGeo = []
     if geo:
         for each in geo:

@@ -1891,7 +1891,7 @@ def renameFaceGuides(side='C', extraName=''):
         '{}mouthCorner'.format(extraName),
         '{}mouthCorner'.format(extraName),
         '{}noseCorner'.format(extraName),
-        '{}nodeCorner'.format(extraName),
+        '{}noseCorner'.format(extraName),
         '{}cheek'.format(extraName),
         '{}cheek'.format(extraName),
         '{}eyebrowInner'.format(extraName),
@@ -1982,3 +1982,5 @@ def renameAllBodyPartGuides():
             renameHeadGuides(side, extraName)
         elif '_tail{}'.format(suffix['group']) in sN:
             renameTailGuides(side, extraName)
+        elif '_faceJnts{}'.format(suffix['group']) in sN:
+            renameFaceGuides(side, extraName)

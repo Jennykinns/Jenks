@@ -65,7 +65,7 @@ class face:
                                   rig=self.rig, parent=faceCtrlsGrp.name,
                                   scaleOffset=self.rig.scaleOffset)
             eyeCtrl.constrain(eyeJnt)
-            eyeCtrl.modifyShape(shape='sphere', scale=(0.1, 0.1, 0.1))
+            eyeCtrl.modifyShape(shape='sphere', scale=(0.1, 0.1, 0.1), color=27)
             if jntPar:
                 cmds.parent(eyeJnt, jntPar)
             ## do aim controls
@@ -82,7 +82,7 @@ class face:
             upperEyelidCtrl.constrain(upperEyelidJnt)
             upperEyelidCtrl.constrain(upperEyelidJnt, typ='scale')
             upperEyelidCtrl.modifyShape(shape='arc', scale=(0.1, 0.1, 0.1), rotation=(0, 0, 90),
-                                        mirror=True)
+                                        mirror=True, color=27)
 
             lowerEyelidJnt = '{}_{}eyelidLower{}'.format(s, extraName, suffix['joint'])
             if jntPar:
@@ -95,7 +95,7 @@ class face:
             lowerEyelidCtrl.constrain(lowerEyelidJnt)
             lowerEyelidCtrl.constrain(lowerEyelidJnt, typ='scale')
             lowerEyelidCtrl.modifyShape(shape='arc', scale=(0.1, 0.1, 0.1), rotation=(0, 0, 90),
-                                        mirror=True)
+                                        mirror=True, color=27)
 
         ## tongue
         if tongue:
@@ -153,7 +153,8 @@ class face:
                 constr = cmds.parentConstraint(jawCtrl.ctrlEnd, faceCtrlsGrp.name,
                                                ctrl.offsetGrps[0].name, mo=1)[0]
                 cmds.setAttr('{}.interpType'.format(constr), 2)
-            ctrl.modifyShape(shape='pin', scale=(0.2, 0.2, 0.2), rotation=(-90, 0, 0), mirror=True)
+            ctrl.modifyShape(shape='pin', scale=(0.2, 0.2, 0.2), rotation=(-90, 0, 0), mirror=True,
+                             color=11)
             ## constrain
             ctrl.constrain(jnt)
             ctrl.constrain(jnt, typ='scale')

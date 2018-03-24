@@ -274,7 +274,7 @@ class strapModule:
 
     """ Create a strap rig. """
 
-    def __init__(self, rig, name='strap', extraName='', side='C'):
+    def __init__(self, rig=None, name='strap', extraName='', side='C'):
         """ Setup the initial variables to use when creating the strap.
         [Args]:
         rig (class) - The rig class to use
@@ -288,7 +288,7 @@ class strapModule:
         self.side = side
         self.rig = rig
 
-    def create(self, jnts, nrb, parent=None, numOfJnts=10):
+    def create(self, jnts, nrb, parent=None, numOfJnts=10, skipSkinning=False):
         """ Create the strap.
         [Args]:
         jnts (list)(string) - The names of the joints to bind to the
@@ -312,13 +312,14 @@ class strapModule:
         prevJnt = None
         for each in jnts:
             if prevJnt:
-                cmds.parent(each, prevJnt)
+                try:
+                    cmds.parent(each, prevJnt)
+                except RuntimeError:
+                    pass
             prevJnt = each
-        orientJoints.doOrientJoint(jointsToOrient=jnts,
-                                   aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
-                                   upAxis=(0, 1, 0),
-                                   worldUp=(0, 1 if not self.side == 'R' else -1, 0),
-                                   guessUp=1)
+        if not skipSkinning:
+            utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
+                               upAxis=(0, 1, 0))
         for each in jnts:
             cmds.parent(each, self.strapMechGrp.name)
             ## create control
@@ -329,12 +330,17 @@ class strapModule:
             self.ctrls.append(ctrl)
             ctrl.constrain(each)
             ctrl.constrain(each, typ='scale')
-        ## skin jnts to nrb / clusters
-        skin = cmds.skinCluster(jnts, nrb, parent)[0]
+        if not skipSkinning:
+            ## skin jnts to nrb / clusters
+            skin = cmds.skinCluster(jnts, nrb, parent)[0]
         ## rivet locators + jnts
+        if self.rig:
+            rivJntPar = self.rig.skelGrp.name
+        else:
+            rivJntPar = None
         for i in range(numOfJnts):
             createRivet(self.name, extraName, self, nrb, parent=self.strapMechGrp.name,
-                        pv=0.5, pu=(1.0/(numOfJnts-1.0))*i, rivJntPar=parent)
+                        pv=0.5, pu=(1.0/(numOfJnts-1.0))*i, rivJntPar=rivJntPar)
 
 
 def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=None,

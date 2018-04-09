@@ -115,6 +115,7 @@ def loadSkin(geo, assetName=None, prompt=False):
     fileName = fileFn.getLatestVersion(assetName, path, 'rig/WIP/skin', name=geo)
     if not fileName:
         return False
+    fileFn.printToMaya('Currently Skinning: {}'.format(geo))
     skinCls = getSkinInfo(geo)
     if not skinCls:
         skinInfo = {'joints':[]}
@@ -215,7 +216,6 @@ def loadAllSkin(assetName=None, prompt=False, selection=False):
                 if parGeo not in importedGeo:
                     each = parGeo
                     importedGeo.append(parGeo)
-            fileFn.printToMaya('Currently Skinning: {}'.format(each))
             loadSkin(each, assetName)
         print 'Finished Skinning From Saved Files.'
         fileFn.suppressWarnings(0)

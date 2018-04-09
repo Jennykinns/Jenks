@@ -799,6 +799,9 @@ class newNode:
             elif node == 'shadingEngine':
                 self.name = cmds.sets(renderable=True, noSurfaceShader=True,
                                       empty=True, name=nodeName)
+            elif node == 'mesh':
+                self.name = cmds.createNode(node, ss=1)
+                self.transform = cmds.listRelatives(self.name, p=1)
             else:
                 self.name = cmds.createNode(node, n=nodeName, ss=1)
             if parent:

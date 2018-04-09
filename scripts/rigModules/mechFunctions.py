@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+import maya.mel as mel
 
 from Jenks.scripts.rigModules import utilityFunctions as utils
 from Jenks.scripts.rigModules import ikFunctions as ikFn
@@ -308,16 +309,17 @@ class strapModule:
         self.strapCtrlsGrp = utils.newNode('group', name='{}{}Ctrls'.format(extraName, self.name),
                                            side=self.side, parent=self.rig.ctrlsGrp.name,
                                            skipNum=True)
-        cmds.parentConstraint(parent, self.strapCtrlsGrp.name, mo=1)
-        prevJnt = None
-        for each in jnts:
-            if prevJnt:
-                try:
-                    cmds.parent(each, prevJnt)
-                except RuntimeError:
-                    pass
-            prevJnt = each
+        if parent:
+            cmds.parentConstraint(parent, self.strapCtrlsGrp.name, mo=1)
         if not skipSkinning:
+            prevJnt = None
+            for each in jnts:
+                if prevJnt:
+                    try:
+                        cmds.parent(each, prevJnt)
+                    except RuntimeError:
+                        pass
+            prevJnt = each
             utils.orientJoints(jnts, aimAxis=(1 if not self.side == 'R' else -1, 0, 0),
                                upAxis=(0, 1, 0))
         for each in jnts:
@@ -637,9 +639,9 @@ def createRivet(rivName, extraName='', module=None, nrb=None, side='C', loftComp
     if extraName:
         extraName += '_'
     if not nrb and loftComponents:
-        nrb = cmds.loft(loftComponents, ch=1, u=1, d=3, ss=1, rn=0, po=0,
-                        n='{}_{}{}Riv{}'.format(module.side if module else side, extraName,
-                                               rivName, suffix['nurbsSurface']))[0]
+        nrbName = utils.setupName('{}{}Riv'.format(extraName, rivName), obj='nurbsSurface',
+                                  side=module.side if module else side, skipNumber=False)
+        nrb = cmds.loft(loftComponents, ch=1, u=1, d=3, ss=1, rn=0, po=0, n=nrbName)[0]
         if parent:
             cmds.parent(nrb, parent)
     rivLoc = utils.newNode('locator', name='{}{}Riv'.format(extraName, rivName),
@@ -667,3 +669,68 @@ def createRivetFromSelected(rivName, extraName='', module=None, side='C',
         createRivet(rivName=rivName, extraName=extraName, module=module, side=side,
                     loftComponents=sel, pv=pv, pu=pu, parent=parent, rivJntPar=rivJntPar,
                     jnt=jnt)
+
+class nCloth:
+    def __init__(self, name='nCloth', side='C', rig=None):
+        self.name = name
+        self.side = side
+        self.rig = rig
+
+    def create(self, geo, worldSpace=False):
+        meshes = cmds.listRelatives(geo, f=1, ni=1, s=1, type='mesh')
+        if not meshes:
+            cmds.warning('No Geometry Selected. Skipping.')
+            return False
+        nucleus = mel.eval('getActiveNucleusNode(false, true);')
+        self.clothNodes = []
+        for mesh in meshes:
+            conns = cmds.listConnections(mesh, sh=1, type='nBase')
+            if not conns:
+
+                meshTforms = mel.eval('listTransforms("{}")'.format(mesh))
+                tform = meshTforms[0]
+
+                nCloth = utils.newNode('nCloth', name=self.name, side=self.side)
+
+                mel.eval('hideParticleAttrs("{}")'.format(nCloth.name))
+                self.clothNodes.append(nCloth)
+
+                nCloth.connect('currentTime', 'time1.outTime', mode='to')
+                wrapPlugs = cmds.listConnections('{}.worldMesh'.format(mesh), d=1, p=1,
+                                                 sh=1, type='wrap')
+                nCloth.connect('inputMesh', '{}.worldMesh'.format(mesh), mode='to')
+
+                outMesh = utils.newNode('mesh', name='{}OutputMesh'.format(self.name),
+                                        side=self.side)
+                if not worldSpace:
+                    cmds.parent(outMesh.name, tform, s=1, r=1)
+                    cmds.delete(outMesh.transform)
+                    nCloth.setAttr('localSpaceOutput', True)
+                shadCons = cmds.listConnections('{}.instObjGroups[0]'.format(mesh), d=1, sh=1,
+                                                type='shadingEngine')
+                # if len(shadCons) > 0:
+                if shadCons:
+                    cmds.hyperShade(outMesh.name, assign=shadCons[0])
+                else:
+                    cmds.sets(outMesh.name, add='initialShadingGroup')
+
+                outMesh.setAttr('quadSplit', 0)
+                nCloth.connect('outputMesh', '{}.inMesh'.format(outMesh.name), mode='from')
+
+                mel.eval('addActiveToNSystem("{}", "{}")'.format(nCloth.name, nucleus))
+                nCloth.connect('startFrame', '{}.startFrame'.format(nucleus), mode='to')
+                cmds.setAttr('{}.intermediateObject'.format(mesh), 1)
+                clothTforms = mel.eval('listTransforms "{}"'.format(nCloth.name))
+                cmds.setAttr('{}.translate'.format(clothTforms[0]), l=True)
+                cmds.setAttr('{}.rotate'.format(clothTforms[0]), l=True)
+                cmds.setAttr('{}.scale'.format(clothTforms[0]), l=True)
+
+                ## todo: add shit about thickness for collisions
+
+                if wrapPlugs:
+                    mel.eval('if( !`exists transferWrapConns` ){ source "removeNCloth.mel"; } transferWrapConns( "' + wrapPlugs + '", "' + outMesh.name + '" );')
+        return True
+
+    def setAttr(self, attr, value):
+        for each in self.clothNodes:
+            each.setAttr(attr, value)

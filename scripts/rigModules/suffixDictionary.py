@@ -60,4 +60,5 @@ suffix = {
     'aiTriplanar' : '_TRP',
     'aiComposite' : '_COMP',
     'aiFlat' : '_FLT',
+    'nCloth' : '_NCLOTH',
 }

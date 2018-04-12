@@ -28,7 +28,7 @@ def getLatestVersion(assetName, path, location, new=False, name=None, suffix=Non
     elif location == 'model/WIP':
         suffix = '.ma'
         name = assetName
-    elif location == 'anim/Published':
+    elif location == 'anim/Published' or location == 'anim/Dynamics':
         suffix = '.abc'
         name = assetName
     elif location == 'anim/Playblasts':
@@ -711,30 +711,37 @@ def loadWipAnimation(shotName=None, latest=False, prompt=False):
     loadMayaFile(shotName, typ='anim/WIP', prompt=prompt, latest=latest, new=True, shot=True)
     return True
 
-def publishAnimation(shotName=None, autoName=True, prompt=False):
-    rigs = cmds.ls('*:_RIG__GRP')
-    cmds.select(cl=True)
-    for each in rigs:
-        rigChilds = cmds.listRelatives(each, c=1, s=0)
-        for child in rigChilds:
-            if ':C_geometry_GRP' in child:
-                cmds.select(child, add=1)
-                continue
+def publishAnimation(shotName=None, autoName=True, prompt=False, dynamics=False):
+    if not dynamics:
+        rigs = cmds.ls('*:_RIG__GRP')
+        cmds.select(cl=True)
+        for each in rigs:
+            rigChilds = cmds.listRelatives(each, c=1, s=0)
+            for child in rigChilds:
+                if ':C_geometry_GRP' in child:
+                    cmds.select(child, add=1)
+                    continue
+        extraPath = 'anim/Published'
+    else:
+        cmds.select(cl=True)
+        cmds.select('*:C_geometry_GRP', add=1)
+        extraPath = 'anim/Dynamics'
     shotName = assetNameSetup(shotName, prompt, typ='shot')
     if not shotName:
         return False
     path = getShotDir()
+    # extraPath = 'anim/Published' if not dynamics else 'anim/Dynamics'
     if not autoName:
         fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
         fileName = cmds.fileDialog2(dialogStyle=2, caption='Publish Animation',
                                     fileMode=0, fileFilter=fileFilter,
-                                    dir='{}{}/anim/Published'.format(path, shotName))
+                                    dir='{}{}/{}'.format(path, shotName, extraPath))
         if fileName:
             fileName = fileName[0]
         else:
             return False
     else:
-        fileName = getLatestVersion(shotName, path, 'anim/Published', new=True)
+        fileName = getLatestVersion(shotName, path, extraPath, new=True)
     # playBackSlider = mel.eval('$tmpVar=$gPlayBackSlider')
     # frameRange = cmds.timeControl(playBackSlider, q=1, ra=1)
     publishSnapshot(shot=shotName, typ='anim')
@@ -743,20 +750,22 @@ def publishAnimation(shotName=None, autoName=True, prompt=False):
     # print 'Published Animation: {}'.format(fileName)
     printToMaya('Published Animation: {}'.format(fileName))
 
-def mergeAnimationAlembic(shotName=None, latest=True, prompt=False):
+
+def mergeAnimationAlembic(shotName=None, latest=True, prompt=False, dynamics=False):
     shotName = assetNameSetup(shotName, prompt, typ='shot')
     if not shotName:
         return False
     path = getShotDir()
+    extraPath = 'anim/Published' if not dynamics else 'anim/Dynamics'
     if latest:
-        fileName = getLatestVersion(shotName, path, 'anim/Published')
+        fileName = getLatestVersion(shotName, path, extraPath)
     else:
         fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
         fileName = cmds.fileDialog2(dialogStyle=2,
                                     caption='Merge Published Animation',
                                     fileMode=1,
                                     fileFilter=fileFilter,
-                                    dir='{}{}/anim/Published'.format(path, shotName))
+                                    dir='{}{}/{}'.format(path, shotName, extraPath))
         fileName = fileName[0] if fileName else False
     mel.eval('AbcImport -mode import -connect "/" "{}"'.format(fileName))
 

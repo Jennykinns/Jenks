@@ -289,7 +289,7 @@ class strapModule:
         self.side = side
         self.rig = rig
 
-    def create(self, jnts, nrb, parent=None, numOfJnts=10, skipSkinning=False):
+    def create(self, jnts, nrb, parent=None, numOfJnts=10, skipSkinning=False, mode='pu'):
         """ Create the strap.
         [Args]:
         jnts (list)(string) - The names of the joints to bind to the
@@ -341,8 +341,12 @@ class strapModule:
         else:
             rivJntPar = None
         for i in range(numOfJnts):
-            createRivet(self.name, extraName, self, nrb, parent=self.strapMechGrp.name,
-                        pv=0.5, pu=(1.0/(numOfJnts-1.0))*i, rivJntPar=rivJntPar)
+            if mode == 'pu':
+                createRivet(self.name, extraName, self, nrb, parent=self.strapMechGrp.name,
+                            pv=0.5, pu=(1.0/(numOfJnts-1.0))*i, rivJntPar=rivJntPar)
+            else:
+                createRivet(self.name, extraName, self, nrb, parent=self.strapMechGrp.name,
+                        pv=(1.0/(numOfJnts-1.0))*i, pu=0.5, rivJntPar=rivJntPar)
 
 
 def ribbonJoints(sj, ej, bendyName, module, extraName='', moduleType=None, par=None,

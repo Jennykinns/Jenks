@@ -272,6 +272,14 @@ def addJntToSkinJnt(jnt, rig):
     if not existingConnections or rig.skinJntsAttr not in existingConnections:
         cmds.connectAttr(rig.skinJntsAttr, rigConnection)
 
+def getHierarchyRootNode(node):
+    rootNd = node
+    while True:
+        par = cmds.listRelatives(rootNd, p=1)
+        if not par:
+            break
+        rootNd = par[0]
+    return rootNd
 
 def getChildrenBetweenObjs(startObj, endObj, typ='joint'):
     """ Get the children DAGs between two objects.

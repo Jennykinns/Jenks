@@ -273,12 +273,14 @@ def loadGeo(assetName=None, group=None, prompt=False, abc=True):
         nodes = cmds.file(fileName, i=1, dns=1, type='mayaAscii', rnn=1)
         mNodes = []
         for each in nodes:
-            mNodes.append(api.getMObj(each))
+            mNodes.append(api.getMObj(utils.getHierarchyRootNode(each)))
         if group:
             for each in mNodes:
                 lN, sN = api.getPath(each)
                 if cmds.nodeType(lN) == 'transform':
-                    cmds.parent(lN, group)
+                    par = cmds.listRelatives(lN, p=1)
+                    if not par or group not in par:
+                        cmds.parent(lN, group)
     # print 'Loaded geometry: {}'.format(fileName)
     printToMaya('Loaded Geometry: {}'.format(fileName))
     return True

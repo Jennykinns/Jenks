@@ -704,8 +704,20 @@ class nCloth:
                                                  sh=1, type='wrap')
                 nCloth.connect('inputMesh', '{}.worldMesh'.format(mesh), mode='to')
 
+                oldMeshName = mesh.rsplit('|')[-1]
+                # newMeshName = '{}_{}InputMesh_{}'.format(mesh.split('_', 1)[0], self.name,
+                #                                           mesh.rsplit('_', 1)[-1])
+                newMeshName = utils.setupName('{}InputMesh'.format(self.name),
+                                              suffix='_{}'.format(oldMeshName.rsplit('_')[-1]),
+                                              side=oldMeshName.split('_')[0])
+                print newMeshName
+                mesh = cmds.rename(mesh, newMeshName)
+
                 outMesh = utils.newNode('mesh', name='{}OutputMesh'.format(self.name),
                                         side=self.side)
+
+                outMesh.renameNode(oldMeshName)
+
                 if not worldSpace:
                     cmds.parent(outMesh.name, tform, s=1, r=1)
                     cmds.delete(outMesh.transform)

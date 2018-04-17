@@ -770,6 +770,7 @@ class newNode:
         nodeName = setupName(name if name else node,
                              obj=node if not suffixOverride else suffixOverride,
                              side=side, skipNumber=skipNum)
+
         if shaderNode:
             if shaderNode == 'shader':
                 self.name = cmds.shadingNode(node, n=nodeName, ss=1, asShader=1)
@@ -800,7 +801,7 @@ class newNode:
                 self.name = cmds.sets(renderable=True, noSurfaceShader=True,
                                       empty=True, name=nodeName)
             elif node == 'mesh':
-                self.name = cmds.createNode(node, ss=1)
+                self.name = cmds.createNode(node, ss=1, name=nodeName)
                 self.transform = cmds.listRelatives(self.name, p=1)
             else:
                 self.name = cmds.createNode(node, n=nodeName, ss=1)
@@ -889,5 +890,10 @@ class newNode:
         if self.node == 'joint':
             cmds.makeIdentity(self.name, a=1, r=1)
 
+    def renameNode(self, newName, otherNode=False):
+        if not otherNode:
+            self.name = cmds.rename(self.name, newName)
+        else:
+            exec('self.{0} = cmds.rename(self.{0}, {1}'.format(otherNode, newName))
 
 

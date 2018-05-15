@@ -4,6 +4,7 @@
 
 ### Quick Start (Automatic Installation)
 
+* Download the [latest installer](https://github.com/Jennykinns/Jenks/releases)
 * Run the installer, if necessary change the install directory to your Maya directory.
 * Optional: To avoid conflict of existing userSetup.mel file, manual installation may be required - to do this simply add the following lines to your userSetup.mel file:
 ```

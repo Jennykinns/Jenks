@@ -1103,6 +1103,7 @@ class headModule:
                 gParent = cmds.listRelatives(parent, p=1)[0]
                 ctrlSpaceSwitches.append(gParent)
         utils.orientJoints([parJnt.name], aimAxis=(1 if not self.side == 'R' else -1, 0, 0))
+        utils.addJntToSkinJnt(parJnt.name, self.rig)
         # else:
         #     cmds.error('FUCK, I DON\'T KNOW WHAT TO DO WITHOUT A PARENT FOR THE HEAD YET.')
         jnts = [

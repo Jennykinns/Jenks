@@ -1,0 +1,6 @@
+$mayaDir=`getenv "MAYA_APP_DIR"`;
+
+//Jenks Pipeline Menu
+$pipeMenuLoc = $mayaDir + "/scripts/Jenks/scripts/pipelineMenu";
+string $command = "source \""+$pipeMenuLoc+"\"";
+eval $command;

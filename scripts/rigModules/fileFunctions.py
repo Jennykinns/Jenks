@@ -209,6 +209,7 @@ def referenceRig(assetName=None, prompt=False, replace=False, refNd=None):
         return False
     path = getAssetDir()
     fileName = getLatestVersion(assetName, path, 'rig/Published')
+    loadAllPlugins()
     if not replace:
         cmds.file(fileName, r=1, ns=newNameSpace(assetName))
     else:
@@ -218,6 +219,7 @@ def referenceRig(assetName=None, prompt=False, replace=False, refNd=None):
     return True
 
 def loadWipRig(assetName=None, latest=False, prompt=False):
+    loadAllPlugins()
     loadMayaFile(assetName, typ='rig/WIP', prompt=prompt, latest=latest)
     return True
 
@@ -710,6 +712,7 @@ def saveWipAnimation(shotName=None, autoName=False, prompt=False):
     return True
 
 def loadWipAnimation(shotName=None, latest=False, prompt=False):
+    loadAllPlugins()
     loadMayaFile(shotName, typ='anim/WIP', prompt=prompt, latest=latest, new=True, shot=True)
     return True
 
@@ -754,12 +757,34 @@ def publishAnimation(shotName=None, autoName=True, prompt=False, dynamics=False)
     printToMaya('Published Animation: {}'.format(fileName))
 
 
+def referenceAnimationAlembic(shotName=None, latest=True, prompt=False, replace=False, refNd=None):
+    shotName = assetNameSetup(shotName, prompt, typ='shot')
+    if not shotName:
+        return False
+    path = getShotDir()
+    extraPath = 'anim/Published'
+    loadAllPlugins()
+    if latest:
+        fileName = getLatestVersion(shotName, path, extraPath)
+    else:
+        fileFilter = fileDialogFilter([('Alembic Cache', '*.abc')])
+        fileName = cmds.fileDialog2(dialogStyle=2,
+                                    caption='Reference Published Animation',
+                                    fileMode=1,
+                                    fileFilter=fileFilter,
+                                    dir='{}{}/{}'.format(path, shotName, extraPath))
+        fileName = fileName[0] if fileName else False
+    referenceFile(shotName, typ='shot', location=extraPath, replace=replace, refNd=refNd)
+    printToMaya('Referenced Shot Animation: {}'.format(fileName))
+
+
 def mergeAnimationAlembic(shotName=None, latest=True, prompt=False, dynamics=False):
     shotName = assetNameSetup(shotName, prompt, typ='shot')
     if not shotName:
         return False
     path = getShotDir()
     extraPath = 'anim/Published' if not dynamics else 'anim/Dynamics'
+    loadAllPlugins()
     if latest:
         fileName = getLatestVersion(shotName, path, extraPath)
     else:
@@ -1347,13 +1372,16 @@ def reloadReferences():
     assets, refNd = utils.getAssetsInScene()
     for i, each in enumerate(assets):
         referenceRig(each, replace=True, refNd=refNd[i])
+    anim, refNd = utils.getAssetsInScene('anim/Published')
+    for i, each in enumerate(anim):
+        referenceFile(each, typ='shot', location='anim/Published', replace=True, refNd=refNd[i])
     layouts, refNd = utils.getAssetsInScene('layout/Published')
     for i, each in enumerate(layouts):
-        print each
         referenceFile(each, typ='shot', location='layout/Published', replace=True, refNd=refNd[i])
     subAssets, refNd = utils.getAssetsInScene('subAssets')
     for i, each in enumerate(subAssets):
-        referenceFile(each, typ='subAsset', location='model/Published', replace=True, refNd=refNd[i])
+        referenceFile(each, typ='subAsset', location='model/Published',
+                      replace=True, refNd=refNd[i])
 
 def printToMaya(msg):
     msg = '{}\n'.format(msg)
